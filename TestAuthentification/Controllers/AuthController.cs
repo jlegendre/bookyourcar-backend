@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using TestAuthentification.Models;
@@ -18,6 +19,15 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        public A5dContext _context;
+        public AuthService _authservice;
+
+        public AuthController(A5dContext context)
+        {
+            _context = context;
+            _authservice = new AuthService(context);
+        }
+
         // GET api/values
         [HttpPost, Route("login")]
         public async Task<IActionResult> Login([FromBody]LoginViewModel loginViewModel)
@@ -27,14 +37,14 @@ namespace TestAuthentification.Controllers
                 return BadRequest("Invalid client request");
             }
 
-            User myUser = await AuthService.FindByEmailAsync(loginViewModel.Email);
+            User myUser = await _authservice.FindByEmailAsync(loginViewModel.Email);
                        
             if (myUser != null && AuthService.CheckPasswordAsync(myUser, loginViewModel.Password))
             {
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
-                var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
+                SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
-                var tokeOptions = new JwtSecurityToken(
+                JwtSecurityToken tokeOptions = new JwtSecurityToken(
                     issuer: "http://localhost:5000",
                     audience: "http://localhost:5000",
                     claims: new List<Claim>(),
@@ -42,7 +52,7 @@ namespace TestAuthentification.Controllers
                     signingCredentials: signinCredentials
                 );
 
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+                string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
                 return Ok(new { Token = tokenString });
             }
             else
@@ -62,9 +72,9 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
+            User user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
 
-            var result = await AuthService.CreateAsync(user, registerViewModel.Password);
+            IdentityResult result = await _authservice.CreateAsync(user, registerViewModel.Password);
 
             if (!result.Succeeded)
             {
@@ -79,10 +89,7 @@ namespace TestAuthentification.Controllers
         [HttpGet, Route("users")]
         public IEnumerable<User> getUsers()
         {
-            //var test = _context.User.ToList();
-
-
-            return null;
+            return  _context.User.ToList();
 
         }
     }

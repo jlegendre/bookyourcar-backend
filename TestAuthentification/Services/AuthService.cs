@@ -12,7 +12,7 @@ namespace TestAuthentification.Services
 {
     public class AuthService 
     {
-        private static A5dContext _context;
+        public static A5dContext _context;
 
         //context bdd
         public AuthService(A5dContext context)
@@ -20,23 +20,23 @@ namespace TestAuthentification.Services
             _context = context;
         }
 
-        public async static Task<User> FindByEmailAsync(string email)
+        public async Task<User> FindByEmailAsync(string email)
         {
             return await _context.User.Where(x => x.UserEmail == email).SingleOrDefaultAsync();
         }
 
-        public async static Task Add(User user)
+        public async Task Add(User user)
         {
             await _context.User.AddAsync(user);
             await _context.SaveChangesAsync();
         }
 
-        public async static Task<IList<User>> GetAllAsync()
+        public async Task<IList<User>> GetAllAsync()
         {
             return await _context.User.ToListAsync();
         }
 
-        public async static Task RemoveAsync(int Id)
+        public async Task RemoveAsync(int Id)
         {
             var itemToRemove = await _context.User.SingleOrDefaultAsync(r => r.UserId == Id);
             if (itemToRemove != null)
@@ -51,7 +51,7 @@ namespace TestAuthentification.Services
             return user.UserPassword.Equals(password);
         }
 
-        public async static Task<IdentityResult> CreateAsync(User user, string password)
+        public async Task<IdentityResult> CreateAsync(User user, string password)
         {
             try
             {

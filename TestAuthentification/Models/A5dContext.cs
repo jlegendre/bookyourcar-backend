@@ -1,17 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 
 namespace TestAuthentification.Models
 {
     public partial class A5dContext : DbContext
     {
-        private readonly IConfiguration _configuration;       
-
-        public A5dContext(IConfiguration configuration)
+        public A5dContext()
         {
-            _configuration = configuration;
         }
 
         public A5dContext(DbContextOptions<A5dContext> options)
@@ -34,7 +30,7 @@ namespace TestAuthentification.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql(_configuration.GetConnectionString("DefaultConnection"));
+                optionsBuilder.UseMySql("server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX");
             }
         }
 
@@ -319,6 +315,10 @@ namespace TestAuthentification.Models
                     .HasName("USER_EMAIL")
                     .IsUnique();
 
+                entity.HasIndex(e => e.UserPhone)
+                    .HasName("USER_USER_TEL_uindex")
+                    .IsUnique();
+
                 entity.HasIndex(e => e.UserPoleId)
                     .HasName("USER_POLE_ID");
 
@@ -335,17 +335,14 @@ namespace TestAuthentification.Models
                     .HasColumnType("varchar(100)");
 
                 entity.Property(e => e.UserFirstname)
-                    .IsRequired()
                     .HasColumnName("USER_FIRSTNAME")
                     .HasColumnType("varchar(25)");
 
                 entity.Property(e => e.UserName)
-                    .IsRequired()
                     .HasColumnName("USER_NAME")
                     .HasColumnType("varchar(25)");
 
                 entity.Property(e => e.UserNumpermis)
-                    .IsRequired()
                     .HasColumnName("USER_NUMPERMIS")
                     .HasColumnType("varchar(25)");
 
@@ -353,6 +350,10 @@ namespace TestAuthentification.Models
                     .IsRequired()
                     .HasColumnName("USER_PASSWORD")
                     .HasColumnType("varchar(50)");
+
+                entity.Property(e => e.UserPhone)
+                    .HasColumnName("USER_PHONE")
+                    .HasColumnType("varchar(10)");
 
                 entity.Property(e => e.UserPoleId)
                     .HasColumnName("USER_POLE_ID")
@@ -365,13 +366,11 @@ namespace TestAuthentification.Models
                 entity.HasOne(d => d.UserPole)
                     .WithMany(p => p.UserUserPole)
                     .HasForeignKey(d => d.UserPoleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("USER_ibfk_2");
 
                 entity.HasOne(d => d.UserRight)
                     .WithMany(p => p.UserUserRight)
                     .HasForeignKey(d => d.UserRightId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("USER_ibfk_1");
             });
 
