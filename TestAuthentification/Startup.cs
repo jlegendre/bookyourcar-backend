@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using Microsoft.AspNetCore.Identity;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace TestAuthentification
 {
@@ -54,8 +55,7 @@ namespace TestAuthentification
     });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<A5dContext>(options => options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<User, IdentityRole>()
-             .AddErrorDescriber<CustomIdentityErrorDescriber>();
+            services.AddIdentityCore<User>().AddErrorDescriber<CustomIdentityErrorDescriber>();
 
             services.AddCors(options =>
             {
@@ -64,6 +64,12 @@ namespace TestAuthentification
                     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials().Build();
                 });
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "BookYourCar", Version = "v1" });
+            });
+
 
         }
 
@@ -83,6 +89,13 @@ namespace TestAuthentification
             app.UseAuthentication();
             app.UseMvc();
             app.UseCors("EnableCORS");
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.RoutePrefix = string.Empty;
+            });
+           
         }
     }
 }
