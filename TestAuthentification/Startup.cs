@@ -57,6 +57,14 @@ namespace TestAuthentification
             services.AddIdentity<User, IdentityRole>()
              .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("EnableCORS", builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials().Build();
+                });
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,6 +82,7 @@ namespace TestAuthentification
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
+            app.UseCors("EnableCORS");
         }
     }
 }
