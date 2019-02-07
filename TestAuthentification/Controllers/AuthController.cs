@@ -18,21 +18,6 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        
-        private readonly A5dContext _context;
-        private AuthService _authService;
-
-        public AuthController(A5dContext context)
-        {
-            _context = context;
-            _authService = new AuthService(_context);
-        }
-
-        public AuthController()
-        {
-
-        }
-
         // GET api/values
         [HttpPost, Route("login")]
         public async Task<IActionResult> Login([FromBody]LoginViewModel loginViewModel)
@@ -42,9 +27,9 @@ namespace TestAuthentification.Controllers
                 return BadRequest("Invalid client request");
             }
 
-            User myUser = await _authService.FindByEmailAsync(loginViewModel.Email);
+            User myUser = await AuthService.FindByEmailAsync(loginViewModel.Email);
                        
-            if (myUser != null && _authService.CheckPasswordAsync(myUser, loginViewModel.Password))
+            if (myUser != null && AuthService.CheckPasswordAsync(myUser, loginViewModel.Password))
             {
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -79,7 +64,7 @@ namespace TestAuthentification.Controllers
 
             var user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
 
-            var result = await _authService.CreateAsync(user, registerViewModel.Password);
+            var result = await AuthService.CreateAsync(user, registerViewModel.Password);
 
             if (!result.Succeeded)
             {
