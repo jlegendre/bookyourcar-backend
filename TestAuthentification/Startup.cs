@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using Microsoft.AspNetCore.Identity;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace TestAuthentification
 {
@@ -64,6 +65,12 @@ namespace TestAuthentification
                 });
             });
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "BookYourCar", Version = "v1" });
+            });
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,6 +89,13 @@ namespace TestAuthentification
             app.UseAuthentication();
             app.UseMvc();
             app.UseCors("EnableCORS");
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.RoutePrefix = string.Empty;
+            });
+           
         }
     }
 }
