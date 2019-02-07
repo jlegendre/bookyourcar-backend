@@ -54,8 +54,7 @@ namespace TestAuthentification
     });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<A5dContext>(options => options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<User, IdentityRole>()
-             .AddErrorDescriber<CustomIdentityErrorDescriber>();
+            services.AddIdentityCore<User>().AddErrorDescriber<CustomIdentityErrorDescriber>();
 
             services.AddCors(options =>
             {
