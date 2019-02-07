@@ -45,8 +45,8 @@ namespace TestAuthentification.Controllers
                 SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
                 JwtSecurityToken tokeOptions = new JwtSecurityToken(
-                    issuer: "http://localhost:5050",
-                    audience: "http://localhost:5050",
+                    issuer: "http://0.0.0.0:5050",
+                    audience: "http://0.0.0.0:5050",
                     claims: new List<Claim>(),
                     expires: DateTime.Now.AddMinutes(5),
                     signingCredentials: signinCredentials
