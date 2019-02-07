@@ -22,22 +22,30 @@ namespace TestAuthentification.Services
             Describer = errors ?? new CustomIdentityErrorDescriber();
         }
 
+        /// <summary>
+        /// Recupère l'utilisateur en fonction de son email 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public async Task<User> FindByEmailAsync(string email)
         {
             return await _context.User.Where(x => x.UserEmail == email).SingleOrDefaultAsync();
         }
 
-        public async Task Add(User user)
-        {
-            await _context.User.AddAsync(user);
-            await _context.SaveChangesAsync();
-        }
-
+        /// <summary>
+        /// Recupère la liste des utilisateurs
+        /// </summary>
+        /// <returns></returns>
         public async Task<IList<User>> GetAllAsync()
         {
             return await _context.User.ToListAsync();
         }
 
+        /// <summary>
+        /// Supprime un utilisateur en fonction de son Id
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         public async Task RemoveAsync(int Id)
         {
             var itemToRemove = await _context.User.SingleOrDefaultAsync(r => r.UserId == Id);
@@ -48,11 +56,23 @@ namespace TestAuthentification.Services
             }
         }
 
-        public static bool CheckPasswordAsync(User user, string password)
+        /// <summary>
+        /// Regarde si le password correspond à celui à l'utilisateur
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static bool CheckPassword(User user, string password)
         {
             return user.UserPassword.Equals(password);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public async Task<IdentityResult> CreateAsync(User user, string password)
         {
             var errors = new List<IdentityError>();
@@ -60,6 +80,10 @@ namespace TestAuthentification.Services
             if (!CheckEmailUnique(user.UserEmail))
             {
                 errors.Add(Describer.DuplicateEmail(user.UserEmail));
+            }
+            if (string.IsNullOrEmpty(user.UserEmail))
+            {
+                errors.Add(Describer.InvalidEmail(user.UserEmail));
             }
             else
             {
@@ -72,6 +96,11 @@ namespace TestAuthentification.Services
 
         }
 
+        /// <summary>
+        /// Regarde si l'email est bien unique
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         private bool CheckEmailUnique(string userEmail)
         {
             return FindByEmailAsync(userEmail).IsCompletedSuccessfully;

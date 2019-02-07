@@ -37,13 +37,17 @@ namespace TestAuthentification.Controllers
                 return BadRequest("Invalid client request");
             }
 
+            // On recupère l'utilisateur en fonction de son email
             User myUser = await _authservice.FindByEmailAsync(loginViewModel.Email);
-                       
-            if (myUser != null && AuthService.CheckPasswordAsync(myUser, loginViewModel.Password))
+
+            // On regarde si le password correspond avec celui du formulaire 
+            // si c'est le cas on créé un jeton d'authentification Token
+            if (myUser != null && AuthService.CheckPassword(myUser, loginViewModel.Password))
             {
                 SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
                 SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
+                // On Définit les proprietées du token, comme ça date d'expiration
                 JwtSecurityToken tokeOptions = new JwtSecurityToken(
                     issuer: "http://localhost:5000",
                     audience: "http://localhost:5000",
@@ -74,6 +78,7 @@ namespace TestAuthentification.Controllers
 
             User user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
 
+            // on créé un utilisateur en recuperant le resultat de la query
             IdentityResult result = await _authservice.CreateAsync(user, registerViewModel.Password);
 
             if (!result.Succeeded)
@@ -89,7 +94,7 @@ namespace TestAuthentification.Controllers
         [HttpGet, Route("users")]
         public IEnumerable<User> getUsers()
         {
-            return  _context.User.ToList();
+            return _context.User.ToList();
 
         }
     }
