@@ -10,14 +10,16 @@ using TestAuthentification.Models;
 
 namespace TestAuthentification.Services
 {
-    public class AuthService 
+    public class AuthService
     {
         public static A5dContext _context;
-
+        public CustomIdentityErrorDescriber Describer { get; }
+               
         //context bdd
-        public AuthService(A5dContext context)
+        public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
         {
             _context = context;
+            Describer = errors ?? new CustomIdentityErrorDescriber();
         }
 
         public async Task<User> FindByEmailAsync(string email)
@@ -53,26 +55,26 @@ namespace TestAuthentification.Services
 
         public async Task<IdentityResult> CreateAsync(User user, string password)
         {
-            try
+            var errors = new List<IdentityError>();
+            
+            if (!CheckEmailUnique(user.UserEmail))
+            {
+                errors.Add(Describer.DuplicateEmail(user.UserEmail));
+            }
+            else
             {
                 await _context.AddAsync(user);
-                return IdentityResult.Success;
+                await _context.SaveChangesAsync();
+            }
 
-            }
-            catch (Exception e)
-            {
-                return IdentityResult.Failed(new IdentityError
-                {
-                    Code = e.Source,
-                    Description = e.Message
-                });
-            }
-            
+
+            return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
 
         }
 
-
-
-
+        private bool CheckEmailUnique(string userEmail)
+        {
+            return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
+        }
     }
 }

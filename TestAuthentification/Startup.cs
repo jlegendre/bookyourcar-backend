@@ -17,6 +17,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace TestAuthentification
 {
@@ -52,6 +54,8 @@ namespace TestAuthentification
     });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<A5dContext>(options => options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentity<User, IdentityRole>()
+             .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
         }
 
