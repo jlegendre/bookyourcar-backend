@@ -47,8 +47,8 @@ namespace TestAuthentification
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
-            ValidIssuer = "http://localhost:5000",
-            ValidAudience = "http://localhost:5000",
+            ValidIssuer = "http://localhost:5050",
+            ValidAudience = "http://localhost:5050",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"))
         };
     });
