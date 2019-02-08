@@ -57,7 +57,7 @@ namespace TestAuthentification
                 };
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddDbContext<A5dContext>(options => options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<A5dContext>(options => options.UseMySql("server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX"));
             services.AddIdentityCore<User>().AddErrorDescriber<CustomIdentityErrorDescriber>();
 
             services.AddCors(options =>
