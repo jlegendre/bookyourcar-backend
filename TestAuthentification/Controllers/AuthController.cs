@@ -38,7 +38,7 @@ namespace TestAuthentification.Controllers
             }
 
             // On recupère l'utilisateur en fonction de son email
-            User myUser = _authservice.FindByEmailAsync(loginViewModel.Email);
+            User myUser = await _authservice.FindByEmailAsync(loginViewModel.Email);
 
             // On regarde si le password correspond avec celui du formulaire 
             // si c'est le cas on créé un jeton d'authentification Token
@@ -49,7 +49,7 @@ namespace TestAuthentification.Controllers
 
                 Claim[] claims = new[]
                {
-                    new Claim(ClaimTypes.Name, myUser.UserEmail),
+                    new Claim(ClaimTypes.Email, myUser.UserEmail),
                     new Claim(ClaimTypes.Role, myUser.UserRight.RightLabel)
                 };
 

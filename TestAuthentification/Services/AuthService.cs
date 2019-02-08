@@ -29,16 +29,12 @@ namespace TestAuthentification.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public User FindByEmailAsync(string email)
+        public async Task<User> FindByEmailAsync(string email)
         {
-            //Course course = db.Courses
-            //    .Include(i => i.Modules.Select(s => s.Chapters))
-            //    .Include(i => i.Lab)
-            //    .Single(x => x.Id == id);
-            User user = _context.User
-                .Include(i => i.UserRight.UserUserRight).Single(x => x.UserEmail == email);
+            // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
+            return await _context.User
+                .Include(i => i.UserRight.UserUserRight).SingleAsync(x => x.UserEmail == email);
                        
-            return user;
         }
 
         /// <summary>
@@ -90,7 +86,7 @@ namespace TestAuthentification.Services
             {
                 errors.Add(Describer.DuplicateEmail(user.UserEmail));
             }
-            if (string.IsNullOrEmpty(user.UserEmail))
+            else if (string.IsNullOrEmpty(user.UserEmail))
             {
                 errors.Add(Describer.InvalidEmail(user.UserEmail));
             }
@@ -112,8 +108,7 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         private bool CheckEmailUnique(string userEmail)
         {
-            return false;
-            //return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
+            return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
         }
 
         public async Task<IdentityResult> AddToRoleAdminAsync(User user)
