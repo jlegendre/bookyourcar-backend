@@ -14,7 +14,26 @@ namespace TestAuthentification
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+
+            var config = new ConfigurationBuilder()
+                .AddCommandLine(args)
+                .Build();
+
+            var host = new WebHostBuilder()
+                .UseConfiguration(config)
+                .UseKestrel()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .ConfigureLogging((hostingContext, logging) =>
+                        {
+                            logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                            logging.AddConsole();
+                            logging.AddDebug();
+                            logging.AddEventSourceLogger();
+                        })
+                .UseStartup<Startup>()
+                .Build();
+            
+            host.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
