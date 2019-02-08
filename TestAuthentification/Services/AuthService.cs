@@ -14,7 +14,7 @@ namespace TestAuthentification.Services
     {
         public static A5dContext _context;
         public CustomIdentityErrorDescriber Describer { get; }
-               
+
         //context bdd
         public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
         {
@@ -75,8 +75,8 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         public async Task<IdentityResult> CreateAsync(User user, string password)
         {
-            var errors = new List<IdentityError>();
-            
+            List<IdentityError> errors = new List<IdentityError>();
+
             if (!CheckEmailUnique(user.UserEmail))
             {
                 errors.Add(Describer.DuplicateEmail(user.UserEmail));
@@ -87,7 +87,7 @@ namespace TestAuthentification.Services
             }
             else
             {
-                await _context.AddAsync(user);
+                await _context.User.AddAsync(user);
                 await _context.SaveChangesAsync();
             }
 
@@ -105,5 +105,42 @@ namespace TestAuthentification.Services
         {
             return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
         }
+
+        public async Task<IdentityResult> AddToRoleAdminAsync(User user)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            if (user.UserRightId != 0 || user.UserRightId != null)
+            {
+                errors.Add(Describer.UserAlreadyInRole(user.UserRight.RightLabel));
+            }
+            else
+            {
+                // TODO a configurer, a determiner
+                user.UserRightId = 1;
+                await _context.SaveChangesAsync();
+            }
+
+            return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
+
+        }
+
+        public async Task<IdentityResult> AddToRoleUserAsync(User user)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            if (user.UserRightId == 0 || user.UserRightId == null)
+            {
+                errors.Add(Describer.UserAlreadyInRole(user.UserRight.RightLabel));
+            }
+            else
+            {
+                // TODO a configurer, a determiner
+                user.UserRightId = 2;
+                await _context.SaveChangesAsync();
+            }
+
+            return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
+
+        }
+
     }
 }

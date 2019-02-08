@@ -86,6 +86,10 @@ namespace TestAuthentification.Controllers
                 return BadRequest(result.Errors);
             }
 
+            // Si c'est ok on ajoute l'utilisateur à un Role soit Admin soit ...
+            await _authservice.AddToRoleAdminAsync(user);
+            //await _authservice.AddToRoleUserAsync(user);
+
             return Ok();
         }
 
@@ -97,5 +101,9 @@ namespace TestAuthentification.Controllers
             return _context.User.ToList();
 
         }
+
+               
+
+
     }
 }
