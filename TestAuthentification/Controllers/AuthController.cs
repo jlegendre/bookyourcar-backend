@@ -99,17 +99,11 @@ namespace TestAuthentification.Controllers
             return Ok();
         }
 
-
         [Authorize(Roles = "User")]
         [HttpGet, Route("users")]
         public IEnumerable<User> getUsers()
         {
             return _context.User.ToList();
-
         }
-
-               
-
-
     }
 }

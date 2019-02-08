@@ -31,10 +31,6 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         public User FindByEmailAsync(string email)
         {
-            //Course course = db.Courses
-            //    .Include(i => i.Modules.Select(s => s.Chapters))
-            //    .Include(i => i.Lab)
-            //    .Single(x => x.Id == id);
             User user = _context.User
                 .Include(i => i.UserRight.UserUserRight).Single(x => x.UserEmail == email);
                        
