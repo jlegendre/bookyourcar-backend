@@ -15,6 +15,8 @@ namespace TestAuthentification.Services
         public static A5dContext _context;
         public CustomIdentityErrorDescriber Describer { get; }
 
+        public User User { get; set; }
+
         //context bdd
         public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
         {
@@ -27,9 +29,16 @@ namespace TestAuthentification.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public async Task<User> FindByEmailAsync(string email)
+        public User FindByEmailAsync(string email)
         {
-            return await _context.User.Where(x => x.UserEmail == email).SingleOrDefaultAsync();
+            //Course course = db.Courses
+            //    .Include(i => i.Modules.Select(s => s.Chapters))
+            //    .Include(i => i.Lab)
+            //    .Single(x => x.Id == id);
+            User user = _context.User
+                .Include(i => i.UserRight.UserUserRight).Single(x => x.UserEmail == email);
+                       
+            return user;
         }
 
         /// <summary>
@@ -103,7 +112,8 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         private bool CheckEmailUnique(string userEmail)
         {
-            return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
+            return false;
+            //return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
         }
 
         public async Task<IdentityResult> AddToRoleAdminAsync(User user)
