@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -58,7 +59,7 @@ namespace TestAuthentification.Controllers
                     issuer: "http://localhost:5000",
                     audience: "http://localhost:5000",
                     claims: claims,
-                    expires: DateTime.Now.AddMinutes(5),
+                    expires: loginViewModel.RememberMe ? DateTime.UtcNow.AddDays(5) : DateTime.UtcNow.AddMinutes(10),
                     signingCredentials: signinCredentials
                 );
 
@@ -67,7 +68,8 @@ namespace TestAuthentification.Controllers
             }
             else
             {
-                return Unauthorized();
+                ModelState.AddModelError("", "Mot de passe ou email invalide.");
+                return BadRequest(ModelState);
             }
         }
 
@@ -101,9 +103,66 @@ namespace TestAuthentification.Controllers
 
         [Authorize(Roles = "User")]
         [HttpGet, Route("users")]
-        public IEnumerable<User> getUsers()
+        public IEnumerable<User> GetUsers()
         {
+
             return _context.User.ToList();
+        }
+
+        [HttpGet, Route("userInfo")]
+        public async Task<IActionResult> GetUserInfo(string token)
+        {
+
+            var handler = new JwtSecurityTokenHandler();
+            var simplePrinciple = handler.ReadJwtToken(token);
+            var email = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
+
+            if (ValidateToken(token))
+            {
+                var user = _context.User.Where(x => x.UserEmail == email);
+
+                return Ok(user);
+            }
+
+            return Unauthorized();
+
+
+
+        }
+
+        private static bool ValidateToken(string authToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = GetValidationParameters();
+
+            SecurityToken validatedToken;
+            try
+            {
+                IPrincipal principal = tokenHandler.ValidateToken(authToken, validationParameters, out validatedToken);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+
+
+        private static TokenValidationParameters GetValidationParameters()
+        {
+            return new TokenValidationParameters()
+            {
+                ValidateLifetime = true, // Because there is no expiration in the generated token
+                ValidateAudience = false, // Because there is no audiance in the generated token
+                ValidateIssuer = false,   // Because there is no issuer in the generated token
+                ValidIssuer = "Sample",
+                RequireExpirationTime = true,
+                ValidAudience = "Sample",
+                ClockSkew = TimeSpan.Zero,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey")) // The same key as the one that generate the token
+            };
         }
     }
 }

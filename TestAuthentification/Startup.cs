@@ -50,8 +50,9 @@ namespace TestAuthentification
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "http://localhost:5000",
-                    ValidAudience = "http://localhost:5000",
+                    ValidIssuer = "http://localhost:5001",
+                    ValidAudience = "http://localhost:5001",
+                    ClockSkew = TimeSpan.Zero,
 
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"))
                 };
@@ -98,6 +99,8 @@ namespace TestAuthentification
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = "swagger";
             });
+
+
            
         }
     }
