@@ -20,14 +20,16 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        public A5dContext _context;
-        public AuthService _authservice;
+        private static A5dContext _context;
+        private readonly AuthService _authService;
 
         public AuthController(A5dContext context)
         {
             _context = context;
-            _authservice = new AuthService(context);
+            _authService = new AuthService(_context);
+
         }
+        
 
         // GET api/values
         [HttpPost, Route("login")]
@@ -39,7 +41,7 @@ namespace TestAuthentification.Controllers
             }
 
             // On recupère l'utilisateur en fonction de son email
-            User myUser = await _authservice.FindByEmailAsync(loginViewModel.Email);
+            User myUser = await _authService.FindByEmailAsync(loginViewModel.Email);
 
             // On regarde si le password correspond avec celui du formulaire 
             // si c'est le cas on créé un jeton d'authentification Token
@@ -65,10 +67,11 @@ namespace TestAuthentification.Controllers
 
                 string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
                 return Ok(new { Token = tokenString });
+                //return CreatedAtAction(nameof(GetUserInfo), new { Token = tokenString });
             }
             else
             {
-                ModelState.AddModelError("", "Mot de passe ou email invalide.");
+                ModelState.AddModelError("Password", "Mot de passe ou Email invalide.");
                 return BadRequest(ModelState);
             }
         }
@@ -77,7 +80,7 @@ namespace TestAuthentification.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
+        public async Task<IActionResult> RegisterAsync(RegisterViewModel registerViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -85,84 +88,23 @@ namespace TestAuthentification.Controllers
             }
 
             User user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
+            
+            await _authService.AddToRoleUserAsync(user);
+            await _context.User.AddAsync(user);
 
-            // on créé un utilisateur en recuperant le resultat de la query
-            IdentityResult result = await _authservice.CreateAsync(user, registerViewModel.Password);
-
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
-
-            // Si c'est ok on ajoute l'utilisateur à un Role soit Admin soit ...
-            await _authservice.AddToRoleAdminAsync(user);
-            //await _authservice.AddToRoleUserAsync(user);
-
+            await _context.SaveChangesAsync();
+            
             return Ok();
         }
 
-        [Authorize(Roles = "User")]
         [HttpGet, Route("users")]
         public IEnumerable<User> GetUsers()
         {
-
-            return _context.User.ToList();
+            return null;
+            //return _context.User.ToList();
         }
 
-        [HttpGet, Route("userInfo")]
-        public async Task<IActionResult> GetUserInfo(string token)
-        {
+        
 
-            var handler = new JwtSecurityTokenHandler();
-            var simplePrinciple = handler.ReadJwtToken(token);
-            var email = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
-
-            if (ValidateToken(token))
-            {
-                var user = _context.User.Where(x => x.UserEmail == email);
-
-                return Ok(user);
-            }
-
-            return Unauthorized();
-
-
-
-        }
-
-        private static bool ValidateToken(string authToken)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = GetValidationParameters();
-
-            SecurityToken validatedToken;
-            try
-            {
-                IPrincipal principal = tokenHandler.ValidateToken(authToken, validationParameters, out validatedToken);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
-        }
-
-
-
-        private static TokenValidationParameters GetValidationParameters()
-        {
-            return new TokenValidationParameters()
-            {
-                ValidateLifetime = true, // Because there is no expiration in the generated token
-                ValidateAudience = false, // Because there is no audiance in the generated token
-                ValidateIssuer = false,   // Because there is no issuer in the generated token
-                ValidIssuer = "Sample",
-                RequireExpirationTime = true,
-                ValidAudience = "Sample",
-                ClockSkew = TimeSpan.Zero,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey")) // The same key as the one that generate the token
-            };
-        }
     }
 }

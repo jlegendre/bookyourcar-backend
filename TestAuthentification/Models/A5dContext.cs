@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace TestAuthentification.Models
 {
-    public partial class A5dContext : DbContext
+    public class A5dContext : DbContext
     {
         public A5dContext()
         {

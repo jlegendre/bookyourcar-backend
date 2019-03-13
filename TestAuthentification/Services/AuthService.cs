@@ -12,15 +12,16 @@ namespace TestAuthentification.Services
 {
     public class AuthService
     {
-        public static A5dContext _context;
-        public CustomIdentityErrorDescriber Describer { get; }
+        private static A5dContext _context { get; set; }
+        public static CustomIdentityErrorDescriber Describer = new CustomIdentityErrorDescriber();
 
-        public User User { get; set; }
 
         //context bdd
         public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
         {
+
             _context = context;
+
             Describer = errors ?? new CustomIdentityErrorDescriber();
         }
 
@@ -34,7 +35,7 @@ namespace TestAuthentification.Services
             // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
             return await _context.User
                 .Include(i => i.UserRight.UserUserRight).SingleAsync(x => x.UserEmail == email);
-                       
+
         }
 
         /// <summary>
@@ -82,7 +83,7 @@ namespace TestAuthentification.Services
         {
             List<IdentityError> errors = new List<IdentityError>();
 
-            if (!CheckEmailUnique(user.UserEmail))
+            if (CheckEmailUnique(user.UserEmail))
             {
                 errors.Add(Describer.DuplicateEmail(user.UserEmail));
             }
@@ -93,7 +94,6 @@ namespace TestAuthentification.Services
             else
             {
                 await _context.User.AddAsync(user);
-                await _context.SaveChangesAsync();
             }
 
 
@@ -120,9 +120,7 @@ namespace TestAuthentification.Services
             }
             else
             {
-                // TODO a configurer, a determiner
                 user.UserRightId = 1;
-                await _context.SaveChangesAsync();
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
@@ -132,15 +130,13 @@ namespace TestAuthentification.Services
         public async Task<IdentityResult> AddToRoleUserAsync(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
-            if (user.UserRightId == 0 || user.UserRightId == null)
+            if (user.UserRightId != null)
             {
                 errors.Add(Describer.UserAlreadyInRole(user.UserRight.RightLabel));
             }
             else
             {
-                // TODO a configurer, a determiner
                 user.UserRightId = 2;
-                await _context.SaveChangesAsync();
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
