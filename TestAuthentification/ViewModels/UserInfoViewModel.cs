@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TestAuthentification.Models;
-
-namespace TestAuthentification.ViewModels
+﻿namespace TestAuthentification.ViewModels
 {
-    public class UserInfoViewModel
+    public class UserViewModel
     {
 
         public int UserId { get; set; }
@@ -18,9 +12,5 @@ namespace TestAuthentification.ViewModels
         public int? UserRightId { get; set; }
         public int? UserPoleId { get; set; }
         public string UserPassword { get; set; }
-
-        public Right UserPole { get; set; }
-        public Right UserRight { get; set; }
-        public ICollection<RideUser> RideUser { get; set; }
     }
 }

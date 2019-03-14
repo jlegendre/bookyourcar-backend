@@ -100,8 +100,7 @@ namespace TestAuthentification.Controllers
         [HttpGet, Route("users")]
         public IEnumerable<User> GetUsers()
         {
-            return null;
-            //return _context.User.ToList();
+            return _context.User.ToList();
         }
 
         
