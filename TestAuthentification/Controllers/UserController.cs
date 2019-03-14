@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
@@ -26,15 +27,13 @@ namespace TestAuthentification.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUser(string token)
+        public async Task<IActionResult> GetUser()
         {
-            if (token == null)
-            {
-                return Unauthorized();
-            }
-
             try
             {
+                var token = getToken();
+
+
                 var handler = new JwtSecurityTokenHandler();
                 var simplePrinciple = handler.ReadJwtToken(token);
                 var email = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
@@ -56,8 +55,9 @@ namespace TestAuthentification.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateUser(string token, UserViewModel userViewModel)
+        public IActionResult UpdateUser(UserViewModel userViewModel)
         {
+            var token = getToken();
             var user = _context.User.SingleOrDefault(x => x.UserEmail == userViewModel.UserEmail);
 
             if (user == null)
@@ -93,11 +93,16 @@ namespace TestAuthentification.Controllers
 
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(string token, int id)
+        public IActionResult DeleteUser(int id)
         {
+            var token = getToken();
+
             if (TokenService.ValidateToken(token))
             {
                 var user = _context.User.Find(id);
+                if (user == null)
+                    return BadRequest();
+
                 _context.User.Remove(user);
                 _context.SaveChanges();
                 return Ok();
@@ -105,6 +110,23 @@ namespace TestAuthentification.Controllers
 
             return Unauthorized();
 
+        }
+
+        /// <summary>
+        /// permet de récuperer le token
+        /// </summary>
+        /// <returns></returns>
+        private string getToken()
+        {
+            var token2 = Request.Headers;
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+
+            return token;
         }
 
 

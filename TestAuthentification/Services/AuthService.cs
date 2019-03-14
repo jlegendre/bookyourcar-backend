@@ -12,9 +12,8 @@ namespace TestAuthentification.Services
 {
     public class AuthService
     {
-        private static A5dContext _context { get; set; }
-        public static CustomIdentityErrorDescriber Describer = new CustomIdentityErrorDescriber();
-
+        private readonly A5dContext _context;
+        public readonly CustomIdentityErrorDescriber Describer;
 
         //context bdd
         public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
@@ -30,11 +29,12 @@ namespace TestAuthentification.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public async Task<User> FindByEmailAsync(string email)
+        public User FindByEmail(string email)
         {
             // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
-            return await _context.User
-                .Include(i => i.UserRight.UserUserRight).SingleAsync(x => x.UserEmail == email);
+            var user = _context.User
+                .Include(i => i.UserRight.UserUserRight).SingleOrDefault(x => x.UserEmail == email);
+            return user;
 
         }
 
@@ -79,7 +79,7 @@ namespace TestAuthentification.Services
         /// <param name="user"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<IdentityResult> CreateAsync(User user, string password)
+        public IdentityResult VerifUser(User user, string password)
         {
             List<IdentityError> errors = new List<IdentityError>();
 
@@ -91,11 +91,6 @@ namespace TestAuthentification.Services
             {
                 errors.Add(Describer.InvalidEmail(user.UserEmail));
             }
-            else
-            {
-                await _context.User.AddAsync(user);
-            }
-
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
 
@@ -108,10 +103,17 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         private bool CheckEmailUnique(string userEmail)
         {
-            return FindByEmailAsync(userEmail).IsCompletedSuccessfully;
+            var user = FindByEmail(userEmail);
+
+            if (user != null)
+            {
+                return true;
+            }
+
+            return false;
         }
 
-        public async Task<IdentityResult> AddToRoleAdminAsync(User user)
+        public IdentityResult AddToRoleAdminAsync(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
             if (user.UserRightId != 0 || user.UserRightId != null)
@@ -127,7 +129,7 @@ namespace TestAuthentification.Services
 
         }
 
-        public async Task<IdentityResult> AddToRoleUserAsync(User user)
+        public IdentityResult AddToRoleUserAsync(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
             if (user.UserRightId != null)

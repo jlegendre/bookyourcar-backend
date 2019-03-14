@@ -33,7 +33,7 @@ namespace TestAuthentification.Controllers
 
         // GET api/values
         [HttpPost, Route("login")]
-        public async Task<IActionResult> Login([FromBody]LoginViewModel loginViewModel)
+        public IActionResult Login([FromBody]LoginViewModel loginViewModel)
         {
             if (loginViewModel == null && !ModelState.IsValid)
             {
@@ -41,7 +41,7 @@ namespace TestAuthentification.Controllers
             }
 
             // On recupère l'utilisateur en fonction de son email
-            User myUser = await _authService.FindByEmailAsync(loginViewModel.Email);
+            User myUser = _authService.FindByEmail(loginViewModel.Email);
 
             // On regarde si le password correspond avec celui du formulaire 
             // si c'est le cas on créé un jeton d'authentification Token
@@ -80,7 +80,7 @@ namespace TestAuthentification.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> RegisterAsync(RegisterViewModel registerViewModel)
+        public IActionResult RegisterAsync(RegisterViewModel registerViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -89,11 +89,23 @@ namespace TestAuthentification.Controllers
 
             User user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
             
-            await _authService.AddToRoleUserAsync(user);
-            await _context.User.AddAsync(user);
 
-            await _context.SaveChangesAsync();
-            
+            IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            IdentityResult result2 = _authService.AddToRoleUserAsync(user);
+            if (!result2.Succeeded)
+            {
+                return BadRequest(result2.Errors);
+            }
+
+            _context.User.Add(user);
+            _context.SaveChanges();
+            _context.Dispose();
+
             return Ok();
         }
 
