@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAuthentification", "TestAuthentification\TestAuthentification.csproj", "{59326EF2-40D4-4B13-88DD-A54BB73DA3FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTestAuthentification", "XUnitTestAuthentification\XUnitTestAuthentification.csproj", "{F30E3610-D006-4BAF-BF8C-AC2EA5FC71A4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
