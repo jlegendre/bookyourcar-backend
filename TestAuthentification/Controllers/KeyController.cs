@@ -11,56 +11,56 @@ namespace TestAuthentification.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PoleController : ControllerBase
+    public class KeyController : ControllerBase
     {
         private readonly A5dContext _context;
 
-        public PoleController(A5dContext context)
+        public KeyController(A5dContext context)
         {
             _context = context;
         }
 
-        // GET: api/Poles
+        // GET: api/Keys
         [HttpGet]
-        public IEnumerable<Pole> GetPole()
+        public IEnumerable<Key> GetKey()
         {
-            return _context.Pole;
+            return _context.Key;
         }
 
-        // GET: api/Poles/5
+        // GET: api/Keys/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPole([FromRoute] int id)
+        public async Task<IActionResult> GetKey([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
+            var key = await _context.Key.FindAsync(id);
 
-            if (pole == null)
+            if (key == null)
             {
                 return NotFound();
             }
 
-            return Ok(pole);
+            return Ok(key);
         }
 
-        // PUT: api/Poles/5
+        // PUT: api/Keys/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] Pole pole)
+        public async Task<IActionResult> PutKey([FromRoute] int id, [FromBody] Key key)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != pole.PoleId)
+            if (id != key.KeyId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pole).State = EntityState.Modified;
+            _context.Entry(key).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace TestAuthentification.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PoleExists(id))
+                if (!KeyExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace TestAuthentification.Controllers
             return NoContent();
         }
 
-        // POST: api/Poles
+        // POST: api/Keys
         [HttpPost]
-        public async Task<IActionResult> PostPole([FromBody] Pole pole)
+        public async Task<IActionResult> PostKey([FromBody] Key key)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Pole.Add(pole);
+            _context.Key.Add(key);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPole", new { id = pole.PoleId }, pole);
+            return CreatedAtAction("GetKey", new { id = key.KeyId }, key);
         }
 
-        // DELETE: api/Poles/5
+        // DELETE: api/Keys/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePole([FromRoute] int id)
+        public async Task<IActionResult> DeleteKey([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
-            if (pole == null)
+            var key = await _context.Key.FindAsync(id);
+            if (key == null)
             {
                 return NotFound();
             }
 
-            _context.Pole.Remove(pole);
+            _context.Key.Remove(key);
             await _context.SaveChangesAsync();
 
-            return Ok(pole);
+            return Ok(key);
         }
 
-        private bool PoleExists(int id)
+        private bool KeyExists(int id)
         {
-            return _context.Pole.Any(e => e.PoleId == id);
+            return _context.Key.Any(e => e.KeyId == id);
         }
     }
 }

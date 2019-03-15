@@ -11,56 +11,56 @@ namespace TestAuthentification.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PoleController : ControllerBase
+    public class LocationController : ControllerBase
     {
         private readonly A5dContext _context;
 
-        public PoleController(A5dContext context)
+        public LocationController(A5dContext context)
         {
             _context = context;
         }
 
-        // GET: api/Poles
+        // GET: api/Locations
         [HttpGet]
-        public IEnumerable<Pole> GetPole()
+        public IEnumerable<Location> GetLocation()
         {
-            return _context.Pole;
+            return _context.Location;
         }
 
-        // GET: api/Poles/5
+        // GET: api/Locations/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPole([FromRoute] int id)
+        public async Task<IActionResult> GetLocation([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
+            var location = await _context.Location.FindAsync(id);
 
-            if (pole == null)
+            if (location == null)
             {
                 return NotFound();
             }
 
-            return Ok(pole);
+            return Ok(location);
         }
 
-        // PUT: api/Poles/5
+        // PUT: api/Locations/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] Pole pole)
+        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] Location location)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != pole.PoleId)
+            if (id != location.LocId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pole).State = EntityState.Modified;
+            _context.Entry(location).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace TestAuthentification.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PoleExists(id))
+                if (!LocationExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace TestAuthentification.Controllers
             return NoContent();
         }
 
-        // POST: api/Poles
+        // POST: api/Locations
         [HttpPost]
-        public async Task<IActionResult> PostPole([FromBody] Pole pole)
+        public async Task<IActionResult> PostLocation([FromBody] Location location)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Pole.Add(pole);
+            _context.Location.Add(location);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPole", new { id = pole.PoleId }, pole);
+            return CreatedAtAction("GetLocation", new { id = location.LocId }, location);
         }
 
-        // DELETE: api/Poles/5
+        // DELETE: api/Locations/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePole([FromRoute] int id)
+        public async Task<IActionResult> DeleteLocation([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
-            if (pole == null)
+            var location = await _context.Location.FindAsync(id);
+            if (location == null)
             {
                 return NotFound();
             }
 
-            _context.Pole.Remove(pole);
+            _context.Location.Remove(location);
             await _context.SaveChangesAsync();
 
-            return Ok(pole);
+            return Ok(location);
         }
 
-        private bool PoleExists(int id)
+        private bool LocationExists(int id)
         {
-            return _context.Pole.Any(e => e.PoleId == id);
+            return _context.Location.Any(e => e.LocId == id);
         }
     }
 }

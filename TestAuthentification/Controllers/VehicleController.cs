@@ -11,56 +11,56 @@ namespace TestAuthentification.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PoleController : ControllerBase
+    public class VehicleController : ControllerBase
     {
         private readonly A5dContext _context;
 
-        public PoleController(A5dContext context)
+        public VehicleController(A5dContext context)
         {
             _context = context;
         }
 
-        // GET: api/Poles
+        // GET: api/Vehicles
         [HttpGet]
-        public IEnumerable<Pole> GetPole()
+        public IEnumerable<Vehicle> GetVehicle()
         {
-            return _context.Pole;
+            return _context.Vehicle;
         }
 
-        // GET: api/Poles/5
+        // GET: api/Vehicles/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPole([FromRoute] int id)
+        public async Task<IActionResult> GetVehicle([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
+            var vehicle = await _context.Vehicle.FindAsync(id);
 
-            if (pole == null)
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            return Ok(pole);
+            return Ok(vehicle);
         }
 
-        // PUT: api/Poles/5
+        // PUT: api/Vehicles/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] Pole pole)
+        public async Task<IActionResult> PutVehicle([FromRoute] int id, [FromBody] Vehicle vehicle)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != pole.PoleId)
+            if (id != vehicle.VehId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pole).State = EntityState.Modified;
+            _context.Entry(vehicle).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace TestAuthentification.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PoleExists(id))
+                if (!VehicleExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace TestAuthentification.Controllers
             return NoContent();
         }
 
-        // POST: api/Poles
+        // POST: api/Vehicles
         [HttpPost]
-        public async Task<IActionResult> PostPole([FromBody] Pole pole)
+        public async Task<IActionResult> PostVehicle([FromBody] Vehicle vehicle)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Pole.Add(pole);
+            _context.Vehicle.Add(vehicle);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPole", new { id = pole.PoleId }, pole);
+            return CreatedAtAction("GetVehicle", new { id = vehicle.VehId }, vehicle);
         }
 
-        // DELETE: api/Poles/5
+        // DELETE: api/Vehicles/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePole([FromRoute] int id)
+        public async Task<IActionResult> DeleteVehicle([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
-            if (pole == null)
+            var vehicle = await _context.Vehicle.FindAsync(id);
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            _context.Pole.Remove(pole);
+            _context.Vehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            return Ok(pole);
+            return Ok(vehicle);
         }
 
-        private bool PoleExists(int id)
+        private bool VehicleExists(int id)
         {
-            return _context.Pole.Any(e => e.PoleId == id);
+            return _context.Vehicle.Any(e => e.VehId == id);
         }
     }
 }

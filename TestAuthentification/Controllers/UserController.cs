@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
@@ -18,7 +17,6 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-
         private readonly A5dContext _context;
 
         public UserController(A5dContext context)
@@ -26,99 +24,163 @@ namespace TestAuthentification.Controllers
             _context = context;
         }
 
+        // GET: api/Users
         [HttpGet]
-        public async Task<IActionResult> GetUser()
+        public IEnumerable<User> GetUser()
         {
-            try
+            return _context.User;
+        }
+
+        // GET: api/Users/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUser([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
             {
-                var token = getToken();
-
-
-                var handler = new JwtSecurityTokenHandler();
-                var simplePrinciple = handler.ReadJwtToken(token);
-                var email = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
-
-                if (TokenService.ValidateToken(token))
-                {
-                    var user = await _context.User.Where(x => x.UserEmail == email).SingleOrDefaultAsync();
-
-                    return Ok(user);
-                }
+                return BadRequest(ModelState);
             }
-            catch (Exception e)
+
+            var token = GetToken();
+            if (TokenService.ValidateToken(token))
             {
-                Console.WriteLine(e.Message);
+                var user = await _context.User.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(user);
             }
 
             return Unauthorized();
-
         }
 
-        [HttpPut]
-        public IActionResult UpdateUser(UserViewModel userViewModel)
+        // PUT: api/Users/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUser([FromRoute] int id, [FromBody] UserViewModel userViewModel)
         {
-            var token = getToken();
-            var user = _context.User.SingleOrDefault(x => x.UserEmail == userViewModel.UserEmail);
-
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (id != userViewModel.UserId)
+            {
+                return BadRequest();
+            }
+            var user = _context.User.SingleOrDefault(x => x.UserId == id);
             if (user == null)
             {
                 return NotFound();
             }
-            user.UserEmail = userViewModel.UserEmail;
-            user.UserPassword = userViewModel.UserPassword;
-            user.UserFirstname = userViewModel.UserFirstname;
-            user.UserName = userViewModel.UserName;
-            user.UserNumpermis = userViewModel.UserNumpermis;
-            user.UserPhone = userViewModel.UserPhone;
-            user.UserPoleId = userViewModel.UserPoleId;
-            user.UserRightId = userViewModel.UserRightId;
-            try
+
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token))
             {
-                if (TokenService.ValidateToken(token))
-                {
-                    _context.User.Update(user);
-                    _context.SaveChanges();
-                    return Ok(user);
-                }
-
-                return Unauthorized();
-
+                return BadRequest(ModelState);
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-
-        }
-
-
-        [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
-        {
-            var token = getToken();
 
             if (TokenService.ValidateToken(token))
             {
-                var user = _context.User.Find(id);
-                if (user == null)
-                    return BadRequest();
 
-                _context.User.Remove(user);
-                _context.SaveChanges();
-                return Ok();
+                try
+                {
+                    user.UserEmail = userViewModel.UserEmail;
+                    user.UserPassword = userViewModel.UserPassword;
+                    user.UserFirstname = userViewModel.UserFirstname;
+                    user.UserName = userViewModel.UserName;
+                    user.UserNumpermis = userViewModel.UserNumpermis;
+                    user.UserPhone = userViewModel.UserPhone;
+                    user.UserPoleId = userViewModel.UserPoleId;
+                    user.UserRightId = userViewModel.UserRightId;
+
+                    _context.Entry(user).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            return Unauthorized();
+        }
+
+        // POST: api/Users
+        [HttpPost]
+        public async Task<IActionResult> PostUser([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (TokenService.ValidateToken(token))
+            {
+                _context.User.Add(user);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetUser", new { id = user.UserId }, user);
             }
 
             return Unauthorized();
 
+
+
+        }
+
+        // DELETE: api/Users/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _context.User.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (TokenService.ValidateToken(token))
+            {
+                _context.User.Remove(user);
+                await _context.SaveChangesAsync();
+                return Ok(user);
+            }
+
+            return Unauthorized();
+
+        }
+
+        private bool UserExists(int id)
+        {
+            return _context.User.Any(e => e.UserId == id);
         }
 
         /// <summary>
         /// permet de récuperer le token
         /// </summary>
         /// <returns></returns>
-        private string getToken()
+        private string GetToken()
         {
-            var token2 = Request.Headers;
             var token = Request.Headers["Authorization"].ToString();
             if (token.StartsWith("Bearer"))
             {
@@ -128,7 +190,30 @@ namespace TestAuthentification.Controllers
 
             return token;
         }
+        [HttpGet, Route("userRole")]
+        public IActionResult GetUserRole()
+        {
+            var token = GetToken();
+            if (String.IsNullOrEmpty(token) || (!ModelState.IsValid))
+            {
+                return BadRequest(ModelState);
+            }
 
+            if (TokenService.ValidateToken(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var simplePrinciple = handler.ReadJwtToken(token);
+                var role = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+                var roles = new Dictionary<string, string>();
+                roles.Add("role", role);
 
+                return Ok(roles);
+            }
+
+            return Unauthorized();
+
+        }
     }
+
+
 }

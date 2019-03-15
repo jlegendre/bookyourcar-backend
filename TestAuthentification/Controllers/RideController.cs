@@ -11,56 +11,56 @@ namespace TestAuthentification.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PoleController : ControllerBase
+    public class RideController : ControllerBase
     {
         private readonly A5dContext _context;
 
-        public PoleController(A5dContext context)
+        public RideController(A5dContext context)
         {
             _context = context;
         }
 
-        // GET: api/Poles
+        // GET: api/Rides
         [HttpGet]
-        public IEnumerable<Pole> GetPole()
+        public IEnumerable<Ride> GetRide()
         {
-            return _context.Pole;
+            return _context.Ride;
         }
 
-        // GET: api/Poles/5
+        // GET: api/Rides/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPole([FromRoute] int id)
+        public async Task<IActionResult> GetRide([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
+            var ride = await _context.Ride.FindAsync(id);
 
-            if (pole == null)
+            if (ride == null)
             {
                 return NotFound();
             }
 
-            return Ok(pole);
+            return Ok(ride);
         }
 
-        // PUT: api/Poles/5
+        // PUT: api/Rides/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] Pole pole)
+        public async Task<IActionResult> PutRide([FromRoute] int id, [FromBody] Ride ride)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != pole.PoleId)
+            if (id != ride.RideId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pole).State = EntityState.Modified;
+            _context.Entry(ride).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace TestAuthentification.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PoleExists(id))
+                if (!RideExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace TestAuthentification.Controllers
             return NoContent();
         }
 
-        // POST: api/Poles
+        // POST: api/Rides
         [HttpPost]
-        public async Task<IActionResult> PostPole([FromBody] Pole pole)
+        public async Task<IActionResult> PostRide([FromBody] Ride ride)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Pole.Add(pole);
+            _context.Ride.Add(ride);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPole", new { id = pole.PoleId }, pole);
+            return CreatedAtAction("GetRide", new { id = ride.RideId }, ride);
         }
 
-        // DELETE: api/Poles/5
+        // DELETE: api/Rides/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePole([FromRoute] int id)
+        public async Task<IActionResult> DeleteRide([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
-            if (pole == null)
+            var ride = await _context.Ride.FindAsync(id);
+            if (ride == null)
             {
                 return NotFound();
             }
 
-            _context.Pole.Remove(pole);
+            _context.Ride.Remove(ride);
             await _context.SaveChangesAsync();
 
-            return Ok(pole);
+            return Ok(ride);
         }
 
-        private bool PoleExists(int id)
+        private bool RideExists(int id)
         {
-            return _context.Pole.Any(e => e.PoleId == id);
+            return _context.Ride.Any(e => e.RideId == id);
         }
     }
 }

@@ -11,56 +11,56 @@ namespace TestAuthentification.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PoleController : ControllerBase
+    public class RightController : ControllerBase
     {
         private readonly A5dContext _context;
 
-        public PoleController(A5dContext context)
+        public RightController(A5dContext context)
         {
             _context = context;
         }
 
-        // GET: api/Poles
+        // GET: api/Rights
         [HttpGet]
-        public IEnumerable<Pole> GetPole()
+        public IEnumerable<Right> GetRight()
         {
-            return _context.Pole;
+            return _context.Right;
         }
 
-        // GET: api/Poles/5
+        // GET: api/Rights/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPole([FromRoute] int id)
+        public async Task<IActionResult> GetRight([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
+            var right = await _context.Right.FindAsync(id);
 
-            if (pole == null)
+            if (right == null)
             {
                 return NotFound();
             }
 
-            return Ok(pole);
+            return Ok(right);
         }
 
-        // PUT: api/Poles/5
+        // PUT: api/Rights/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] Pole pole)
+        public async Task<IActionResult> PutRight([FromRoute] int id, [FromBody] Right right)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != pole.PoleId)
+            if (id != right.RightId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pole).State = EntityState.Modified;
+            _context.Entry(right).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace TestAuthentification.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PoleExists(id))
+                if (!RightExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace TestAuthentification.Controllers
             return NoContent();
         }
 
-        // POST: api/Poles
+        // POST: api/Rights
         [HttpPost]
-        public async Task<IActionResult> PostPole([FromBody] Pole pole)
+        public async Task<IActionResult> PostRight([FromBody] Right right)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Pole.Add(pole);
+            _context.Right.Add(right);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPole", new { id = pole.PoleId }, pole);
+            return CreatedAtAction("GetRight", new { id = right.RightId }, right);
         }
 
-        // DELETE: api/Poles/5
+        // DELETE: api/Rights/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePole([FromRoute] int id)
+        public async Task<IActionResult> DeleteRight([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pole = await _context.Pole.FindAsync(id);
-            if (pole == null)
+            var right = await _context.Right.FindAsync(id);
+            if (right == null)
             {
                 return NotFound();
             }
 
-            _context.Pole.Remove(pole);
+            _context.Right.Remove(right);
             await _context.SaveChangesAsync();
 
-            return Ok(pole);
+            return Ok(right);
         }
 
-        private bool PoleExists(int id)
+        private bool RightExists(int id)
         {
-            return _context.Pole.Any(e => e.PoleId == id);
+            return _context.Right.Any(e => e.RightId == id);
         }
     }
 }
