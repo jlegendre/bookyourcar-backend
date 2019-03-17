@@ -54,7 +54,7 @@ namespace TestAuthentification.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }k
+            }
 
             var poleToModifie = await _context.Pole.FindAsync(id);
 
