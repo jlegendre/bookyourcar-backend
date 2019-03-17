@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.ViewModels;
 
 namespace TestAuthentification.Controllers
 {
@@ -48,19 +49,21 @@ namespace TestAuthentification.Controllers
 
         // PUT: api/Poles/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] Pole pole)
+        public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] PoleViewModel poleModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
+            }k
 
-            if (id != pole.PoleId)
-            {
-                return BadRequest();
-            }
+            var poleToModifie = await _context.Pole.FindAsync(id);
 
-            _context.Entry(pole).State = EntityState.Modified;
+            poleToModifie.PoleAddress = poleModel.PoleAddress;
+            poleToModifie.PoleCity = poleModel.PoleCity;
+            poleToModifie.PoleCp = poleModel.PoleCp;
+            poleToModifie.PoleName = poleModel.PoleName;
+
+            _context.Entry(poleToModifie).State = EntityState.Modified;
 
             try
             {
@@ -83,12 +86,19 @@ namespace TestAuthentification.Controllers
 
         // POST: api/Poles
         [HttpPost]
-        public async Task<IActionResult> PostPole([FromBody] Pole pole)
+        public async Task<IActionResult> PostPole([FromBody] PoleViewModel poleModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            var pole = new Pole()
+            {
+                PoleAddress = poleModel.PoleAddress,
+                PoleCity = poleModel.PoleCity,
+                PoleCp = poleModel.PoleCp,
+                PoleName = poleModel.PoleName
+            };
 
             _context.Pole.Add(pole);
             await _context.SaveChangesAsync();
@@ -114,7 +124,7 @@ namespace TestAuthentification.Controllers
             _context.Pole.Remove(pole);
             await _context.SaveChangesAsync();
 
-            return Ok(pole);
+            return NoContent();
         }
 
         private bool PoleExists(int id)

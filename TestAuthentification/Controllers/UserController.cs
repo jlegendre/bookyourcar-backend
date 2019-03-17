@@ -194,7 +194,7 @@ namespace TestAuthentification.Controllers
         public IActionResult GetUserRole()
         {
             var token = GetToken();
-            if (String.IsNullOrEmpty(token) || (!ModelState.IsValid))
+            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
             {
                 return BadRequest(ModelState);
             }
