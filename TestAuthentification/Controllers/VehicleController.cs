@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.ViewModels;
 
 namespace TestAuthentification.Controllers
 {
@@ -48,19 +49,25 @@ namespace TestAuthentification.Controllers
 
         // PUT: api/Vehicles/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVehicle([FromRoute] int id, [FromBody] Vehicle vehicle)
+        public async Task<IActionResult> PutVehicle([FromRoute] int id, [FromBody] VehiculeViewModel vehicle)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != vehicle.VehId)
-            {
-                return BadRequest();
-            }
+            var vehiculeToModifie = await _context.Vehicle.FindAsync(id);
+            vehiculeToModifie.VehDatemec = vehicle.VehDatemec;
+            vehiculeToModifie.VehKm = vehicle.VehKm;
+            vehiculeToModifie.VehNumberplace = vehicle.VehNumberplace;
+            vehiculeToModifie.VehBrand = vehicle.VehBrand;
+            vehiculeToModifie.VehColor = vehicle.VehColor;
+            vehiculeToModifie.VehModel = vehicle.VehModel;
+            vehiculeToModifie.VehRegistration = vehicle.VehRegistration;
+            vehiculeToModifie.VehTypeEssence = vehicle.VehTypeEssence;
+            vehiculeToModifie.VehIsactive = vehicle.VehIsactive;
 
-            _context.Entry(vehicle).State = EntityState.Modified;
+            _context.Entry(vehiculeToModifie).State = EntityState.Modified;
 
             try
             {
@@ -83,17 +90,28 @@ namespace TestAuthentification.Controllers
 
         // POST: api/Vehicles
         [HttpPost]
-        public async Task<IActionResult> PostVehicle([FromBody] Vehicle vehicle)
+        public async Task<IActionResult> PostVehicle([FromBody] VehiculeViewModel vehicle)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            var vehiculeToAdd = new Vehicle()
+            {
+                VehBrand = vehicle.VehBrand,
+                VehColor = vehicle.VehColor,
+                VehModel = vehicle.VehModel,
+                VehRegistration = vehicle.VehRegistration,
+                VehTypeEssence = vehicle.VehTypeEssence,
+                VehDatemec = vehicle.VehDatemec,
+                VehKm = vehicle.VehKm,
+                VehNumberplace = vehicle.VehNumberplace,
+            };
 
-            _context.Vehicle.Add(vehicle);
+            _context.Vehicle.Add(vehiculeToAdd);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVehicle", new { id = vehicle.VehId }, vehicle);
+            return CreatedAtAction("GetVehicle", new { id = vehiculeToAdd.VehId }, vehiculeToAdd);
         }
 
         // DELETE: api/Vehicles/5
@@ -114,7 +132,7 @@ namespace TestAuthentification.Controllers
             _context.Vehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            return Ok(vehicle);
+            return NoContent();
         }
 
         private bool VehicleExists(int id)
