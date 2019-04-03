@@ -35,16 +35,16 @@ namespace TestAuthentification
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-        #if DEBUG
+#if DEBUG
 
-        #endif
+#endif
 
             services.AddAuthentication(AzureADB2CDefaults.BearerAuthenticationScheme)
                 .AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options));
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-             options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -102,6 +102,10 @@ namespace TestAuthentification
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
+            Environment.SetEnvironmentVariable("KeyAPIEmail", "8c8039f810dde01b9c8587d95a10b633");
+            Environment.SetEnvironmentVariable("SecretAPIEmail", "7414cc9223d0a77e98573dba18c36fe7");
+            Environment.SetEnvironmentVariable("UrlResetPassword", "https://localhost:5001/swagger/index.html");
+            
 
 
         }

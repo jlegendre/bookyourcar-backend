@@ -18,6 +18,19 @@
           "lib/netstandard1.3/JWT.dll": {}
         }
       },
+      "Mailjet.Api/1.2.2": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "Newtonsoft.Json": "9.0.1"
+        },
+        "compile": {
+          "lib/netstandard1.1/Mailjet.Client.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.1/Mailjet.Client.dll": {}
+        }
+      },
       "Microsoft.AspNet.WebApi.Client/5.2.6": {
         "type": "package",
         "dependencies": {
@@ -4792,6 +4805,19 @@
         "lib/net46/JWT.xml",
         "lib/netstandard1.3/JWT.dll",
         "lib/netstandard1.3/JWT.xml"
+      ]
+    },
+    "Mailjet.Api/1.2.2": {
+      "sha512": "EyuZ4zPv4fGjQDBR78TTPW7BQ16Vd+vPmzN0RK2RCIfvDH9jBN7uSBCh4AmLikiesLGjof2UaOoRiHZl521ghA==",
+      "type": "package",
+      "path": "mailjet.api/1.2.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Mailjet.Client.dll",
+        "lib/netstandard1.1/Mailjet.Client.dll",
+        "mailjet.api.1.2.2.nupkg.sha512",
+        "mailjet.api.nuspec"
       ]
     },
     "Microsoft.AspNet.WebApi.Client/5.2.6": {
@@ -12967,6 +12993,7 @@
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.1": [
       "JWT >= 5.0.1",
+      "Mailjet.Api >= 1.2.2",
       "Microsoft.AspNetCore.App >= 2.1.1",
       "Microsoft.AspNetCore.Authentication.AzureADB2C.UI >= 2.1.1",
       "Microsoft.AspNetCore.Razor.Design >= 2.1.2",
@@ -13021,6 +13048,10 @@
           "JWT": {
             "target": "Package",
             "version": "[5.0.1, )"
+          },
+          "Mailjet.Api": {
+            "target": "Package",
+            "version": "[1.2.2, )"
           },
           "Microsoft.AspNetCore.App": {
             "suppressParent": "All",

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using Mailjet.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -120,7 +121,34 @@ namespace TestAuthentification.Controllers
             return _context.User.ToList();
         }
 
-        
+        [HttpPost, Route("ResetPassword")]
+        public async Task<IActionResult> ResetPasswordAsync(string emailDestinataire)
+        {
+            string ContenuDuMail = "Voici le lien pour rénitialiser votre mot de passe " +
+                                   Environment.GetEnvironmentVariable("UrlResetPassword");
+
+            MailjetResponse response =
+                await EmailService.SendEmailAsync("Changement de mot de passe", ContenuDuMail, emailDestinataire);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine(string.Format("Total: {0}, Count: {1}\n", response.GetTotal(), response.GetCount()));
+                Console.WriteLine(response.GetData());
+                return Ok();
+            }
+            else
+            {
+                Console.WriteLine(string.Format("StatusCode: {0}\n", response.StatusCode));
+                Console.WriteLine(string.Format("ErrorInfo: {0}\n", response.GetErrorInfo()));
+                Console.WriteLine(response.GetData());
+                Console.WriteLine(string.Format("ErrorMessage: {0}\n", response.GetErrorMessage()));
+                return BadRequest();
+            }
+
+            
+        }
+
+
+
 
     }
 }
