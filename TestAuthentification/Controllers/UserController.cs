@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -210,6 +211,24 @@ namespace TestAuthentification.Controllers
                 return Ok(roles);
             }
 
+            return Unauthorized();
+
+        }
+
+        public IActionResult GetUserEnAttente()
+        {
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (TokenService.ValidateToken(token))
+            {
+
+
+                return Ok();
+            }
             return Unauthorized();
 
         }
