@@ -45,7 +45,7 @@ namespace TestAuthentification.Controllers
 
             // On regarde si le password correspond avec celui du formulaire 
             // si c'est le cas on créé un jeton d'authentification Token
-            if (myUser != null && AuthService.CheckPassword(myUser, loginViewModel.Password))
+            if (myUser != null && AuthService.CheckPassword(myUser, loginViewModel.Password) && myUser.UserIsactivated)
             {
                 SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
                 SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -68,6 +68,11 @@ namespace TestAuthentification.Controllers
                 string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
                 return Ok(new { Token = tokenString });
                 //return CreatedAtAction(nameof(GetUserInfo), new { Token = tokenString });
+            }
+            else if (!myUser.UserIsactivated)
+            {
+                ModelState.AddModelError("Message", "Votre compte n'est pas encore activé");
+                return BadRequest(ModelState);
             }
             else
             {

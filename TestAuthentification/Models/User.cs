@@ -19,7 +19,7 @@ namespace TestAuthentification.Models
         public int? UserRightId { get; set; }
         public int? UserPoleId { get; set; }
         public string UserPassword { get; set; }
-
+        public bool UserIsactivated { get; set; }
         public Right UserPole { get; set; }
         public Right UserRight { get; set; }
         public ICollection<RideUser> RideUser { get; set; }
