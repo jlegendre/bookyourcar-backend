@@ -71,7 +71,7 @@ namespace TestAuthentification.Controllers
             }
             else if (myUser != null && !myUser.UserIsactivated)
             {
-                ModelState.AddModelError("Message", "Votre compte n'est pas encore activé");
+                ModelState.AddModelError("Error", "Votre compte n'est pas encore activé");
                 return BadRequest(ModelState);
             }
             else
