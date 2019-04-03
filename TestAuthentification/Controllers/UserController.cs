@@ -64,10 +64,12 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             if (id != userViewModel.UserId)
             {
                 return BadRequest();
             }
+
             var user = _context.User.SingleOrDefault(x => x.UserId == id);
             if (user == null)
             {
@@ -109,6 +111,7 @@ namespace TestAuthentification.Controllers
                     }
                 }
             }
+
             return Unauthorized();
         }
 
@@ -120,6 +123,7 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             var token = GetToken();
             if (string.IsNullOrEmpty(token))
             {
@@ -154,6 +158,7 @@ namespace TestAuthentification.Controllers
             {
                 return NotFound();
             }
+
             var token = GetToken();
             if (string.IsNullOrEmpty(token))
             {
@@ -191,6 +196,11 @@ namespace TestAuthentification.Controllers
 
             return token;
         }
+
+        /// <summary>
+        /// Retourne le rôle de la personne authentifié
+        /// </summary>
+        /// <returns></returns>
         [HttpGet, Route("userRole")]
         public IActionResult GetUserRole()
         {
@@ -215,7 +225,12 @@ namespace TestAuthentification.Controllers
 
         }
 
-        public IActionResult GetUserEnAttente()
+        /// <summary>
+        /// Retourne la liste des utilisateurs qui n'ont pas encore été validé par l'administrateur
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("userInWaiting")]
+        public IActionResult GetUserInWaiting()
         {
             var token = GetToken();
             if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
@@ -223,16 +238,59 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
+                List<User> userEnAttente = _context.User.Where(x => !x.UserIsactivated).ToList();
 
+                if (userEnAttente.Count > 0)
+                {
+                    return Ok(userEnAttente);
+                }
+                else
+                {
+                    ModelState.AddModelError("info", "Il n'y a pas d'utilisateur en attente.");
 
-                return Ok();
+                    return Ok(ModelState);
+                }
+
             }
+
             return Unauthorized();
 
         }
+
+        /// <summary>
+        /// Permet à l'administrateur de valider un utilisateur
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost, Route("ValidateUserInWaiting")]
+        public IActionResult ValidateUserInWaiting(int id)
+        {
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (TokenService.ValidateTokenWhereIsAdmin(token))
+            {
+                User userValidate = _context.User.FirstOrDefault(x => x.UserId == id);
+
+                if (userValidate != null)
+                {
+                    userValidate.UserIsactivated = true;
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(ModelState);
+                }
+
+            }
+            return Unauthorized();
+        }
     }
-
-
 }
+

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,32 @@ namespace TestAuthentification.Services
             {
                 IPrincipal principal = tokenHandler.ValidateToken(authToken, validationParameters, out validatedToken);
                 return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+        public static bool ValidateTokenWhereIsAdmin(string authToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = GetValidationParameters();
+
+            SecurityToken validatedToken;
+            try
+            {
+                IPrincipal principal = tokenHandler.ValidateToken(authToken, validationParameters, out validatedToken);
+                var handler = new JwtSecurityTokenHandler();
+                var simplePrinciple = handler.ReadJwtToken(authToken);
+                var role = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+
+                if (role.Equals("Admin"))
+                {
+                    return true;
+                }
+                return false;
             }
             catch (Exception e)
             {

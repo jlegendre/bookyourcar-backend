@@ -69,7 +69,7 @@ namespace TestAuthentification.Controllers
                 return Ok(new { Token = tokenString });
                 //return CreatedAtAction(nameof(GetUserInfo), new { Token = tokenString });
             }
-            else if (!myUser.UserIsactivated)
+            else if (myUser != null && !myUser.UserIsactivated)
             {
                 ModelState.AddModelError("Message", "Votre compte n'est pas encore activé");
                 return BadRequest(ModelState);
