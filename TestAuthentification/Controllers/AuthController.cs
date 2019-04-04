@@ -77,7 +77,7 @@ namespace TestAuthentification.Controllers
             }
             else
             {
-                ModelState.AddModelError("Password", "Mot de passe ou Email invalide.");
+                ModelState.AddModelError("Error", "Mot de passe ou Email invalide.");
                 return BadRequest(ModelState);
             }
         }
