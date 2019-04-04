@@ -33,7 +33,12 @@ namespace TestAuthentification.Services
         {
             // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
             var user = _context.User.SingleOrDefault(x => x.UserEmail == email);
-            user.UserRight = _context.Right.FirstOrDefault(x => x.RightId == user.UserRightId);
+            if (user != null)
+            {
+                user.UserRight = _context.Right.FirstOrDefault(x => x.RightId == user.UserRightId);
+                user.UserPole = _context.Pole.FirstOrDefault(x => x.PoleId == user.UserPoleId);
+            }
+            
             return user;
 
         }
