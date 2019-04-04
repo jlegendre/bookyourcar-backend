@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
+using TestAuthentification.ViewModels.User;
 
 namespace TestAuthentification.Controllers
 {
@@ -23,6 +24,7 @@ namespace TestAuthentification.Controllers
         public UserController(A5dContext context)
         {
             _context = context;
+            _context.Pole.ToList();
         }
 
         // GET: api/Users
@@ -241,10 +243,19 @@ namespace TestAuthentification.Controllers
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
                 List<User> userEnAttente = _context.User.Where(x => !x.UserIsactivated).ToList();
+                var model = userEnAttente.Select(x => new ListUserViewModel()
+                {
+                    PoleName =x.UserPole.PoleName,
+                    UserFirstname = x.UserFirstname,
+                    UserId = x.UserId,
+                    UserRightId = x.UserRightId,
+                    UserName = x.UserName,
+                    UserEmail = x.UserEmail
+                });
 
                 if (userEnAttente.Count > 0)
                 {
-                    return Ok(userEnAttente);
+                    return Ok(model);
                 }
                 else
                 {

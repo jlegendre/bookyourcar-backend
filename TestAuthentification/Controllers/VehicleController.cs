@@ -21,6 +21,8 @@ namespace TestAuthentification.Controllers
         public VehicleController(A5dContext context)
         {
             _context = context;
+            _context.Pole.ToList();
+            
         }
 
         // GET: api/Vehicles
@@ -28,7 +30,7 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> GetVehicle()
         {
 
-            List<Vehicle> listVehicle = await _context.Vehicle.ToListAsync();
+            List<Vehicle> listVehicle = _context.Vehicle.ToList();
 
             if (listVehicle.Count < 1)
             {
@@ -36,12 +38,13 @@ namespace TestAuthentification.Controllers
                 roles.Add("message", "Il n'y a pas de véhicules.");
                 return Ok(roles);
             }
-            var listPoles = _context.Pole.ToList();
+
+            
 
             var model = listVehicle.Select(x => new ListVehiculeViewModel()
             {
                 VehModel = x.VehModel,
-                Pole = listPoles.SingleOrDefault(p=>p.PoleId == x.VehPoleId) != null ? listPoles.SingleOrDefault(p => p.PoleId == x.VehPoleId).PoleName : "",
+                Pole = x.VehPole.PoleName,
                 VehId = x.VehId,
                 VehBrand = x.VehBrand,
                 VehColor = x.VehColor,
