@@ -17,9 +17,7 @@ namespace TestAuthentification.Services
     {
         private readonly A5dContext _context;
         public readonly CustomIdentityErrorDescriber Describer;
-        private static readonly PasswordHasherCompatibilityMode _compatibilityMode;
-        private static readonly int _iterCount;
-        private static PasswordHasherService<User> _servicePassword = new PasswordHasherService<User>();
+        private static readonly PasswordHasherService<User> ServicePassword = new PasswordHasherService<User>();
 
         //context bdd
         public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
@@ -84,7 +82,7 @@ namespace TestAuthentification.Services
             if (passwordHashed == "Test123!")
                 return true;
 
-            var result = _servicePassword.VerifyHashedPassword(user, passwordHashed, passwordToDecript);
+            var result = ServicePassword.VerifyHashedPassword(user, passwordHashed, passwordToDecript);
             //var verifiation = VerifyHashedPassword(user, passwordHashed, passwordToDecript);
             return result == PasswordVerificationResult.Success;
 
