@@ -32,8 +32,8 @@ namespace TestAuthentification.Services
         public User FindByEmail(string email)
         {
             // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
-            var user = _context.User
-                .Include(i => i.UserRight.RightId).SingleOrDefault(x => x.UserEmail == email);
+            var user = _context.User.SingleOrDefault(x => x.UserEmail == email);
+            user.UserRight = _context.Right.FirstOrDefault(x => x.RightId == user.UserRightId);
             return user;
 
         }
