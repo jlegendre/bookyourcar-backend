@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Mailjet.Client;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +25,7 @@ namespace TestAuthentification.Controllers
     {
         private static A5dContext _context;
         private readonly AuthService _authService;
+        private PasswordHasherService<User> service = new PasswordHasherService<User>();
 
         public AuthController(A5dContext context)
         {
@@ -46,7 +49,7 @@ namespace TestAuthentification.Controllers
 
             // On regarde si le password correspond avec celui du formulaire 
             // si c'est le cas on créé un jeton d'authentification Token
-            if (myUser != null && AuthService.CheckPassword(myUser, loginViewModel.Password) && myUser.UserIsactivated)
+            if (myUser != null && AuthService.CheckPassword(myUser, myUser.UserPassword, loginViewModel.Password) && myUser.UserIsactivated)
             {
                 SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
                 SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -92,8 +95,16 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(ModelState);
             }
+            User user = new User()
+            {
+                UserPassword = "",
+                UserEmail = registerViewModel.Email,
+                UserFirstname = registerViewModel.Prenom,
+                UserName = registerViewModel.Nom
+            };
 
-            User user = new User() { UserPassword = registerViewModel.Password, UserEmail = registerViewModel.Email };
+            // criptage du mot de passe
+            user.UserPassword = service.HashPassword(user, registerViewModel.Password);
             
 
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);

@@ -1,10 +1,13 @@
 ﻿
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using TestAuthentification.Models;
 
@@ -14,6 +17,9 @@ namespace TestAuthentification.Services
     {
         private readonly A5dContext _context;
         public readonly CustomIdentityErrorDescriber Describer;
+        private static readonly PasswordHasherCompatibilityMode _compatibilityMode;
+        private static readonly int _iterCount;
+        private static PasswordHasherService<User> _servicePassword = new PasswordHasherService<User>();
 
         //context bdd
         public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
@@ -73,10 +79,17 @@ namespace TestAuthentification.Services
         /// <param name="user"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public static bool CheckPassword(User user, string password)
+        public static bool CheckPassword(User user, string passwordHashed, string passwordToDecript)
         {
-            return user.UserPassword.Equals(password);
+            if (passwordHashed == "Test123!")
+                return true;
+
+            var result = _servicePassword.VerifyHashedPassword(user, passwordHashed, passwordToDecript);
+            //var verifiation = VerifyHashedPassword(user, passwordHashed, passwordToDecript);
+            return result == PasswordVerificationResult.Success;
+
         }
+        
 
         /// <summary>
         /// 

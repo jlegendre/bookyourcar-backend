@@ -9,6 +9,13 @@ namespace TestAuthentification.ViewModels
         [Display(Name = "Courrier électronique")]
         public string Email { get; set; }
 
+       
+        [Display(Name = "Prénom")]
+        public string Prenom { get; set; }
+
+        [Display(Name = "Nom")]
+        public string Nom { get; set; }
+
         [Required]
         [StringLength(100, ErrorMessage = "La chaîne {0} doit comporter au moins {2} caractères.", MinimumLength = 6)]
         [DataType(DataType.Password)]
