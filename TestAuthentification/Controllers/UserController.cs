@@ -265,7 +265,7 @@ namespace TestAuthentification.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("ValidateUserInWaiting")]
-        public IActionResult ValidateUserInWaiting(int id)
+        public async Task<IActionResult> ValidateUserInWaiting([FromBody] int id)
         {
             var token = GetToken();
             if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
@@ -275,7 +275,7 @@ namespace TestAuthentification.Controllers
 
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
-                User userValidate = _context.User.FirstOrDefault(x => x.UserId == id);
+                User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
 
                 if (userValidate != null)
                 {
