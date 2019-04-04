@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.1",
-    "signature": "9c985b812377d761d8facfb5359924e221c5aa72"
+    "signature": "0bd2789e68c35b9a057dec851f31db479db74dd4"
   },
   "compilationOptions": {
     "defines": [
@@ -25,6 +25,7 @@
       "TestAuthentification/1.0.0": {
         "dependencies": {
           "JWT": "5.0.1",
+          "Mailjet.Api": "1.2.2",
           "Microsoft.AspNetCore.App": "2.1.1",
           "Microsoft.AspNetCore.Authentication.AzureADB2C.UI": "2.1.1",
           "Microsoft.AspNetCore.Razor.Design": "2.1.2",
@@ -57,6 +58,21 @@
         },
         "compile": {
           "lib/netstandard1.3/JWT.dll": {}
+        }
+      },
+      "Mailjet.Api/1.2.2": {
+        "dependencies": {
+          "NETStandard.Library": "2.0.3",
+          "Newtonsoft.Json": "11.0.2"
+        },
+        "runtime": {
+          "lib/netstandard1.1/Mailjet.Client.dll": {
+            "assemblyVersion": "1.2.2.0",
+            "fileVersion": "1.2.2.0"
+          }
+        },
+        "compile": {
+          "lib/netstandard1.1/Mailjet.Client.dll": {}
         }
       },
       "Microsoft.AspNetCore.Authentication.AzureADB2C.UI/2.1.1": {
@@ -3685,6 +3701,13 @@
       "sha512": "sha512-0rDXizf96UrvR15jNwWgkM91JHgZ8SZnGDQIDzGw7c4rfdwcLvp0ZLXLTwIxwij7ywV+Ufb5iHPpyB5Na1n6SQ==",
       "path": "jwt/5.0.1",
       "hashPath": "jwt.5.0.1.nupkg.sha512"
+    },
+    "Mailjet.Api/1.2.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EyuZ4zPv4fGjQDBR78TTPW7BQ16Vd+vPmzN0RK2RCIfvDH9jBN7uSBCh4AmLikiesLGjof2UaOoRiHZl521ghA==",
+      "path": "mailjet.api/1.2.2",
+      "hashPath": "mailjet.api.1.2.2.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication.AzureADB2C.UI/2.1.1": {
       "type": "package",

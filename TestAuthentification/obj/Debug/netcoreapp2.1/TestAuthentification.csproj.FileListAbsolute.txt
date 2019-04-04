@@ -12,4 +12,3 @@ C:\Users\Jérémy\source\repos\A5DBack\testauthentification\TestAuthentification
 C:\Users\Jérémy\source\repos\A5DBack\testauthentification\TestAuthentification\obj\Debug\netcoreapp2.1\TestAuthentification.RazorTargetAssemblyInfo.cache
 C:\Users\Jérémy\source\repos\A5DBack\testauthentification\TestAuthentification\obj\Debug\netcoreapp2.1\TestAuthentification.dll
 C:\Users\Jérémy\source\repos\A5DBack\testauthentification\TestAuthentification\obj\Debug\netcoreapp2.1\TestAuthentification.pdb
-C:\Users\Jérémy\source\repos\A5DBack\testauthentification\TestAuthentification\obj\Debug\netcoreapp2.1\TestAuthentification.csprojAssemblyReference.cache

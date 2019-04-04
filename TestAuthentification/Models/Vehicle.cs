@@ -20,9 +20,11 @@ namespace TestAuthentification.Models
         public DateTime VehDatemec { get; set; }
         public string VehTypeEssence { get; set; }
         public string VehColor { get; set; }
-        public sbyte VehIsactive { get; set; }
+        public bool VehIsactive { get; set; }
         public int VehNumberplace { get; set; }
+        public int? VehPoleId { get; set; }
 
+        public Pole VehPole { get; set; }
         public ICollection<Historymaintenance> Historymaintenance { get; set; }
         public ICollection<Key> Key { get; set; }
         public ICollection<Location> Location { get; set; }

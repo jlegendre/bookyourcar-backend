@@ -7,14 +7,12 @@ namespace TestAuthentification.Models
     {
         public Right()
         {
-            UserUserPole = new HashSet<User>();
-            UserUserRight = new HashSet<User>();
+            User = new HashSet<User>();
         }
 
         public int RightId { get; set; }
         public string RightLabel { get; set; }
 
-        public ICollection<User> UserUserPole { get; set; }
-        public ICollection<User> UserUserRight { get; set; }
+        public ICollection<User> User { get; set; }
     }
 }

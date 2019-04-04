@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace TestAuthentification.Models
 {
-    public class A5dContext : DbContext
+    public partial class A5dContext : DbContext
     {
         public A5dContext()
         {
@@ -28,7 +28,11 @@ namespace TestAuthentification.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseMySql("server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -317,7 +321,7 @@ namespace TestAuthentification.Models
                     .IsUnique();
 
                 entity.HasIndex(e => e.UserPoleId)
-                    .HasName("USER_POLE_ID");
+                    .HasName("USER_ibfk_2");
 
                 entity.HasIndex(e => e.UserRightId)
                     .HasName("USER_RIGHT_ID");
@@ -337,8 +341,9 @@ namespace TestAuthentification.Models
 
                 entity.Property(e => e.UserIsactivated)
                     .HasColumnName("USER_ISACTIVATED")
-                    .HasColumnType("boolean");
-                
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.UserName)
                     .HasColumnName("USER_NAME")
                     .HasColumnType("varchar(25)");
@@ -365,12 +370,12 @@ namespace TestAuthentification.Models
                     .HasColumnType("int(11)");
 
                 entity.HasOne(d => d.UserPole)
-                    .WithMany(p => p.UserUserPole)
+                    .WithMany(p => p.User)
                     .HasForeignKey(d => d.UserPoleId)
                     .HasConstraintName("USER_ibfk_2");
 
                 entity.HasOne(d => d.UserRight)
-                    .WithMany(p => p.UserUserRight)
+                    .WithMany(p => p.User)
                     .HasForeignKey(d => d.UserRightId)
                     .HasConstraintName("USER_ibfk_1");
             });
@@ -380,6 +385,9 @@ namespace TestAuthentification.Models
                 entity.HasKey(e => e.VehId);
 
                 entity.ToTable("VEHICLE");
+
+                entity.HasIndex(e => e.VehPoleId)
+                    .HasName("FK_VEHICLE_POLE");
 
                 entity.Property(e => e.VehId)
                     .HasColumnName("VEH_ID")
@@ -401,7 +409,7 @@ namespace TestAuthentification.Models
 
                 entity.Property(e => e.VehIsactive)
                     .HasColumnName("VEH_ISACTIVE")
-                    .HasColumnType("tinyint(1)");
+                    .HasColumnType("bit(1)");
 
                 entity.Property(e => e.VehKm).HasColumnName("VEH_KM");
 
@@ -414,6 +422,10 @@ namespace TestAuthentification.Models
                     .HasColumnName("VEH_NUMBERPLACE")
                     .HasColumnType("int(11)");
 
+                entity.Property(e => e.VehPoleId)
+                    .HasColumnName("VEH_POLE_ID")
+                    .HasColumnType("int(11)");
+
                 entity.Property(e => e.VehRegistration)
                     .IsRequired()
                     .HasColumnName("VEH_REGISTRATION")
@@ -423,6 +435,11 @@ namespace TestAuthentification.Models
                     .IsRequired()
                     .HasColumnName("VEH_TYPE_ESSENCE")
                     .HasColumnType("varchar(100)");
+
+                entity.HasOne(d => d.VehPole)
+                    .WithMany(p => p.Vehicle)
+                    .HasForeignKey(d => d.VehPoleId)
+                    .HasConstraintName("FK_VEHICLE_POLE");
             });
         }
     }

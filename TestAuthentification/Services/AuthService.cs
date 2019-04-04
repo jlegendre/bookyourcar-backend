@@ -33,7 +33,7 @@ namespace TestAuthentification.Services
         {
             // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
             var user = _context.User
-                .Include(i => i.UserRight.UserUserRight).SingleOrDefault(x => x.UserEmail == email);
+                .Include(i => i.UserRight.RightId).SingleOrDefault(x => x.UserEmail == email);
             return user;
 
         }

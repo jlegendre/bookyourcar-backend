@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using TestAuthentification.Models;
 
-namespace TestAuthentification.ViewModels
+namespace TestAuthentification.ViewModels.Vehicle
 {
-    public class VehiculeViewModel
+    public class ListVehiculeViewModel
     {
         [Key]
         public int VehId { get; set; }
@@ -18,14 +20,14 @@ namespace TestAuthentification.ViewModels
         public string VehModel { get; set; }
         [Display(Name = "Nombre de km")]
         public float VehKm { get; set; }
-        [Display(Name = "Date de mise en circulation")]
-        public DateTime VehDatemec { get; set; }
-        [Display(Name = "Type Essence")]
+        [Display(Name = "Carburant")]
         public string VehTypeEssence { get; set; }
         [Display(Name = "Couleur")]
         public string VehColor { get; set; }
         [Display(Name = "Nombre de places")]
         public int VehNumberplace { get; set; }
-        public sbyte VehIsactive { get; set; }
+
+        public string Pole { get; set; }
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.ViewModels;
+using TestAuthentification.ViewModels.Vehicle;
 
 namespace TestAuthentification.Controllers
 {
@@ -23,9 +25,33 @@ namespace TestAuthentification.Controllers
 
         // GET: api/Vehicles
         [HttpGet]
-        public IEnumerable<Vehicle> GetVehicle()
+        public async Task<IActionResult> GetVehicle()
         {
-            return _context.Vehicle;
+
+            List<Vehicle> listVehicle = await _context.Vehicle.ToListAsync();
+
+            if (listVehicle.Count < 1)
+            {
+                var roles = new Dictionary<string, string>();
+                roles.Add("message", "Il n'y a pas de véhicules.");
+                return Ok(roles);
+            }
+            var listPoles = _context.Pole.ToList();
+
+            var model = listVehicle.Select(x => new ListVehiculeViewModel()
+            {
+                VehModel = x.VehModel,
+                Pole = listPoles.SingleOrDefault(p=>p.PoleId == x.VehPoleId) != null ? listPoles.SingleOrDefault(p => p.PoleId == x.VehPoleId).PoleName : "",
+                VehId = x.VehId,
+                VehBrand = x.VehBrand,
+                VehColor = x.VehColor,
+                VehKm =  x.VehKm,
+                VehNumberplace = x.VehNumberplace,
+                VehRegistration = x.VehRegistration,
+                VehTypeEssence = x.VehTypeEssence
+            });
+
+            return Ok(model.ToList());
         }
 
         // GET: api/Vehicles/5
