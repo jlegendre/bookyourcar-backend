@@ -264,8 +264,8 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("ValidateUserInWaiting")]
-        public async Task<IActionResult> ValidateUserInWaiting([FromBody] int id)
+        [HttpPut, Route("ValidateUserInWaiting")]
+        public async Task<IActionResult> ValidateUserInWaiting([FromForm] int id)
         {
             var token = GetToken();
             if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
