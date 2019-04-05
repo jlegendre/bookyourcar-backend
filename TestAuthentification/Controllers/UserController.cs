@@ -243,18 +243,18 @@ namespace TestAuthentification.Controllers
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
                 List<User> userEnAttente = _context.User.Where(x => !x.UserIsactivated).ToList();
-                var model = userEnAttente.Select(x => new ListUserViewModel()
-                {
-                    PoleName =x.UserPole.PoleName,
-                    UserFirstname = x.UserFirstname,
-                    UserId = x.UserId,
-                    UserRightId = x.UserRightId,
-                    UserName = x.UserName,
-                    UserEmail = x.UserEmail
-                });
-
+                
                 if (userEnAttente.Count > 0)
                 {
+                    var model = userEnAttente.Select(x => new ListUserViewModel()
+                    {
+                        PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                        UserFirstname = x.UserFirstname,
+                        UserId = x.UserId,
+                        UserRightId = x.UserRightId,
+                        UserName = x.UserName,
+                        UserEmail = x.UserEmail
+                    });
                     return Ok(model);
                 }
                 else
@@ -276,7 +276,7 @@ namespace TestAuthentification.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPut, Route("ValidateUserInWaiting")]
-        public async Task<IActionResult> ValidateUserInWaiting([FromForm] int id)
+        public async Task<IActionResult> ValidateUserInWaiting([FromRoute] int id)
         {
             var token = GetToken();
             if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
