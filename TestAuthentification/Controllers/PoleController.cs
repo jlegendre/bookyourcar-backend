@@ -23,9 +23,25 @@ namespace TestAuthentification.Controllers
 
         // GET: api/Poles
         [HttpGet]
-        public IEnumerable<Pole> GetPole()
+        public async Task<IActionResult> GetPole()
         {
-            return _context.Pole;
+            var listPole = await _context.Pole.ToListAsync();
+            if (listPole.Count > 0)
+            {
+                var model = listPole.Select(x => new PoleViewModel()
+                {
+                    PoleName = x.PoleName,
+                    PoleAddress = x.PoleAddress,
+                    PoleCity = x.PoleCity,
+                    PoleCp = x.PoleCp
+                });
+
+                return Ok(model.ToList());
+            }
+            var roles = new Dictionary<string, string>();
+            roles.Add("message", "Il n'y a pas de Poles.");
+            return Ok(roles);
+
         }
 
         // GET: api/Poles/5

@@ -30,7 +30,7 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> GetVehicle()
         {
 
-            List<Vehicle> listVehicle = _context.Vehicle.ToList();
+            List<Vehicle> listVehicle = await _context.Vehicle.ToListAsync();
 
             if (listVehicle.Count < 1)
             {

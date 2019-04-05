@@ -29,20 +29,27 @@ namespace TestAuthentification.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public List<ListUserViewModel> GetUser()
+        public async Task<IActionResult> GetUser()
         {
-            var listUser = _context.User.ToList();
-
-            var model = listUser.Select(x => new ListUserViewModel()
+            var listUser = await _context.User.ToListAsync();
+            if (listUser.Count > 0)
             {
-                PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
-                UserFirstname = x.UserFirstname,
-                UserEmail = x.UserEmail,
-                UserId = x.UserId,
-                UserRightId = x.UserRightId,
-                UserName = x.UserName
-            });
-            return model.ToList();
+                var model = listUser.Select(x => new ListUserViewModel()
+                {
+                    PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                    UserFirstname = x.UserFirstname,
+                    UserEmail = x.UserEmail,
+                    UserId = x.UserId,
+                    UserRightId = x.UserRightId,
+                    UserName = x.UserName
+                });
+                return Ok(model.ToList());
+            }
+            var roles = new Dictionary<string, string>();
+            roles.Add("message", "Il n'y a pas de Poles.");
+            return Ok(roles);
+
+
         }
 
         // GET: api/Users/5
@@ -57,7 +64,7 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
             if (TokenService.ValidateToken(token))
             {
-                
+
                 var user = await _context.User.FindAsync(id);
                 if (user == null)
                 {
@@ -141,7 +148,7 @@ namespace TestAuthentification.Controllers
         }
 
         // POST: api/Users
-        [HttpPost]
+        //[HttpPost]
         //public async Task<IActionResult> PostUser([FromBody] User user)
         //{
         //    if (!ModelState.IsValid)
@@ -266,7 +273,7 @@ namespace TestAuthentification.Controllers
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
                 List<User> userEnAttente = _context.User.Where(x => !x.UserIsactivated).ToList();
-                
+
                 if (userEnAttente.Count > 0)
                 {
                     var model = userEnAttente.Select(x => new ListUserViewModel()
