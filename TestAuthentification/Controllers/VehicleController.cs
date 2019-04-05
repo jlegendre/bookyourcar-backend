@@ -22,7 +22,7 @@ namespace TestAuthentification.Controllers
         {
             _context = context;
             _context.Pole.ToList();
-            
+
         }
 
         // GET: api/Vehicles
@@ -38,9 +38,6 @@ namespace TestAuthentification.Controllers
                 roles.Add("message", "Il n'y a pas de véhicules.");
                 return Ok(roles);
             }
-
-            
-
             var model = listVehicle.Select(x => new ListVehiculeViewModel()
             {
                 VehModel = x.VehModel,
@@ -48,7 +45,7 @@ namespace TestAuthentification.Controllers
                 VehId = x.VehId,
                 VehBrand = x.VehBrand,
                 VehColor = x.VehColor,
-                VehKm =  x.VehKm,
+                VehKm = x.VehKm,
                 VehNumberplace = x.VehNumberplace,
                 VehRegistration = x.VehRegistration,
                 VehTypeEssence = x.VehTypeEssence
@@ -67,13 +64,26 @@ namespace TestAuthentification.Controllers
             }
 
             var vehicle = await _context.Vehicle.FindAsync(id);
-
-            if (vehicle == null)
+            if (vehicle != null)
             {
-                return NotFound();
-            }
+                VehiculeViewModel model = new VehiculeViewModel
+                {
+                    VehId = vehicle.VehId,
+                    VehBrand = vehicle.VehBrand,
+                    VehColor = vehicle.VehColor,
+                    VehDatemec = vehicle.VehDatemec,
+                    VehIsactive = vehicle.VehIsactive,
+                    VehKm = vehicle.VehKm,
+                    VehModel = vehicle.VehModel,
+                    VehNumberplace = vehicle.VehNumberplace,
+                    VehRegistration = vehicle.VehRegistration,
+                    VehTypeEssence = vehicle.VehTypeEssence
+                };
 
-            return Ok(vehicle);
+                return Ok(model);
+            }
+            return NotFound();
+
         }
 
         // PUT: api/Vehicles/5
@@ -161,7 +171,7 @@ namespace TestAuthentification.Controllers
             _context.Vehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         private bool VehicleExists(int id)

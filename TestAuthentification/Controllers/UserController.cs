@@ -29,9 +29,20 @@ namespace TestAuthentification.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public IEnumerable<User> GetUser()
+        public List<ListUserViewModel> GetUser()
         {
-            return _context.User;
+            var listUser = _context.User.ToList();
+
+            var model = listUser.Select(x => new ListUserViewModel()
+            {
+                PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                UserFirstname = x.UserFirstname,
+                UserEmail = x.UserEmail,
+                UserId = x.UserId,
+                UserRightId = x.UserRightId,
+                UserName = x.UserName
+            });
+            return model.ToList();
         }
 
         // GET: api/Users/5
@@ -46,13 +57,25 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
             if (TokenService.ValidateToken(token))
             {
+                
                 var user = await _context.User.FindAsync(id);
                 if (user == null)
                 {
                     return NotFound();
                 }
+                var userInfo = new UserViewModel()
+                {
+                    UserPoleId = user.UserPoleId,
+                    UserFirstname = user.UserFirstname,
+                    UserRightId = user.UserRightId,
+                    UserId = user.UserId,
+                    UserName = user.UserName,
+                    UserEmail = user.UserEmail,
+                    UserNumpermis = user.UserNumpermis,
+                    UserPhone = user.UserPhone
+                };
 
-                return Ok(user);
+                return Ok(userInfo);
             }
 
             return Unauthorized();
@@ -90,7 +113,6 @@ namespace TestAuthentification.Controllers
                 try
                 {
                     user.UserEmail = userViewModel.UserEmail;
-                    user.UserPassword = userViewModel.UserPassword;
                     user.UserFirstname = userViewModel.UserFirstname;
                     user.UserName = userViewModel.UserName;
                     user.UserNumpermis = userViewModel.UserNumpermis;
@@ -100,6 +122,7 @@ namespace TestAuthentification.Controllers
 
                     _context.Entry(user).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
+                    return Ok();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,32 +142,32 @@ namespace TestAuthentification.Controllers
 
         // POST: api/Users
         [HttpPost]
-        public async Task<IActionResult> PostUser([FromBody] User user)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //public async Task<IActionResult> PostUser([FromBody] User user)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var token = GetToken();
-            if (string.IsNullOrEmpty(token))
-            {
-                return BadRequest(ModelState);
-            }
+        //    var token = GetToken();
+        //    if (string.IsNullOrEmpty(token))
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (TokenService.ValidateToken(token))
-            {
-                _context.User.Add(user);
-                await _context.SaveChangesAsync();
+        //    if (TokenService.ValidateToken(token))
+        //    {
+        //        _context.User.Add(user);
+        //        await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-            }
+        //        return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+        //    }
 
-            return Unauthorized();
+        //    return Unauthorized();
 
 
 
-        }
+        //}
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
@@ -171,7 +194,7 @@ namespace TestAuthentification.Controllers
             {
                 _context.User.Remove(user);
                 await _context.SaveChangesAsync();
-                return Ok(user);
+                return Ok();
             }
 
             return Unauthorized();
