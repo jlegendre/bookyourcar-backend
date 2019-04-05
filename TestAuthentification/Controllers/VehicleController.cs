@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.ViewModels;
-using TestAuthentification.ViewModels.Vehicle;
 
 namespace TestAuthentification.Controllers
 {
@@ -32,26 +31,28 @@ namespace TestAuthentification.Controllers
 
             List<Vehicle> listVehicle = await _context.Vehicle.ToListAsync();
 
-            if (listVehicle.Count < 1)
+            if (listVehicle.Count > 0)
             {
-                var roles = new Dictionary<string, string>();
-                roles.Add("message", "Il n'y a pas de véhicules.");
-                return Ok(roles);
+                var model = listVehicle.Select(x => new VehiculeViewModel()
+                {
+                    VehModel = x.VehModel,
+                    PoleName = x.VehPole.PoleName,
+                    VehId = x.VehId,
+                    VehBrand = x.VehBrand,
+                    VehColor = x.VehColor,
+                    VehKm = x.VehKm,
+                    VehNumberplace = x.VehNumberplace,
+                    VehRegistration = x.VehRegistration,
+                    VehTypeEssence = x.VehTypeEssence,
+                    VehDatemec = x.VehDatemec,
+                    VehIsactive = x.VehIsactive
+                });
+                return Ok(model.ToList());
             }
-            var model = listVehicle.Select(x => new ListVehiculeViewModel()
-            {
-                VehModel = x.VehModel,
-                Pole = x.VehPole.PoleName,
-                VehId = x.VehId,
-                VehBrand = x.VehBrand,
-                VehColor = x.VehColor,
-                VehKm = x.VehKm,
-                VehNumberplace = x.VehNumberplace,
-                VehRegistration = x.VehRegistration,
-                VehTypeEssence = x.VehTypeEssence
-            });
+            var roles = new Dictionary<string, string>();
+            roles.Add("message", "Il n'y a pas de véhicules.");
+            return Ok(roles);
 
-            return Ok(model.ToList());
         }
 
         // GET: api/Vehicles/5
@@ -77,7 +78,8 @@ namespace TestAuthentification.Controllers
                     VehModel = vehicle.VehModel,
                     VehNumberplace = vehicle.VehNumberplace,
                     VehRegistration = vehicle.VehRegistration,
-                    VehTypeEssence = vehicle.VehTypeEssence
+                    VehTypeEssence = vehicle.VehTypeEssence,
+                    PoleName = vehicle.VehPole.PoleName,
                 };
 
                 return Ok(model);
@@ -105,6 +107,7 @@ namespace TestAuthentification.Controllers
             vehiculeToModifie.VehRegistration = vehicle.VehRegistration;
             vehiculeToModifie.VehTypeEssence = vehicle.VehTypeEssence;
             vehiculeToModifie.VehIsactive = vehicle.VehIsactive;
+            vehiculeToModifie.VehPole.PoleName = vehicle.PoleName;
 
             _context.Entry(vehiculeToModifie).State = EntityState.Modified;
 
@@ -145,6 +148,7 @@ namespace TestAuthentification.Controllers
                 VehDatemec = vehicle.VehDatemec,
                 VehKm = vehicle.VehKm,
                 VehNumberplace = vehicle.VehNumberplace,
+                VehIsactive = vehicle.VehIsactive,
             };
 
             _context.Vehicle.Add(vehiculeToAdd);

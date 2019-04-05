@@ -4,6 +4,8 @@ namespace TestAuthentification.ViewModels
 {
     public class PoleViewModel
     {
+        [Key]
+        public int PoleId { get; set; }
         [Required]
         [Display(Name = "Nom")]
         public string PoleName { get; set; }

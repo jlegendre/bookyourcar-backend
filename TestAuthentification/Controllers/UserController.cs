@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
-using TestAuthentification.ViewModels.User;
 
 namespace TestAuthentification.Controllers
 {
@@ -34,14 +33,17 @@ namespace TestAuthentification.Controllers
             var listUser = await _context.User.ToListAsync();
             if (listUser.Count > 0)
             {
-                var model = listUser.Select(x => new ListUserViewModel()
+                var model = listUser.Select(x => new UserViewModel()
                 {
                     PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
                     UserFirstname = x.UserFirstname,
                     UserEmail = x.UserEmail,
                     UserId = x.UserId,
                     UserRightId = x.UserRightId,
-                    UserName = x.UserName
+                    UserName = x.UserName,
+                    UserPoleId = x.UserPoleId,
+                    UserPhone = x.UserPhone,
+                    UserNumpermis = x.UserNumpermis
                 });
                 return Ok(model.ToList());
             }
@@ -79,7 +81,8 @@ namespace TestAuthentification.Controllers
                     UserName = user.UserName,
                     UserEmail = user.UserEmail,
                     UserNumpermis = user.UserNumpermis,
-                    UserPhone = user.UserPhone
+                    UserPhone = user.UserPhone,
+                    PoleName = user.UserPole != null ? user.UserPole.PoleName : "",
                 };
 
                 return Ok(userInfo);
@@ -126,6 +129,7 @@ namespace TestAuthentification.Controllers
                     user.UserPhone = userViewModel.UserPhone;
                     user.UserPoleId = userViewModel.UserPoleId;
                     user.UserRightId = userViewModel.UserRightId;
+                    user.UserPole.PoleName = userViewModel.PoleName;
 
                     _context.Entry(user).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
@@ -276,14 +280,17 @@ namespace TestAuthentification.Controllers
 
                 if (userEnAttente.Count > 0)
                 {
-                    var model = userEnAttente.Select(x => new ListUserViewModel()
+                    var model = userEnAttente.Select(x => new UserViewModel()
                     {
                         PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
                         UserFirstname = x.UserFirstname,
                         UserId = x.UserId,
                         UserRightId = x.UserRightId,
                         UserName = x.UserName,
-                        UserEmail = x.UserEmail
+                        UserEmail = x.UserEmail,
+                        UserPoleId = x.UserPoleId,
+                        UserPhone = x.UserPhone,
+                        UserNumpermis = x.UserNumpermis
                     });
                     return Ok(model);
                 }

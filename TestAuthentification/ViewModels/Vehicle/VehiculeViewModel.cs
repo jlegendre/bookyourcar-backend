@@ -27,5 +27,7 @@ namespace TestAuthentification.ViewModels
         [Display(Name = "Nombre de places")]
         public int VehNumberplace { get; set; }
         public bool VehIsactive { get; set; }
+
+        public string PoleName { get; set; }
     }
 }

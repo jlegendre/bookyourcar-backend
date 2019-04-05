@@ -33,7 +33,8 @@ namespace TestAuthentification.Controllers
                     PoleName = x.PoleName,
                     PoleAddress = x.PoleAddress,
                     PoleCity = x.PoleCity,
-                    PoleCp = x.PoleCp
+                    PoleCp = x.PoleCp,
+                    PoleId = x.PoleId
                 });
 
                 return Ok(model.ToList());
@@ -54,13 +55,20 @@ namespace TestAuthentification.Controllers
             }
 
             var pole = await _context.Pole.FindAsync(id);
-
-            if (pole == null)
+            if (pole != null)
             {
-                return NotFound();
+                var model = new PoleViewModel()
+                {
+                    PoleName = pole.PoleName,
+                    PoleId = pole.PoleId,
+                    PoleAddress = pole.PoleAddress,
+                    PoleCp = pole.PoleCp,
+                    PoleCity = pole.PoleCity
+                };
+                return Ok(model);
             }
+            return NotFound();
 
-            return Ok(pole);
         }
 
         // PUT: api/Poles/5

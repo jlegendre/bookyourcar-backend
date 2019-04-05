@@ -11,5 +11,6 @@
         public string UserNumpermis { get; set; }
         public int? UserRightId { get; set; }
         public int? UserPoleId { get; set; }
+        public string PoleName { get; set; }
     }
 }
