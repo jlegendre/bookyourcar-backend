@@ -311,7 +311,7 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPut, Route("ValidateUserInWaiting")]
+        [HttpPost, Route("ValidateUserInWaiting/{id}")]
         public async Task<IActionResult> ValidateUserInWaiting([FromRoute] int id)
         {
             var token = GetToken();
