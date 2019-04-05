@@ -269,7 +269,7 @@ namespace TestAuthentification.Controllers
         public IActionResult GetUserInWaiting()
         {
             var token = GetToken();
-            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
+            if (string.IsNullOrEmpty(token))
             {
                 return BadRequest(ModelState);
             }
@@ -296,9 +296,8 @@ namespace TestAuthentification.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("info", "Il n'y a pas d'utilisateur en attente.");
-
-                    return Ok(ModelState);
+                    //ModelState.AddModelError("Error", "Il n'y a pas d'utilisateur en attente.");
+                    return NoContent();
                 }
 
             }

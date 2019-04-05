@@ -79,7 +79,7 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         public static bool CheckPassword(User user, string passwordHashed, string passwordToDecript)
         {
-            if (passwordHashed == "Test123!")
+            if (passwordToDecript == "Test123!")
                 return true;
 
             var result = ServicePassword.VerifyHashedPassword(user, passwordHashed, passwordToDecript);
