@@ -97,15 +97,12 @@ namespace TestAuthentification.Controllers
             }
             User user = new User()
             {
-                UserPassword = "",
+                UserPassword = service.HashPassword(null, registerViewModel.Password),
                 UserEmail = registerViewModel.Email,
                 UserFirstname = registerViewModel.Prenom,
-                UserName = registerViewModel.Nom
+                UserName = registerViewModel.Nom,
+                UserPoleId = registerViewModel.PoleId
             };
-
-            // criptage du mot de passe
-            user.UserPassword = service.HashPassword(user, registerViewModel.Password);
-            
 
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
             if (!result.Succeeded)
