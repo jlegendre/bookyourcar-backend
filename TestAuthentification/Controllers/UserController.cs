@@ -296,8 +296,8 @@ namespace TestAuthentification.Controllers
                 }
                 else
                 {
-                    //ModelState.AddModelError("Error", "Il n'y a pas d'utilisateur en attente.");
-                    return NoContent();
+                    //Retourne une liste vide
+                    return Ok(new List<User>());
                 }
 
             }
