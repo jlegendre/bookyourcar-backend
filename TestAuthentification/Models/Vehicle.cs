@@ -7,7 +7,9 @@ namespace TestAuthentification.Models
     {
         public Vehicle()
         {
+            Comments = new HashSet<Comments>();
             Historymaintenance = new HashSet<Historymaintenance>();
+            Images = new HashSet<Images>();
             Key = new HashSet<Key>();
             Location = new HashSet<Location>();
         }
@@ -21,11 +23,14 @@ namespace TestAuthentification.Models
         public string VehTypeEssence { get; set; }
         public string VehColor { get; set; }
         public bool VehIsactive { get; set; }
+        public sbyte VehState { get; set; }
         public int VehNumberplace { get; set; }
         public int? VehPoleId { get; set; }
 
         public Pole VehPole { get; set; }
+        public ICollection<Comments> Comments { get; set; }
         public ICollection<Historymaintenance> Historymaintenance { get; set; }
+        public ICollection<Images> Images { get; set; }
         public ICollection<Key> Key { get; set; }
         public ICollection<Location> Location { get; set; }
     }

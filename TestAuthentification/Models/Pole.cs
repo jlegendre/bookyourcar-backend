@@ -9,7 +9,8 @@ namespace TestAuthentification.Models
         {
             LocationLocPoleIdendNavigation = new HashSet<Location>();
             LocationLocPoleIdstartNavigation = new HashSet<Location>();
-            Ride = new HashSet<Ride>();
+            RideRidePoleIdendNavigation = new HashSet<Ride>();
+            RideRidePoleIdstartNavigation = new HashSet<Ride>();
             User = new HashSet<User>();
             Vehicle = new HashSet<Vehicle>();
         }
@@ -22,7 +23,8 @@ namespace TestAuthentification.Models
 
         public ICollection<Location> LocationLocPoleIdendNavigation { get; set; }
         public ICollection<Location> LocationLocPoleIdstartNavigation { get; set; }
-        public ICollection<Ride> Ride { get; set; }
+        public ICollection<Ride> RideRidePoleIdendNavigation { get; set; }
+        public ICollection<Ride> RideRidePoleIdstartNavigation { get; set; }
         public ICollection<User> User { get; set; }
         public ICollection<Vehicle> Vehicle { get; set; }
     }

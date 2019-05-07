@@ -15,8 +15,10 @@ namespace TestAuthentification.Models
         {
         }
 
+        public virtual DbSet<Comments> Comments { get; set; }
         public virtual DbSet<EfmigrationsHistory> EfmigrationsHistory { get; set; }
         public virtual DbSet<Historymaintenance> Historymaintenance { get; set; }
+        public virtual DbSet<Images> Images { get; set; }
         public virtual DbSet<Key> Key { get; set; }
         public virtual DbSet<Location> Location { get; set; }
         public virtual DbSet<Pole> Pole { get; set; }
@@ -28,10 +30,71 @@ namespace TestAuthentification.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseMySql("server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Comments>(entity =>
+            {
+                entity.HasKey(e => e.CommentId);
+
+                entity.ToTable("COMMENTS");
+
+                entity.HasIndex(e => e.CommentLocId)
+                    .HasName("FK_COMMENT_LOC");
+
+                entity.HasIndex(e => e.CommentUserId)
+                    .HasName("FK_COMMENT_USER");
+
+                entity.HasIndex(e => e.CommentVehId)
+                    .HasName("FK_COMMENT_VEH");
+
+                entity.Property(e => e.CommentId)
+                    .HasColumnName("COMMENT_ID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.CommentDate)
+                    .HasColumnName("COMMENT_DATE")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.CommentLocId)
+                    .HasColumnName("COMMENT_LOC_ID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.CommentText)
+                    .IsRequired()
+                    .HasColumnName("COMMENT_TEXT")
+                    .HasColumnType("text");
+
+                entity.Property(e => e.CommentUserId)
+                    .HasColumnName("COMMENT_USER_ID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.CommentVehId)
+                    .HasColumnName("COMMENT_VEH_ID")
+                    .HasColumnType("int(11)");
+
+                entity.HasOne(d => d.CommentLoc)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(d => d.CommentLocId)
+                    .HasConstraintName("FK_COMMENT_LOC");
+
+                entity.HasOne(d => d.CommentUser)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(d => d.CommentUserId)
+                    .HasConstraintName("FK_COMMENT_USER");
+
+                entity.HasOne(d => d.CommentVeh)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(d => d.CommentVehId)
+                    .HasConstraintName("FK_COMMENT_VEH");
+            });
+
             modelBuilder.Entity<EfmigrationsHistory>(entity =>
             {
                 entity.HasKey(e => e.MigrationId);
@@ -97,6 +160,35 @@ namespace TestAuthentification.Models
                     .HasConstraintName("HISTORYMAINTENANCE_ibfk_1");
             });
 
+            modelBuilder.Entity<Images>(entity =>
+            {
+                entity.HasKey(e => e.ImageId);
+
+                entity.ToTable("IMAGES");
+
+                entity.HasIndex(e => e.ImageVehId)
+                    .HasName("IMAGE_VEH_ID");
+
+                entity.Property(e => e.ImageId)
+                    .HasColumnName("IMAGE_ID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.ImageUri)
+                    .IsRequired()
+                    .HasColumnName("IMAGE_URI")
+                    .HasColumnType("varchar(255)");
+
+                entity.Property(e => e.ImageVehId)
+                    .HasColumnName("IMAGE_VEH_ID")
+                    .HasColumnType("int(11)");
+
+                entity.HasOne(d => d.ImageVeh)
+                    .WithMany(p => p.Images)
+                    .HasForeignKey(d => d.ImageVehId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_IMG_VEH_ID");
+            });
+
             modelBuilder.Entity<Key>(entity =>
             {
                 entity.ToTable("KEY");
@@ -140,13 +232,16 @@ namespace TestAuthentification.Models
                 entity.ToTable("LOCATION");
 
                 entity.HasIndex(e => e.LocPoleIdend)
-                    .HasName("LOC_POLE_IDEND");
+                    .HasName("FK_POLE_END_ID");
 
                 entity.HasIndex(e => e.LocPoleIdstart)
-                    .HasName("LOC_POLE_IDSTART");
+                    .HasName("FK_POLE_START_ID");
+
+                entity.HasIndex(e => e.LocUserId)
+                    .HasName("FK_LOC_USER_ID");
 
                 entity.HasIndex(e => e.LocVehId)
-                    .HasName("LOC_VEH_ID");
+                    .HasName("FK_VEH_ID");
 
                 entity.Property(e => e.LocId)
                     .HasColumnName("LOC_ID")
@@ -168,6 +263,15 @@ namespace TestAuthentification.Models
                     .HasColumnName("LOC_POLE_IDSTART")
                     .HasColumnType("int(11)");
 
+                entity.Property(e => e.LocState)
+                    .HasColumnName("LOC_STATE")
+                    .HasColumnType("tinyint(4)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocUserId)
+                    .HasColumnName("LOC_USER_ID")
+                    .HasColumnType("int(11)");
+
                 entity.Property(e => e.LocVehId)
                     .HasColumnName("LOC_VEH_ID")
                     .HasColumnType("int(11)");
@@ -176,19 +280,24 @@ namespace TestAuthentification.Models
                     .WithMany(p => p.LocationLocPoleIdendNavigation)
                     .HasForeignKey(d => d.LocPoleIdend)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("LOCATION_ibfk_2");
+                    .HasConstraintName("FK_POLE_END_ID");
 
                 entity.HasOne(d => d.LocPoleIdstartNavigation)
                     .WithMany(p => p.LocationLocPoleIdstartNavigation)
                     .HasForeignKey(d => d.LocPoleIdstart)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("LOCATION_ibfk_1");
+                    .HasConstraintName("FK_POLE_START_ID");
+
+                entity.HasOne(d => d.LocUser)
+                    .WithMany(p => p.Location)
+                    .HasForeignKey(d => d.LocUserId)
+                    .HasConstraintName("FK_TEST");
 
                 entity.HasOne(d => d.LocVeh)
                     .WithMany(p => p.Location)
                     .HasForeignKey(d => d.LocVehId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("LOCATION_ibfk_3");
+                    .HasConstraintName("FK_VEH_ID");
             });
 
             modelBuilder.Entity<Pole>(entity =>
@@ -227,6 +336,9 @@ namespace TestAuthentification.Models
                 entity.HasIndex(e => e.RideLocId)
                     .HasName("RIDE_LOC_ID");
 
+                entity.HasIndex(e => e.RidePoleIdend)
+                    .HasName("RIDE_POLE_IDEND");
+
                 entity.HasIndex(e => e.RidePoleIdstart)
                     .HasName("RIDE_POLE_IDSTART");
 
@@ -242,6 +354,10 @@ namespace TestAuthentification.Models
                     .HasColumnName("RIDE_LOC_ID")
                     .HasColumnType("int(11)");
 
+                entity.Property(e => e.RidePoleIdend)
+                    .HasColumnName("RIDE_POLE_IDEND")
+                    .HasColumnType("int(11)");
+
                 entity.Property(e => e.RidePoleIdstart)
                     .HasColumnName("RIDE_POLE_IDSTART")
                     .HasColumnType("int(11)");
@@ -252,8 +368,14 @@ namespace TestAuthentification.Models
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RIDE_ibfk_1");
 
+                entity.HasOne(d => d.RidePoleIdendNavigation)
+                    .WithMany(p => p.RideRidePoleIdendNavigation)
+                    .HasForeignKey(d => d.RidePoleIdend)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("RIDE_ibfk_3");
+
                 entity.HasOne(d => d.RidePoleIdstartNavigation)
-                    .WithMany(p => p.Ride)
+                    .WithMany(p => p.RideRidePoleIdstartNavigation)
                     .HasForeignKey(d => d.RidePoleIdstart)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RIDE_ibfk_2");
@@ -351,7 +473,7 @@ namespace TestAuthentification.Models
                 entity.Property(e => e.UserPassword)
                     .IsRequired()
                     .HasColumnName("USER_PASSWORD")
-                    .HasColumnType("varchar(50)");
+                    .HasColumnType("varchar(255)");
 
                 entity.Property(e => e.UserPhone)
                     .HasColumnName("USER_PHONE")
@@ -364,6 +486,11 @@ namespace TestAuthentification.Models
                 entity.Property(e => e.UserRightId)
                     .HasColumnName("USER_RIGHT_ID")
                     .HasColumnType("int(11)");
+
+                entity.Property(e => e.UserState)
+                    .HasColumnName("USER_STATE")
+                    .HasColumnType("tinyint(2)")
+                    .HasDefaultValueSql("'1'");
 
                 entity.HasOne(d => d.UserPole)
                     .WithMany(p => p.User)
@@ -426,6 +553,10 @@ namespace TestAuthentification.Models
                     .IsRequired()
                     .HasColumnName("VEH_REGISTRATION")
                     .HasColumnType("varchar(20)");
+
+                entity.Property(e => e.VehState)
+                    .HasColumnName("VEH_STATE")
+                    .HasColumnType("tinyint(4)");
 
                 entity.Property(e => e.VehTypeEssence)
                     .IsRequired()

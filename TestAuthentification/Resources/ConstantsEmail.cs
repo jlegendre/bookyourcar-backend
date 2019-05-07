@@ -12,7 +12,7 @@ namespace TestAuthentification.Resources
         /// <summary>
         /// envoie d'email quand on créer un compte avec un recap des informations 
         /// </summary>
-        public const string Register = "Bonjour, <br />" +
+        public const string Register = "Bonjour {0}, <br />" +
                                        "Vous venez de créer un nouveau compte sur Book Your Car. <br />" +
                                        "Vous devez maintenant attendre la validation par l'administrateur du site. <br />" +
                                        "Vous serez tenues informées sur le statut de votre demande lors de sa réponse. <br /><br />" +
@@ -22,13 +22,14 @@ namespace TestAuthentification.Resources
         /// <summary>
         /// message validation KO (refus) de création de compte
         /// </summary>
-        public const string RefusRegister = "Votre demande de création de compte n'a malheureusement pas été accepté par notre Equipe." +
+        public const string RefusRegister = "Bonjour {0}, <br />" +
+                                            "Votre demande de création de compte n'a malheureusement pas été accepté par notre Equipe." +
                                             "Cordialement, <br />" +
                                             "L'Équipe A5D - Book Your Car ";
         /// <summary>
         /// message validation OK création de compte
         /// </summary>
-        public const string ValidateRegister = "Bonjour, <br />" +
+        public const string ValidateRegister = "Bonjour {0}, <br />" +
                                                "Votre demande de création de compte vient d'être validé par l'Administrateur. <br />" +
                                                "Vous pouvez maintenant accéder au logiciel Book Your Car avec vos identifiants. <br />" +
                                                "Cordialement, <br />" +

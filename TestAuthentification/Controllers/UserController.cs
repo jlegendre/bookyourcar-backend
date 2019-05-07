@@ -368,7 +368,7 @@ namespace TestAuthentification.Controllers
                     userValidate.UserIsactivated = false;
                     _context.SaveChanges();
 
-                    await EmailService.SendEmailAsync("Refus de votre compte - Book Your Car", ConstantsEmail.RefusRegister, userValidate.UserEmail);
+                    await EmailService.SendEmailAsync("Refus de votre compte - Book Your Car", String.Format(ConstantsEmail.RefusRegister, userValidate.UserFirstname), userValidate.UserEmail);
 
                     return Ok();
                 }

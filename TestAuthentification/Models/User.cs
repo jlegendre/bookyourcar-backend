@@ -7,6 +7,8 @@ namespace TestAuthentification.Models
     {
         public User()
         {
+            Comments = new HashSet<Comments>();
+            Location = new HashSet<Location>();
             RideUser = new HashSet<RideUser>();
         }
 
@@ -20,9 +22,12 @@ namespace TestAuthentification.Models
         public int? UserPoleId { get; set; }
         public string UserPassword { get; set; }
         public bool UserIsactivated { get; set; }
+        public sbyte UserState { get; set; }
 
         public Pole UserPole { get; set; }
         public Right UserRight { get; set; }
+        public ICollection<Comments> Comments { get; set; }
+        public ICollection<Location> Location { get; set; }
         public ICollection<RideUser> RideUser { get; set; }
     }
 }

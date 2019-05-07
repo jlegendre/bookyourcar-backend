@@ -121,9 +121,9 @@ namespace TestAuthentification.Controllers
             _context.SaveChanges();
             _context.Dispose();
 
-#if !DEBUG
-            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", ConstantsEmail.Register, user.UserEmail);
-#endif
+
+            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(ConstantsEmail.Register, user.UserFirstname), user.UserEmail);
+
 
 
             return Ok();
