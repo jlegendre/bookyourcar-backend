@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 
@@ -328,6 +329,47 @@ namespace TestAuthentification.Controllers
                 {
                     userValidate.UserIsactivated = true;
                     _context.SaveChanges();
+#if !DEBUG
+                await EmailService.SendEmailAsync("Validation de votre compte - Book Your Car", ConstantsEmail.ValidateRegister, userValidate.UserEmail);
+#endif
+
+
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(ModelState);
+                }
+
+            }
+            return Unauthorized();
+        }
+
+        /// <summary>
+        /// Permet à l'administrateur de refuser la création d'un utilisateur
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost, Route("RefuseUserInWaiting/{id}")]
+        public async Task<IActionResult> RefuseUserInWaiting([FromRoute] int id)
+        {
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (TokenService.ValidateTokenWhereIsAdmin(token))
+            {
+                User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
+
+                if (userValidate != null)
+                {
+                    userValidate.UserIsactivated = false;
+                    _context.SaveChanges();
+
+                    await EmailService.SendEmailAsync("Refus de votre compte - Book Your Car", ConstantsEmail.RefusRegister, userValidate.UserEmail);
+
                     return Ok();
                 }
                 else

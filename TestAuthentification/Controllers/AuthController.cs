@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using TestAuthentification.Models;
+using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 
@@ -33,7 +34,7 @@ namespace TestAuthentification.Controllers
             _authService = new AuthService(_context);
 
         }
-        
+
 
         // GET api/values
         [HttpPost, Route("login")]
@@ -89,7 +90,7 @@ namespace TestAuthentification.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
-        public IActionResult RegisterAsync(RegisterViewModel registerViewModel)
+        public async Task<IActionResult> RegisterAsync(RegisterViewModel registerViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -120,6 +121,11 @@ namespace TestAuthentification.Controllers
             _context.SaveChanges();
             _context.Dispose();
 
+#if !DEBUG
+            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", ConstantsEmail.Register, user.UserEmail);
+#endif
+
+
             return Ok();
         }
 
@@ -135,8 +141,11 @@ namespace TestAuthentification.Controllers
             string ContenuDuMail = "Voici le lien pour rénitialiser votre mot de passe " +
                                    Environment.GetEnvironmentVariable("UrlResetPassword");
 
+#if !Debug
             MailjetResponse response =
                 await EmailService.SendEmailAsync("Changement de mot de passe", ContenuDuMail, emailDestinataire);
+#endif
+
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine(string.Format("Total: {0}, Count: {1}\n", response.GetTotal(), response.GetCount()));
@@ -152,7 +161,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest();
             }
 
-            
+
         }
 
 

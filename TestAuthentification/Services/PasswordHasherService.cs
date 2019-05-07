@@ -177,7 +177,16 @@ namespace TestAuthentification.Services
                 throw new ArgumentNullException(nameof(providedPassword));
             }
 
-            byte[] decodedHashedPassword = Convert.FromBase64String(hashedPassword);
+            byte[] decodedHashedPassword;
+            try
+            {
+                decodedHashedPassword = Convert.FromBase64String(hashedPassword);
+            }
+            catch
+            {
+                return PasswordVerificationResult.Failed;
+            }
+
 
             // read the format marker from the hashed password
             if (decodedHashedPassword.Length == 0)
@@ -216,6 +225,24 @@ namespace TestAuthentification.Services
                 default:
                     return PasswordVerificationResult.Failed; // unknown format marker
             }
+        }
+
+        public static bool IsBase64(string base64String)
+        {
+            if (string.IsNullOrEmpty(base64String) || base64String.Length % 4 != 0
+                                                   || base64String.Contains(" ") || base64String.Contains("\t") || base64String.Contains("\r") || base64String.Contains("\n"))
+                return false;
+
+            try
+            {
+                Convert.FromBase64String(base64String);
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentNullException(nameof(base64String));
+            }
+            return false;
         }
 
         private static bool VerifyHashedPasswordV2(byte[] hashedPassword, string password)
