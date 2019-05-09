@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 
@@ -175,7 +176,7 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            _context.Vehicle.Remove(vehicle);
+            vehicle.VehState = (sbyte) Enums.VehiculeState.Deleted;
             await _context.SaveChangesAsync();
 
             return Ok();

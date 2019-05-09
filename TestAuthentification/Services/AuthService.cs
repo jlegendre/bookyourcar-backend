@@ -37,7 +37,6 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         public User FindByEmail(string email)
         {
-            // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
             var user = _context.User.SingleOrDefault(x => x.UserEmail == email);
             if (user != null)
             {
@@ -174,7 +173,7 @@ namespace TestAuthentification.Services
 
                 if (!string.IsNullOrEmpty(emailUser))
                 {
-
+                    
                     user = FindByEmail(emailUser);
                 }
             }

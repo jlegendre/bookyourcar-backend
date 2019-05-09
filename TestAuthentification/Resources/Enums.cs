@@ -20,6 +20,19 @@ namespace TestAuthentification.Resources
             Canceled = 5
         }
 
+        public enum VehiculeState
+        {
+            // en utilisation
+            InUse = 0,
+            // valide, disponible
+            Available = 1,
+            // supprimé 
+            Deleted = 2,
+            //en maintenance
+            Maintenance = 3
+            
+        }
+
         /// <summary>
         /// enumeration des roles possibles pour les utilisateurs
         /// </summary>
@@ -30,3 +43,4 @@ namespace TestAuthentification.Resources
         }
     }
 }
+
