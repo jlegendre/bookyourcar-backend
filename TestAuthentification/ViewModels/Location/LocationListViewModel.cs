@@ -10,7 +10,7 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// id du véhicule choisis pour une reservation
         /// </summary>
-        public int VehId { get; set; }
+        public int? VehId { get; set; }
 
         /// <summary>
         /// id du véhicule choisis pour une reservation

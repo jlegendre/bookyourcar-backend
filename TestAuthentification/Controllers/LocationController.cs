@@ -52,7 +52,7 @@ namespace TestAuthentification.Controllers
                             locVM.DateFinResa = loc.LocDateendlocation;
                             locVM.PoleIdDepart = loc.LocPoleIdstart;
                             locVM.PoleIdDestination = loc.LocPoleIdend;
-                            locVM.VehId = loc.LocVehId;
+                            locVM.VehId = loc.LocVehId ?? 0;
 
                             locations.Add(locVM);
                         }
@@ -208,7 +208,7 @@ namespace TestAuthentification.Controllers
 
             // information commentaire
             Comments comment = new Comments();
-            comment.CommentDate = new DateTime();
+            comment.CommentDate = DateTime.Now;
             comment.CommentText = model.Comments;
             comment.CommentUserId = user.UserId;
             
