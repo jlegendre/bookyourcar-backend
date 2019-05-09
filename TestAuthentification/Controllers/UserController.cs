@@ -48,11 +48,9 @@ namespace TestAuthentification.Controllers
                 });
                 return Ok(model.ToList());
             }
-            var roles = new Dictionary<string, string>();
-            roles.Add("message", "Il n'y a pas de Poles.");
-            return Ok(roles);
-
-
+            var users = new Dictionary<string, string>();
+            users.Add("message", "Il n'y a pas d'utilisateurs.");
+            return Ok(users);
         }
 
         // GET: api/Users/5

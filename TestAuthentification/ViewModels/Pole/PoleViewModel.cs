@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TestAuthentification.Resources;
 
 namespace TestAuthentification.ViewModels
 {
@@ -18,6 +19,5 @@ namespace TestAuthentification.ViewModels
         [StringLength(5, ErrorMessage = "Le {0} doit comporter {2} caractères.", MinimumLength = 5)]
         [Display(Name = "Code Postale")]
         public string PoleCp { get; set; }
-
     }
 }

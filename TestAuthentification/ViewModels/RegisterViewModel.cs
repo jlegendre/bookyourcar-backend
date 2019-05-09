@@ -9,10 +9,11 @@ namespace TestAuthentification.ViewModels
         [Display(Name = "Courrier électronique")]
         public string Email { get; set; }
 
-       
+        [Required]
         [Display(Name = "Prénom")]
         public string Prenom { get; set; }
 
+        [Required]
         [Display(Name = "Nom")]
         public string Nom { get; set; }
 
@@ -22,11 +23,13 @@ namespace TestAuthentification.ViewModels
         [Display(Name = "Password")]
         public string Password { get; set; }
 
+        [Required]
         [DataType(DataType.Password)]
         [Display(Name = "ConfirmPassword")]
         [Compare("Password", ErrorMessage = "Le mot de passe et le mot de passe de confirmation ne correspondent pas.")]
         public string ConfirmPassword { get; set; }
 
+        [Required]
         [Display(Name = "Pôle")]
         public int PoleId { get; set; }
 

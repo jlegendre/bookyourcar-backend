@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels.Location;
 
@@ -18,17 +19,80 @@ namespace TestAuthentification.Controllers
     public class LocationController : ControllerBase
     {
         private readonly A5dContext _context;
+        private readonly AuthService _authService;
 
         public LocationController(A5dContext context)
         {
             _context = context;
+            _authService = new AuthService(context);
         }
 
         // GET: api/Locations
         [HttpGet]
-        public IEnumerable<Location> GetLocation()
+        public async Task<IActionResult> GetLocation()
         {
-            return _context.Location;
+            string token = GetToken();
+
+            if (TokenService.ValidateToken(token))
+            {
+                User connectedUser = _authService.GetUserConnected(token);
+
+                if (connectedUser.UserRight.RightLabel == Enums.Roles.Admin.ToString())
+                {
+                    var listLocation = await _context.Location.ToListAsync();
+
+                    List<LocationListViewModel> locations = new List<LocationListViewModel>();
+
+                    if (listLocation.Count > 0)
+                    {
+                        foreach (Location loc in listLocation)
+                        {
+                            LocationListViewModel locVM = new LocationListViewModel();
+                            locVM.DateDebutResa = loc.LocDatestartlocation;
+                            locVM.DateFinResa = loc.LocDateendlocation;
+                            locVM.PoleIdDepart = loc.LocPoleIdstart;
+                            locVM.PoleIdDestination = loc.LocPoleIdend;
+                            locVM.VehId = loc.LocVehId;
+
+                            locations.Add(locVM);
+                        }
+                        return Ok(locations.ToList());
+                    }
+                    var emptyLocation = new Dictionary<string, string>();
+                    emptyLocation.Add("message", "Il n'y a pas de locations.");
+                    return Ok(emptyLocation);
+                }
+                else
+                {
+                    var listLocation = await _context.Location.Where(loc => loc.LocUserId == connectedUser.UserId).ToListAsync();
+
+                    List<LocationListViewModel> locations = new List<LocationListViewModel>();
+
+                    if (listLocation.Count > 0)
+                    {
+                        foreach (Location loc in listLocation)
+                        {
+                            LocationListViewModel locVM = new LocationListViewModel();
+                            locVM.DateDebutResa = loc.LocDatestartlocation;
+                            locVM.DateFinResa = loc.LocDateendlocation;
+                            locVM.PoleIdDepart = loc.LocPoleIdstart;
+                            locVM.PoleIdDestination = loc.LocPoleIdend;
+                            locVM.VehId = loc.LocVehId;
+
+                            locations.Add(locVM);
+                        }
+                        return Ok(locations.ToList());
+                    }
+                    var emptyLocation = new Dictionary<string, string>();
+                    emptyLocation.Add("message", "Il n'y a pas de locations.");
+                    return Ok(emptyLocation);
+                }
+            }
+            else
+            {
+                return Unauthorized();
+            }
+            
         }
 
         // GET: api/Locations/5
@@ -40,7 +104,9 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            var location = await _context.Location.FindAsync(id);
+            Location location = await _context.Location.FindAsync(id);
+
+
 
             if (location == null)
             {
@@ -125,6 +191,8 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
+        /// 
+        [HttpPost, Route("AskLocation")]
         public async Task<IActionResult> AskLocation([FromBody] LocationViewModel model)
         {
 

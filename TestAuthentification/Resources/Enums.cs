@@ -19,5 +19,14 @@ namespace TestAuthentification.Resources
             Finished = 4,
             Canceled = 5
         }
+
+        /// <summary>
+        /// enumeration des roles possibles pour les utilisateurs
+        /// </summary>
+        public enum Roles
+        {
+            User,
+            Admin
+        }
     }
 }
