@@ -102,7 +102,10 @@ namespace TestAuthentification.Controllers
                 UserEmail = registerViewModel.Email,
                 UserFirstname = registerViewModel.Prenom,
                 UserName = registerViewModel.Nom,
-                UserPoleId = registerViewModel.PoleId
+                UserPoleId = registerViewModel.PoleId,
+                UserPhone = registerViewModel.PhoneNumber,
+                UserNumpermis = registerViewModel.NumPermis
+
             };
 
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);

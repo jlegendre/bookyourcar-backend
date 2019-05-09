@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthentification.Models;
@@ -16,16 +18,7 @@ namespace TestAuthentification.Services
             _context = context;
         }
 
-        public User GetUserConnected(string authToken)
-        {
-            if (TokenService.ValidateToken(authToken))
-            {
-                User user = 
-
-                return user;
-            }
-
-        }
+        
 
 
 

@@ -296,7 +296,6 @@ namespace TestAuthentification.Models
                 entity.HasOne(d => d.LocVeh)
                     .WithMany(p => p.Location)
                     .HasForeignKey(d => d.LocVehId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_VEH_ID");
             });
 

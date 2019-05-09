@@ -15,7 +15,7 @@ namespace TestAuthentification.Models
         public DateTime LocDatestartlocation { get; set; }
         public DateTime LocDateendlocation { get; set; }
         public sbyte LocState { get; set; }
-        public int LocVehId { get; set; }
+        public int? LocVehId { get; set; }
         public int? LocUserId { get; set; }
         public int LocPoleIdstart { get; set; }
         public int LocPoleIdend { get; set; }

@@ -8,10 +8,6 @@ namespace TestAuthentification.ViewModels.Location
     {
 
         /// <summary>
-        /// id du véhicule choisis pour une reservation
-        /// </summary>
-        public int VehId { get; set; }
-        /// <summary>
         /// date de début d'une reservation
         /// </summary>
         public DateTime DateDebutResa { get; set; }
@@ -28,6 +24,11 @@ namespace TestAuthentification.ViewModels.Location
         /// id du pôle de retour du véhicule
         /// </summary>
         public int PoleIdDestination { get; set; }
+        /// <summary>
+        /// commentaire de la demande de location
+        /// </summary>
+        public string Comments { get; set; }
 
+        
     }
 }

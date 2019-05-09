@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels.Location;
 
@@ -125,23 +126,52 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
+        // POST: api/Location/AskLocation
+        [HttpPost, Route("AskLocation")]
         public async Task<IActionResult> AskLocation([FromBody] LocationViewModel model)
         {
-
             var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token)) return Unauthorized();
-            var handler = new JwtSecurityTokenHandler();
-            var simplePrinciple = handler.ReadJwtToken(token);
-            var emailUser = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
 
-            if (string.IsNullOrEmpty(emailUser))
+
+            AuthService service = new AuthService(_context);
+            User user = service.GetUserConnected(token);
+
+
+            Location location = new Location();
+
+            // information commentaire
+            Comments comment = new Comments();
+            comment.CommentDate = new DateTime();
+            comment.CommentText = model.Comments;
+            comment.CommentUserId = user.UserId;
+            
+
+            // information location
+            location.LocDatestartlocation = model.DateDebutResa;
+            location.LocDateendlocation = model.DateFinResa;
+            location.LocPoleIdstart = model.PoleIdDepart;
+            location.LocPoleIdend = model.PoleIdDestination;
+            location.LocUserId = user.UserId;
+            location.LocState = Convert.ToSByte(Enums.LocationState.Asked);
+
+
+            try
             {
-                AuthService service = new AuthService(_context);
-                User user = service.FindByEmail(emailUser);
+                // un commentaire a besoin d'être d'abord rattacher a une location
+                _context.Location.Add(location);
+                await _context.SaveChangesAsync();
+                comment.CommentLocId = location.LocId;
+                _context.Comments.Add(comment);
+                await _context.SaveChangesAsync();
+
+                return Ok();
             }
-
-            return Ok();
-
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         /// <summary>

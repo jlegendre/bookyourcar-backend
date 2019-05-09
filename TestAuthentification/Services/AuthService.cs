@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using TestAuthentification.Models;
@@ -35,7 +37,6 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         public User FindByEmail(string email)
         {
-            // TODO A REVOIR  car lorsqu'on appel la meethode et que UserRight est null --> ça plante donc a revoir
             var user = _context.User.SingleOrDefault(x => x.UserEmail == email);
             if (user != null)
             {
@@ -158,6 +159,25 @@ namespace TestAuthentification.Services
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
+
+        }
+
+        public User GetUserConnected(string authToken)
+        {
+            User user = new User();
+            if (TokenService.ValidateToken(authToken))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var simplePrinciple = handler.ReadJwtToken(authToken);
+                var emailUser = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
+
+                if (!string.IsNullOrEmpty(emailUser))
+                {
+                    
+                    user = FindByEmail(emailUser);
+                }
+            }
+            return user;
 
         }
 
