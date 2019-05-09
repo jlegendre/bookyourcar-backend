@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 
 namespace TestAuthentification.Controllers
@@ -178,9 +181,29 @@ namespace TestAuthentification.Controllers
             return Ok();
         }
 
+        
+
         private bool VehicleExists(int id)
         {
             return _context.Vehicle.Any(e => e.VehId == id);
         }
+
+        /// <summary>
+        /// permet de récuperer le token
+        /// </summary>
+        /// <returns></returns>
+        private string GetToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+
+            return token;
+        }
+
+
     }
 }

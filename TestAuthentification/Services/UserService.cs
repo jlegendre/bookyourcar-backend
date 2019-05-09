@@ -16,6 +16,17 @@ namespace TestAuthentification.Services
             _context = context;
         }
 
+        public User GetUserConnected(string authToken)
+        {
+            if (TokenService.ValidateToken(authToken))
+            {
+                User user = 
+
+                return user;
+            }
+
+        }
+
 
 
 

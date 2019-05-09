@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
+using TestAuthentification.Services;
+using TestAuthentification.ViewModels.Location;
 
 namespace TestAuthentification.Controllers
 {
@@ -116,6 +120,46 @@ namespace TestAuthentification.Controllers
 
             return Ok(location);
         }
+        /// <summary>
+        /// Demande de nouvelle location pour un utilisateur
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> AskLocation([FromBody] LocationViewModel model)
+        {
+
+            var token = GetToken();
+            if (!TokenService.ValidateToken(token)) return Unauthorized();
+            var handler = new JwtSecurityTokenHandler();
+            var simplePrinciple = handler.ReadJwtToken(token);
+            var emailUser = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Email).Value;
+
+            if (string.IsNullOrEmpty(emailUser))
+            {
+                AuthService service = new AuthService(_context);
+                User user = service.FindByEmail(emailUser);
+            }
+
+            return Ok();
+
+        }
+
+        /// <summary>
+        /// permet de récuperer le token
+        /// </summary>
+        /// <returns></returns>
+        private string GetToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+
+            return token;
+        }
+
 
         private bool LocationExists(int id)
         {
