@@ -121,6 +121,12 @@ namespace TestAuthentification.Controllers
                 return BadRequest(result2.Errors);
             }
 
+            IdentityResult result3 = _authService.VerifPhoneNumber(user);
+            if (!result3.Succeeded)
+            {
+                return BadRequest(result3.Errors);
+            }
+
 
             // mise à jour de l'état du compte
             user.UserState = (sbyte)Enums.UserState.InWaiting;

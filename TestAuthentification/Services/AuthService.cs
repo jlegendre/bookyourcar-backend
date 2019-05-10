@@ -114,6 +114,25 @@ namespace TestAuthentification.Services
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public IdentityResult VerifPhoneNumber(User user)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+
+            if (CheckPhoneNumberUnique(user.UserPhone))
+            {
+                errors.Add(Describer.InvalidPhoneNumber(user.UserPhone));
+            }
+
+            return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
+
+        }
+
+        /// <summary>
         /// Regarde si l'email est bien unique
         /// </summary>
         /// <param name="userEmail"></param>
@@ -129,6 +148,24 @@ namespace TestAuthentification.Services
 
             return false;
         }
+
+        /// <summary>
+        /// Regarde si l'email est bien unique
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        private bool CheckPhoneNumberUnique(string userPhone)
+        {
+            var user = _context.User.FirstOrDefault(x => x.UserPhone == userPhone);
+
+            if (user != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
 
         public IdentityResult AddToRoleAdminAsync(User user)
         {
