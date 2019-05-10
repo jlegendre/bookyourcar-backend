@@ -13,7 +13,7 @@ namespace TestAuthentification.ViewModels.Location
         public int? VehId { get; set; }
 
         /// <summary>
-        /// id du véhicule choisis pour une reservation
+        /// id de l'utilisateur choisis pour une reservation
         /// </summary>
         public int UserId { get; set; }
 
@@ -25,7 +25,7 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// id du véhicule choisis pour une reservation
         /// </summary>
-        public int LocationState { get; set; }
+        public string LocationState { get; set; }
 
         /// <summary>
         /// date de début d'une reservation
