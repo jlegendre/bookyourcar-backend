@@ -52,7 +52,7 @@ namespace TestAuthentification.Controllers
                             locVM.DateFinResa = loc.LocDateendlocation;
                             locVM.PoleIdDepart = loc.LocPoleIdstart;
                             locVM.PoleIdDestination = loc.LocPoleIdend;
-                            locVM.VehId = loc.LocVehId ?? 0;
+                            locVM.VehId = loc.LocVehId;
 
                             locations.Add(locVM);
                         }
