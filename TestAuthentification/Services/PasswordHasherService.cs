@@ -227,24 +227,6 @@ namespace TestAuthentification.Services
             }
         }
 
-        public static bool IsBase64(string base64String)
-        {
-            if (string.IsNullOrEmpty(base64String) || base64String.Length % 4 != 0
-                                                   || base64String.Contains(" ") || base64String.Contains("\t") || base64String.Contains("\r") || base64String.Contains("\n"))
-                return false;
-
-            try
-            {
-                Convert.FromBase64String(base64String);
-                return true;
-            }
-            catch (Exception e)
-            {
-                throw new ArgumentNullException(nameof(base64String));
-            }
-            return false;
-        }
-
         private static bool VerifyHashedPasswordV2(byte[] hashedPassword, string password)
         {
             const KeyDerivationPrf Pbkdf2Prf = KeyDerivationPrf.HMACSHA1; // default for Rfc2898DeriveBytes
