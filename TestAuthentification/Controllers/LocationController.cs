@@ -92,7 +92,7 @@ namespace TestAuthentification.Controllers
             {
                 return Unauthorized();
             }
-            
+
         }
 
         // GET: api/Locations/5
@@ -211,7 +211,7 @@ namespace TestAuthentification.Controllers
             comment.CommentDate = DateTime.Now;
             comment.CommentText = model.Comments;
             comment.CommentUserId = user.UserId;
-            
+
 
             // information location
             location.LocDatestartlocation = model.DateDebutResa;
@@ -230,6 +230,14 @@ namespace TestAuthentification.Controllers
                 comment.CommentLocId = location.LocId;
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
+
+                PoleService servicePole = new PoleService(_context);
+                var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
+                var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
+
+#if !DEBUG
+                await EmailService.SendEmailAsync("Vous venez de demander une Location", String.Format(ConstantsEmail.LocationAsk, user.UserFirstname, location.LocDatestartlocation, location.LocDateendlocation, poleDepart, poleArrive), user.UserEmail);
+#endif
 
                 return Ok();
             }

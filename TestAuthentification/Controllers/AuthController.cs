@@ -124,11 +124,9 @@ namespace TestAuthentification.Controllers
             _context.SaveChanges();
             _context.Dispose();
 
-
-            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(ConstantsEmail.Register, user.UserFirstname), user.UserEmail);
-
-
-
+#if !DEBUG
+await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(ConstantsEmail.Register, user.UserFirstname), user.UserEmail);
+#endif
             return Ok();
         }
 
@@ -141,13 +139,12 @@ namespace TestAuthentification.Controllers
         [HttpPost, Route("ResetPassword")]
         public async Task<IActionResult> ResetPasswordAsync(string emailDestinataire)
         {
-            string ContenuDuMail = "Voici le lien pour rénitialiser votre mot de passe " +
-                                   Environment.GetEnvironmentVariable("UrlResetPassword");
 
 #if !Debug
             MailjetResponse response =
-                await EmailService.SendEmailAsync("Changement de mot de passe", ContenuDuMail, emailDestinataire);
+                await EmailService.SendEmailAsync("Changement de mot de passe", ConstantsEmail.ResetPassword, emailDestinataire);
 #endif
+
 
             if (response.IsSuccessStatusCode)
             {

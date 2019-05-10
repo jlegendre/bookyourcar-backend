@@ -41,6 +41,18 @@ namespace TestAuthentification.Resources
             User,
             Admin
         }
+
+        public enum UserState
+        {
+            // en attente
+            InWaiting,
+            // compte validé par l'admin
+            Validated,
+            // compte refusé par l'admin
+            Rejected,
+            // compte bloqué
+            Blocked
+        }
     }
 }
 
