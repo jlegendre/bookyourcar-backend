@@ -59,7 +59,7 @@ namespace TestAuthentification
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<A5dContext>(options => options.UseMySql("server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX"));
-            //Scaffold-DbContext -Connection "server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX";Integrated Security=True;Trusted_Connection=True;" -Provider Pomelo.EntityFrameworkCore.Mysql
+            //Scaffold-DbContext "server=mvinet.fr;port=3306;database=a5d;uid=a5d;password=pwtk@[gh$!7Z#&wX" Pomelo.EntityFrameworkCore.Mysql -OutputDir Models -f
             // commande pour mettre à jour le contexte en fonction de la BDD
             services.AddIdentityCore<User>().AddErrorDescriber<CustomIdentityErrorDescriber>();
 

@@ -15,5 +15,15 @@ namespace TestAuthentification.Services
         {
             _context = context;
         }
+
+
+        public Pole GetPole(int id)
+        {
+            var pole = _context.Pole.Find(id);
+
+            return pole;
+        }
     }
 }
+
+

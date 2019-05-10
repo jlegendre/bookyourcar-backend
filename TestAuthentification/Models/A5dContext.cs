@@ -455,12 +455,6 @@ namespace TestAuthentification.Models
                     .HasColumnName("USER_FIRSTNAME")
                     .HasColumnType("varchar(25)");
 
-                entity.Property(e => e.UserIsactivated)
-                    .IsRequired()
-                    .HasColumnName("USER_ISACTIVATED")
-                    .HasColumnType("bit(1)")
-                    .HasDefaultValueSql("'b\\'0\\''");
-
                 entity.Property(e => e.UserName)
                     .HasColumnName("USER_NAME")
                     .HasColumnType("varchar(25)");
