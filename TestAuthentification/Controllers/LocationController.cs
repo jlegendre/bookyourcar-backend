@@ -105,8 +105,14 @@ namespace TestAuthentification.Controllers
             }
 
             Location location = await _context.Location.FindAsync(id);
+            User user = await _context.User.FindAsync(location.LocUserId);
+            Pole startPole = await _context.Pole.FindAsync(location.LocPoleIdstart);
+            Pole endPole = await _context.Pole.FindAsync(location.LocPoleIdstart);
 
-
+            if(location.LocState == (sbyte)Enums.LocationState.Asked)
+            {
+                List<Vehicle> vehicles = (List<Vehicle>)_context.Vehicle.FindAsync().ToAsyncEnumerable();
+            }
 
             if (location == null)
             {
@@ -186,6 +192,7 @@ namespace TestAuthentification.Controllers
 
             return Ok(location);
         }
+
         /// <summary>
         /// Demande de nouvelle location pour un utilisateur
         /// </summary>
