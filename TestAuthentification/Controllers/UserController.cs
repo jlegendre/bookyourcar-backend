@@ -275,7 +275,7 @@ namespace TestAuthentification.Controllers
 
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
-                List<User> userEnAttente = _context.User.Where(x => !x.UserIsactivated).ToList();
+                List<User> userEnAttente = _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
 
                 if (userEnAttente.Count > 0)
                 {
@@ -325,7 +325,7 @@ namespace TestAuthentification.Controllers
 
                 if (userValidate != null)
                 {
-                    userValidate.UserIsactivated = true;
+                    userValidate.UserState = (sbyte)Enums.UserState.Validated;
                     _context.SaveChanges();
 #if !DEBUG
                 await EmailService.SendEmailAsync("Validation de votre compte - Book Your Car", ConstantsEmail.ValidateRegister, userValidate.UserEmail);
@@ -363,7 +363,7 @@ namespace TestAuthentification.Controllers
 
                 if (userValidate != null)
                 {
-                    userValidate.UserIsactivated = false;
+                    userValidate.UserState = (sbyte)Enums.UserState.Rejected;
                     _context.SaveChanges();
 #if !DEBUG
                     await EmailService.SendEmailAsync("Refus de votre compte - Book Your Car", String.Format(ConstantsEmail.RefusRegister, userValidate.UserFirstname), userValidate.UserEmail);

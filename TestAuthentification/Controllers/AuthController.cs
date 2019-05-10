@@ -50,7 +50,7 @@ namespace TestAuthentification.Controllers
 
             // On regarde si le password correspond avec celui du formulaire 
             // si c'est le cas on créé un jeton d'authentification Token
-            if (myUser != null && AuthService.CheckPassword(myUser, myUser.UserPassword, loginViewModel.Password) && myUser.UserIsactivated)
+            if (myUser != null && AuthService.CheckPassword(myUser, myUser.UserPassword, loginViewModel.Password) && myUser.UserState.Equals((sbyte)Enums.UserState.Validated))
             {
                 SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
                 SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -74,7 +74,7 @@ namespace TestAuthentification.Controllers
                 return Ok(new { Token = tokenString });
                 //return CreatedAtAction(nameof(GetUserInfo), new { Token = tokenString });
             }
-            else if (myUser != null && !myUser.UserIsactivated)
+            else if (myUser != null && !myUser.UserState.Equals((sbyte)Enums.UserState.Validated))
             {
                 ModelState.AddModelError("Error", "Votre compte n'est pas encore activé");
                 return BadRequest(ModelState);
@@ -104,7 +104,8 @@ namespace TestAuthentification.Controllers
                 UserName = registerViewModel.Nom,
                 UserPoleId = registerViewModel.PoleId,
                 UserPhone = registerViewModel.PhoneNumber,
-                UserNumpermis = registerViewModel.NumPermis
+                UserNumpermis = registerViewModel.NumPermis,
+                
 
             };
 
@@ -119,6 +120,11 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(result2.Errors);
             }
+
+
+            // mise à jour de l'état du compte
+            user.UserState = (sbyte)Enums.UserState.InWaiting;
+
 
             _context.User.Add(user);
             _context.SaveChanges();
