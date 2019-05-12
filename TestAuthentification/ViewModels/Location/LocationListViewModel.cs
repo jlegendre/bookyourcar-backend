@@ -18,14 +18,19 @@ namespace TestAuthentification.ViewModels.Location
         public string VehicleFriendlyName { get; set; }
 
         /// <summary>
-        /// id du véhicule choisis pour une reservation
+        /// user pour une reservation
         /// </summary>
         public string UserFriendlyName { get; set; }
 
         /// <summary>
-        /// id du véhicule choisis pour une reservation
+        /// statut de la reservation
         /// </summary>
         public string LocationState { get; set; }
+
+        /// <summary>
+        /// id statut de la reservation
+        /// </summary>
+        public sbyte LocationStateId { get; set; }
 
         /// <summary>
         /// date de début d'une reservation

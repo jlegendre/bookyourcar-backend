@@ -70,8 +70,9 @@ namespace TestAuthentification.Controllers
                                 locVM.VehicleFriendlyName = "Pas de vehicule associé";
                             }
 
-                            Enums.LocationState locSt = (Enums.LocationState)loc.LocState;
-                            locVM.LocationState = GetLocationStateTrad(locSt);
+
+                            locVM.LocationState = GetLocationStateTrad(loc.LocState);
+                            locVM.LocationStateId = loc.LocState;
 
                             locations.Add(locVM);
                         }
@@ -115,8 +116,7 @@ namespace TestAuthentification.Controllers
                                 locVM.VehicleFriendlyName = "Pas de vehicule associé";
                             }
 
-                            Enums.LocationState locSt = (Enums.LocationState)loc.LocState;
-                            locVM.LocationState = GetLocationStateTrad(locSt);
+                            locVM.LocationState = GetLocationStateTrad(loc.LocState);
 
                             locations.Add(locVM);
                         }
@@ -144,15 +144,45 @@ namespace TestAuthentification.Controllers
             }
 
             Location location = await _context.Location.FindAsync(id);
-
-
-
             if (location == null)
             {
                 return NotFound();
             }
 
-            return Ok(location);
+            LocationDetailsViewModel locDetailVM = new LocationDetailsViewModel();
+
+            locDetailVM.User = _context.User.Where(u => u.UserId == location.LocUserId).First();
+
+            Pole poleStart = _context.Pole.Where(p => p.PoleId == location.LocPoleIdstart).First();
+            locDetailVM.PoleDepart = poleStart.PoleName;
+            Pole poleEnd = _context.Pole.Where(p => p.PoleId == location.LocPoleIdend).First();
+            locDetailVM.PoleDestination = poleEnd.PoleName;
+
+            locDetailVM.DateDebutResa = location.LocDatestartlocation;
+            locDetailVM.DateFinResa = location.LocDateendlocation;
+
+            locDetailVM.LocationState = GetLocationStateTrad(location.LocState);
+            locDetailVM.LocationStateId = location.LocState;
+
+            //afficher la voiture ou liste voitures disponibles
+            if (location.LocState == (sbyte)Enums.LocationState.Asked)
+            {
+                locDetailVM.AvailableVehicle = new List<Vehicle>()
+                {
+                    new Vehicle(){VehBrand = "Test", VehModel = "Bouchon"},
+                    new Vehicle(){VehBrand = "Ferrari", VehModel = "Rouge"},
+                    new Vehicle(){VehBrand = "Twingo", VehModel = "Verte"}
+                };
+            }
+            else
+            {
+                locDetailVM.SelectedVehicle = _context.Vehicle.Where(v => v.VehId == location.LocVehId).First();
+            }
+
+            //Commentaires associés à la location 
+            locDetailVM.CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList();
+
+            return Ok(locDetailVM);
         }
 
         // PUT: api/Locations/5
@@ -309,10 +339,11 @@ namespace TestAuthentification.Controllers
         }
 
 
-        private string GetLocationStateTrad(Enums.LocationState locState)
+        private string GetLocationStateTrad(sbyte locState)
         {
+            Enums.LocationState locSt = (Enums.LocationState)locState;
             string locationStateTrad = "";
-            switch (locState)
+            switch (locSt)
             {
                 case Enums.LocationState.Asked:
                     locationStateTrad = "Demandée";

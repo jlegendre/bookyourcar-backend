@@ -14,9 +14,14 @@ namespace TestAuthentification.ViewModels.Location
         public User User { get; set; }
 
         /// <summary>
-        /// id du véhicule choisis pour une reservation
+        /// Etat de la location
         /// </summary>
         public string LocationState { get; set; }
+
+        /// <summary>
+        /// Etat de la location
+        /// </summary>
+        public sbyte LocationStateId { get; set; }
 
         /// <summary>
         /// date de début d'une reservation
@@ -31,15 +36,20 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// id du pôle de prise charge du véhicule
         /// </summary>
-        public int PoleIdDepart { get; set; }
+        public string PoleDepart { get; set; }
 
         /// <summary>
         /// id du pôle de retour du véhicule
         /// </summary>
-        public int PoleIdDestination { get; set; }
+        public string PoleDestination { get; set; }
 
         /// <summary>
-        /// vehicule attirbué pour la location
+        /// liste de commentaires pour la location
+        /// </summary>
+        public List<Comments> CommentsList { get; set; }
+
+        /// <summary>
+        /// vehicule attribué pour la location
         /// </summary>
         public Vehicle SelectedVehicle { get; set; }
 
