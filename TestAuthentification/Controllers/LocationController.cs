@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
+using TestAuthentification.ViewModels;
 using TestAuthentification.ViewModels.Location;
 
 namespace TestAuthentification.Controllers
@@ -149,36 +150,48 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            LocationDetailsViewModel locDetailVM = new LocationDetailsViewModel();
+            LocationDetailsViewModel locDetailVM = new LocationDetailsViewModel()
+            {
+                UserId = _context.User.SingleOrDefault(u => u.UserId == location.LocUserId).UserId,
+                CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList(),
+                DateDebutResa = location.LocDatestartlocation,
+                DateFinResa = location.LocDateendlocation,
+                LocationState = GetLocationStateTrad(location.LocState),
+                LocationStateId = location.LocState,
+                PoleDestination = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName,
+                PoleDepart = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName
 
-            locDetailVM.User = _context.User.Where(u => u.UserId == location.LocUserId).First();
-
-            Pole poleStart = _context.Pole.Where(p => p.PoleId == location.LocPoleIdstart).First();
-            locDetailVM.PoleDepart = poleStart.PoleName;
-            Pole poleEnd = _context.Pole.Where(p => p.PoleId == location.LocPoleIdend).First();
-            locDetailVM.PoleDestination = poleEnd.PoleName;
-
-            locDetailVM.DateDebutResa = location.LocDatestartlocation;
-            locDetailVM.DateFinResa = location.LocDateendlocation;
-
-            locDetailVM.LocationState = GetLocationStateTrad(location.LocState);
-            locDetailVM.LocationStateId = location.LocState;
+            };
 
             //afficher la voiture ou liste voitures disponibles
             if (location.LocState == (sbyte)Enums.LocationState.Asked)
             {
-                locDetailVM.AvailableVehicle = new List<Vehicle>()
+                locDetailVM.AvailableVehicle = new List<VehiculeViewModel>()
                 {
-                    new Vehicle(){VehBrand = "Test", VehModel = "Bouchon"},
-                    new Vehicle(){VehBrand = "Ferrari", VehModel = "Rouge"},
-                    new Vehicle(){VehBrand = "Twingo", VehModel = "Verte"}
+                    new VehiculeViewModel(){VehBrand = "Test", VehModel = "Bouchon"},
+                    new VehiculeViewModel(){VehBrand = "Ferrari", VehModel = "Rouge"},
+                    new VehiculeViewModel(){VehBrand = "Twingo", VehModel = "Verte"}
                 };
             }
             else
             {
-                locDetailVM.SelectedVehicle = _context.Vehicle.Where(v => v.VehId == location.LocVehId).First();
+                var vehicule = _context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
+                locDetailVM.SelectedVehicle = new VehiculeViewModel()
+                {
+                    PoleName = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName,
+                    VehModel = vehicule.VehModel,
+                    VehId = vehicule.VehId,
+                    VehBrand = vehicule.VehBrand,
+                    VehDatemec = vehicule.VehDatemec,
+                    VehKm = vehicule.VehKm,
+                    VehNumberplace = vehicule.VehNumberplace,
+                    VehRegistration = vehicule.VehRegistration,
+                    VehTypeEssence = vehicule.VehTypeEssence,
+                    VehColor = vehicule.VehColor,
+                    VehIsactive = vehicule.VehIsactive
+                };
             }
-
+            //_context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
             //Commentaires associés à la location 
             locDetailVM.CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList();
 

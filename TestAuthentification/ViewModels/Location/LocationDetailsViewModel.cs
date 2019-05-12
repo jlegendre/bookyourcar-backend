@@ -11,7 +11,7 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// Utilisateur associé à la location
         /// </summary>
-        public User User { get; set; }
+        public int UserId { get; set; }
 
         /// <summary>
         /// Etat de la location
@@ -46,17 +46,17 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// liste de commentaires pour la location
         /// </summary>
-        public List<Comments> CommentsList { get; set; }
+        public List<CommentsViewModel> CommentsList { get; set; }
 
         /// <summary>
         /// vehicule attribué pour la location
         /// </summary>
-        public Vehicle SelectedVehicle { get; set; }
+        public VehiculeViewModel SelectedVehicle { get; set; }
 
         /// <summary>
         /// liste de vehicules pouvant être attribués à la location
         /// </summary>
-        public List<Vehicle> AvailableVehicle { get; set; }
+        public List<VehiculeViewModel> AvailableVehicle { get; set; }
 
     }
 }
