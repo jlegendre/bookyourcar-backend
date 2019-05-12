@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Mailjet.Client;
 using Microsoft.AspNetCore.Authorization;
@@ -136,15 +137,20 @@ namespace TestAuthentification.Controllers
             _context.SaveChanges();
             _context.Dispose();
 
-#if !DEBUG
-await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(ConstantsEmail.Register, user.UserFirstname), user.UserEmail);
-#endif
+            //string myFiles = System.IO.File.ReadAllText("./EmailTemplates/Register.html");
+            //myFiles.Replace("\"", "\\\"");
+
+            //await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(myFiles, user.UserFirstname), user.UserEmail);
+            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(ConstantsEmail.Register, user.UserFirstname), user.UserEmail);
+
             return Ok();
         }
 
         [HttpGet, Route("users")]
         public IEnumerable<User> GetUsers()
         {
+            var test = System.IO.File.ReadAllLines("./EmailTemplates/Register.html");
+
             return _context.User.ToList();
         }
 
