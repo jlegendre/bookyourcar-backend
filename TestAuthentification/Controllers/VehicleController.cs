@@ -153,6 +153,7 @@ namespace TestAuthentification.Controllers
                 VehKm = vehicle.VehKm,
                 VehNumberplace = vehicle.VehNumberplace,
                 VehIsactive = vehicle.VehIsactive,
+                VehPoleId = vehicle.PoleId
             };
 
             _context.Vehicle.Add(vehiculeToAdd);
