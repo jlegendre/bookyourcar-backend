@@ -8,19 +8,19 @@ namespace TestAuthentification.ViewModels.Location
     public class LocationListViewModel
     {
         /// <summary>
-        /// id du véhicule choisis pour une reservation
+        /// id de la location
         /// </summary>
-        public int? VehId { get; set; }
-
-        /// <summary>
-        /// id de l'utilisateur choisis pour une reservation
-        /// </summary>
-        public int UserId { get; set; }
+        public int LocationId { get; set; }
 
         /// <summary>
         /// id du véhicule choisis pour une reservation
         /// </summary>
-        public int UserName { get; set; }
+        public string VehicleFriendlyName { get; set; }
+
+        /// <summary>
+        /// id du véhicule choisis pour une reservation
+        /// </summary>
+        public string UserFriendlyName { get; set; }
 
         /// <summary>
         /// id du véhicule choisis pour une reservation
@@ -40,11 +40,11 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// id du pôle de prise charge du véhicule
         /// </summary>
-        public int PoleIdDepart { get; set; }
+        public string PoleDepart { get; set; }
 
         /// <summary>
         /// id du pôle de retour du véhicule
         /// </summary>
-        public int PoleIdDestination { get; set; }
+        public string PoleDestination { get; set; }
     }
 }

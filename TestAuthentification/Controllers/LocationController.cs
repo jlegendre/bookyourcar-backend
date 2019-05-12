@@ -48,11 +48,30 @@ namespace TestAuthentification.Controllers
                         foreach (Location loc in listLocation)
                         {
                             LocationListViewModel locVM = new LocationListViewModel();
+                            locVM.LocationId = loc.LocId;
                             locVM.DateDebutResa = loc.LocDatestartlocation;
                             locVM.DateFinResa = loc.LocDateendlocation;
-                            locVM.PoleIdDepart = loc.LocPoleIdstart;
-                            locVM.PoleIdDestination = loc.LocPoleIdend;
-                            locVM.VehId = loc.LocVehId;
+
+                            User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
+                            locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
+
+                            Pole poleStart = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdstart).First();
+                            locVM.PoleDepart = poleStart.PoleName;
+                            Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
+                            locVM.PoleDestination = poleEnd.PoleName;
+
+                            if(loc.LocVehId != null)
+                            {
+                                Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
+                                locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
+                            }
+                            else
+                            {
+                                locVM.VehicleFriendlyName = "Pas de vehicule associé";
+                            }
+
+                            Enums.LocationState locSt = (Enums.LocationState)loc.LocState;
+                            locVM.LocationState = GetLocationStateTrad(locSt);
 
                             locations.Add(locVM);
                         }
@@ -70,14 +89,34 @@ namespace TestAuthentification.Controllers
 
                     if (listLocation.Count > 0)
                     {
+                        User user = _context.User.Where(u => u.UserId == connectedUser.UserId).First();
+
                         foreach (Location loc in listLocation)
                         {
                             LocationListViewModel locVM = new LocationListViewModel();
+                            locVM.LocationId = loc.LocId;
                             locVM.DateDebutResa = loc.LocDatestartlocation;
                             locVM.DateFinResa = loc.LocDateendlocation;
-                            locVM.PoleIdDepart = loc.LocPoleIdstart;
-                            locVM.PoleIdDestination = loc.LocPoleIdend;
-                            locVM.VehId = loc.LocVehId;
+
+                            locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
+
+                            Pole poleStart = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdstart).First();
+                            locVM.PoleDepart = poleStart.PoleName;
+                            Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
+                            locVM.PoleDestination = poleEnd.PoleName;
+
+                            if (loc.LocVehId != null)
+                            {
+                                Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
+                                locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
+                            }
+                            else
+                            {
+                                locVM.VehicleFriendlyName = "Pas de vehicule associé";
+                            }
+
+                            Enums.LocationState locSt = (Enums.LocationState)loc.LocState;
+                            locVM.LocationState = GetLocationStateTrad(locSt);
 
                             locations.Add(locVM);
                         }
@@ -267,6 +306,34 @@ namespace TestAuthentification.Controllers
         private bool LocationExists(int id)
         {
             return _context.Location.Any(e => e.LocId == id);
+        }
+
+
+        private string GetLocationStateTrad(Enums.LocationState locState)
+        {
+            string locationStateTrad = "";
+            switch (locState)
+            {
+                case Enums.LocationState.Asked:
+                    locationStateTrad = "Demandée";
+                    break;
+                case Enums.LocationState.InProgress:
+                    locationStateTrad = "En cours";
+                    break;
+                case Enums.LocationState.Validated:
+                    locationStateTrad = "Validée";
+                    break;
+                case Enums.LocationState.Rejected:
+                    locationStateTrad = "Refusée";
+                    break;
+                case Enums.LocationState.Finished:
+                    locationStateTrad = "Terminée";
+                    break;
+                case Enums.LocationState.Canceled:
+                    locationStateTrad = "Annulée";
+                    break;
+            }
+            return locationStateTrad;
         }
     }
 }
