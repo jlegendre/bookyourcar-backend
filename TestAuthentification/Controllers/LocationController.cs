@@ -153,7 +153,7 @@ namespace TestAuthentification.Controllers
             LocationDetailsViewModel locDetailVM = new LocationDetailsViewModel()
             {
                 UserId = _context.User.SingleOrDefault(u => u.UserId == location.LocUserId).UserId,
-                CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList(),
+                //CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList(),
                 DateDebutResa = location.LocDatestartlocation,
                 DateFinResa = location.LocDateendlocation,
                 LocationState = GetLocationStateTrad(location.LocState),
@@ -193,7 +193,7 @@ namespace TestAuthentification.Controllers
             }
             //_context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
             //Commentaires associés à la location 
-            locDetailVM.CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList();
+            //locDetailVM.CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList();
 
             return Ok(locDetailVM);
         }

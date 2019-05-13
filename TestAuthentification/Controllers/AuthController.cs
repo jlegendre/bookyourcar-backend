@@ -137,11 +137,11 @@ namespace TestAuthentification.Controllers
             _context.SaveChanges();
             _context.Dispose();
 
-            //string myFiles = System.IO.File.ReadAllText("./EmailTemplates/Register.html");
+            string myFiles = System.IO.File.ReadAllText("./EmailTemplates/Register.html");
             //myFiles.Replace("\"", "\\\"");
-
+            myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
             //await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(myFiles, user.UserFirstname), user.UserEmail);
-            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(ConstantsEmail.Register, user.UserFirstname), user.UserEmail);
+            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", myFiles, user.UserEmail);
 
             return Ok();
         }

@@ -34,8 +34,6 @@ namespace TestAuthentification.Services
                                 {"Name", "You"}
                             }
                         }},
-                        {"TemplateID", 1},
-                        {"TemplateLanguage", true},
                         {"Subject", Titre},
                         {"HTMLPart", Contenu }
                         //{"HTMLPart", "<h3>Dear passenger 1, welcome to <a href=\"https://www.mailjet.com/\">Mailjet</a>!</h3><br />May the delivery force be with you!"}
