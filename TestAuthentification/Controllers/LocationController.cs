@@ -11,6 +11,7 @@ using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
+using TestAuthentification.ViewModels.Comments;
 using TestAuthentification.ViewModels.Location;
 
 namespace TestAuthentification.Controllers
@@ -61,7 +62,7 @@ namespace TestAuthentification.Controllers
                             Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
                             locVM.PoleDestination = poleEnd.PoleName;
 
-                            if(loc.LocVehId != null)
+                            if (loc.LocVehId != null)
                             {
                                 Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
                                 locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
@@ -150,10 +151,22 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            LocationDetailsViewModel locDetailVM = new LocationDetailsViewModel()
+            var userInfo = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
+            //lier les commentaires à la location
+            List<CommentsViewModel> commentsList = _context.Comments.Where(c=>c.CommentLocId == location.LocId).Select(x => new CommentsViewModel()
+            {
+                UserId = x.CommentUserId.GetValueOrDefault(),
+                DatePublication = x.CommentDate,
+                FriendlyName = string.Format("{0} {1}", userInfo.UserFirstname, userInfo.UserName),
+                Text = x.CommentText
+            }).ToList();
+
+
+            //_context.Comments.Where(c => c.CommentId == location.LocId);
+            LocationDetailsViewModel locDetailVm = new LocationDetailsViewModel()
             {
                 UserId = _context.User.SingleOrDefault(u => u.UserId == location.LocUserId).UserId,
-                //CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList(),
+                CommentsList = commentsList,
                 DateDebutResa = location.LocDatestartlocation,
                 DateFinResa = location.LocDateendlocation,
                 LocationState = GetLocationStateTrad(location.LocState),
@@ -166,7 +179,7 @@ namespace TestAuthentification.Controllers
             //afficher la voiture ou liste voitures disponibles
             if (location.LocState == (sbyte)Enums.LocationState.Asked)
             {
-                locDetailVM.AvailableVehicle = new List<VehiculeViewModel>()
+                locDetailVm.AvailableVehicle = new List<VehiculeViewModel>()
                 {
                     new VehiculeViewModel(){VehBrand = "Test", VehModel = "Bouchon"},
                     new VehiculeViewModel(){VehBrand = "Ferrari", VehModel = "Rouge"},
@@ -176,7 +189,7 @@ namespace TestAuthentification.Controllers
             else
             {
                 var vehicule = _context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
-                locDetailVM.SelectedVehicle = new VehiculeViewModel()
+                locDetailVm.SelectedVehicle = new VehiculeViewModel()
                 {
                     PoleName = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName,
                     VehModel = vehicule.VehModel,
@@ -192,10 +205,9 @@ namespace TestAuthentification.Controllers
                 };
             }
             //_context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
-            //Commentaires associés à la location 
-            //locDetailVM.CommentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).ToList();
+            //Commentaires associés à la location
 
-            return Ok(locDetailVM);
+            return Ok(locDetailVm);
         }
 
         // PUT: api/Locations/5
