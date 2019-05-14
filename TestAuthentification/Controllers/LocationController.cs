@@ -80,9 +80,7 @@ namespace TestAuthentification.Controllers
                         }
                         return Ok(locations.ToList());
                     }
-                    var emptyLocation = new Dictionary<string, string>();
-                    emptyLocation.Add("message", "Il n'y a pas de locations.");
-                    return Ok(emptyLocation);
+                    return Ok(locations.ToList());
                 }
                 else
                 {
@@ -124,9 +122,7 @@ namespace TestAuthentification.Controllers
                         }
                         return Ok(locations.ToList());
                     }
-                    var emptyLocation = new Dictionary<string, string>();
-                    emptyLocation.Add("message", "Il n'y a pas de locations.");
-                    return Ok(emptyLocation);
+                    return Ok(locations.ToList());
                 }
             }
             else
