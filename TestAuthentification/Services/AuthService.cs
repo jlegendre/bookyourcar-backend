@@ -122,7 +122,7 @@ namespace TestAuthentification.Services
         public IdentityResult VerifPhoneNumber(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
-            if (user.UserPhone != "")
+            if (!string.IsNullOrEmpty(user.UserPhone))
             {
                 if (CheckPhoneNumberUnique(user.UserPhone))
                 {

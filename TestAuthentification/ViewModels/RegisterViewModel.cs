@@ -34,6 +34,7 @@ namespace TestAuthentification.ViewModels
         public int PoleId { get; set; }
 
         [Key()]
+        [Required]
         public string PhoneNumber { get; set; }
 
         public string NumPermis { get; set; }
