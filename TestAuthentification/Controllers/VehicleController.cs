@@ -156,10 +156,17 @@ namespace TestAuthentification.Controllers
                 VehPoleId = vehicle.PoleId
             };
 
-            _context.Vehicle.Add(vehiculeToAdd);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Vehicle.Add(vehiculeToAdd);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
 
-            return CreatedAtAction("GetVehicle", new { id = vehiculeToAdd.VehId }, vehiculeToAdd);
         }
 
         // DELETE: api/Vehicles/5
@@ -177,13 +184,13 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            vehicle.VehState = (sbyte) Enums.VehiculeState.Deleted;
+            vehicle.VehState = (sbyte)Enums.VehiculeState.Deleted;
             await _context.SaveChangesAsync();
 
             return Ok();
         }
 
-        
+
 
         private bool VehicleExists(int id)
         {
