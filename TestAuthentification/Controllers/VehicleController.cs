@@ -33,12 +33,13 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> GetVehicle()
         {
 
-            List<Vehicle> listVehicle = await _context.Vehicle.ToListAsync();
+            List<Vehicle> listVehicle = _context.Vehicle.ToList();
 
             if (listVehicle.Count > 0)
             {
-                var model = listVehicle.Select(x => new VehiculeViewModel()
+                List<VehiculeViewModel> model = listVehicle.Select(x => new VehiculeViewModel()
                 {
+                    PoleId = x.VehPoleId,
                     VehModel = x.VehModel,
                     PoleName = x.VehPole.PoleName,
                     VehId = x.VehId,
@@ -49,9 +50,10 @@ namespace TestAuthentification.Controllers
                     VehRegistration = x.VehRegistration,
                     VehTypeEssence = x.VehTypeEssence,
                     VehDatemec = x.VehDatemec,
-                    VehIsactive = x.VehIsactive
-                });
-                return Ok(model.ToList());
+                    VehIsactive = x.VehIsactive,
+                    
+                }).ToList();
+                return Ok(model);
             }
             var roles = new Dictionary<string, string>();
             roles.Add("message", "Il n'y a pas de véhicules.");

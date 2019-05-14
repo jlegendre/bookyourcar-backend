@@ -43,7 +43,7 @@ namespace TestAuthentification.Services
                 user.UserRight = _context.Right.FirstOrDefault(x => x.RightId == user.UserRightId);
                 user.UserPole = _context.Pole.FirstOrDefault(x => x.PoleId == user.UserPoleId);
             }
-            
+
             return user;
 
         }
@@ -88,7 +88,7 @@ namespace TestAuthentification.Services
             return result == PasswordVerificationResult.Success;
 
         }
-        
+
 
         /// <summary>
         /// 
@@ -122,10 +122,12 @@ namespace TestAuthentification.Services
         public IdentityResult VerifPhoneNumber(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
-
-            if (CheckPhoneNumberUnique(user.UserPhone))
+            if (user.UserPhone != "")
             {
-                errors.Add(Describer.InvalidPhoneNumber(user.UserPhone));
+                if (CheckPhoneNumberUnique(user.UserPhone))
+                {
+                    errors.Add(Describer.InvalidPhoneNumber(user.UserPhone));
+                }
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
@@ -210,7 +212,7 @@ namespace TestAuthentification.Services
 
                 if (!string.IsNullOrEmpty(emailUser))
                 {
-                    
+
                     user = FindByEmail(emailUser);
                 }
             }
