@@ -41,7 +41,7 @@ namespace TestAuthentification.Controllers
                 {
                     PoleId = x.VehPoleId,
                     VehModel = x.VehModel,
-                    PoleName = x.VehPole.PoleName,
+                    PoleName = _context.Pole.Where(p => p.PoleId == x.VehPoleId).Count() > 0 ? _context.Pole.SingleOrDefault(p => p.PoleId == x.VehPoleId).PoleName : "",
                     VehId = x.VehId,
                     VehBrand = x.VehBrand,
                     VehColor = x.VehColor,
@@ -51,7 +51,7 @@ namespace TestAuthentification.Controllers
                     VehTypeEssence = x.VehTypeEssence,
                     VehDatemec = x.VehDatemec,
                     VehIsactive = x.VehIsactive,
-                    
+
                 }).ToList();
                 return Ok(model);
             }
