@@ -175,6 +175,8 @@ namespace TestAuthentification.Controllers
             //afficher la voiture ou liste voitures disponibles
             if (location.LocState == (sbyte)Enums.LocationState.Asked)
             {
+                locDetailVm.AvailableVehicle = GetAvailableVehiculeForLocation(location);
+
                 locDetailVm.AvailableVehicle = new List<VehiculeViewModel>()
                 {
                     new VehiculeViewModel(){VehBrand = "Test", VehModel = "Bouchon"},
@@ -204,6 +206,49 @@ namespace TestAuthentification.Controllers
             //Commentaires associés à la location
 
             return Ok(locDetailVm);
+        }
+
+        private List<Vehicle> GetAvailableVehiculeForLocation(Location location)
+        {
+            List<Vehicle> vehicleList = _context.Vehicle.ToList();
+            List<Vehicle> selectedVehicles = new List<Vehicle>();
+
+            foreach (Vehicle vehicle in vehicleList)
+            {
+                vehicle.Location = _context.Location.Where(l => l.LocVehId == vehicle.VehId).ToList();
+            }
+
+            foreach (Vehicle vehicle in vehicleList)
+            {
+
+                // Si aucune loc ne respecte les 3 conditions suivantes, on ajoute le vehicule à la liste 
+                // loc commence avant et fini après la loc demandée
+                // loc fini pendant la loc demandée
+                // loc commence pendant la loc demandée
+                if(vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation
+                                            || l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation
+                                            || l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation) == null)
+                {
+                    selectedVehicles.Add(vehicle);
+                }
+            }
+
+            if (selectedVehicles.Count > 0)
+            {
+                Location lastLoc = new Location();
+
+                foreach (Vehicle vehicle in selectedVehicles)
+                {
+                    List<Location> locs = vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation).ToList();
+                    lastLoc = locs.OrderByDescending(l => l.LocDateendlocation).First();
+                    if (lastLoc.LocPoleIdend != location.LocPoleIdend)
+                    {
+                        selectedVehicles.Remove(vehicle);
+                    }
+                }
+            }
+
+            return selectedVehicles;
         }
 
         // PUT: api/Locations/5
