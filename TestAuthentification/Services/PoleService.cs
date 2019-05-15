@@ -8,10 +8,10 @@ namespace TestAuthentification.Services
 {
     public class PoleService
     {
-        public A5dContext _context;
+        public BookYourCarContext _context;
         public PoleService _poleservice;
 
-        public PoleService(A5dContext context, CustomIdentityErrorDescriber errors = null)
+        public PoleService(BookYourCarContext context, CustomIdentityErrorDescriber errors = null)
         {
             _context = context;
         }

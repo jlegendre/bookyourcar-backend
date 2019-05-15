@@ -20,9 +20,9 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
 
-        public UserController(A5dContext context)
+        public UserController(BookYourCarContext context)
         {
             _context = context;
             _context.Pole.ToList();

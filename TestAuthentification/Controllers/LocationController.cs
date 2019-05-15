@@ -20,10 +20,10 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class LocationController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
         private readonly AuthService _authService;
 
-        public LocationController(A5dContext context)
+        public LocationController(BookYourCarContext context)
         {
             _context = context;
             _authService = new AuthService(context);

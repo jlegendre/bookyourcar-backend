@@ -13,9 +13,9 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class KeyController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
 
-        public KeyController(A5dContext context)
+        public KeyController(BookYourCarContext context)
         {
             _context = context;
         }

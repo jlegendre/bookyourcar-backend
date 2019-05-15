@@ -17,12 +17,12 @@ namespace TestAuthentification.Services
 {
     public class AuthService
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
         public readonly CustomIdentityErrorDescriber Describer;
         private static readonly PasswordHasherService<User> ServicePassword = new PasswordHasherService<User>();
 
         //context bdd
-        public AuthService(A5dContext context, CustomIdentityErrorDescriber errors = null)
+        public AuthService(BookYourCarContext context, CustomIdentityErrorDescriber errors = null)
         {
 
             _context = context;

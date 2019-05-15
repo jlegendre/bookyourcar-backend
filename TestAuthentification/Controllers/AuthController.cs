@@ -25,11 +25,11 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private static A5dContext _context;
+        private static BookYourCarContext _context;
         private readonly AuthService _authService;
         private PasswordHasherService<User> service = new PasswordHasherService<User>();
 
-        public AuthController(A5dContext context)
+        public AuthController(BookYourCarContext context)
         {
             _context = context;
             _authService = new AuthService(_context);
@@ -106,8 +106,7 @@ namespace TestAuthentification.Controllers
                 UserPoleId = registerViewModel.PoleId,
                 UserPhone = registerViewModel.PhoneNumber,
                 UserNumpermis = registerViewModel.NumPermis,
-                
-
+                UserRightId = 1  //Utilisateur
             };
 
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
