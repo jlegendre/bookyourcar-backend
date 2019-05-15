@@ -535,7 +535,7 @@ namespace TestAuthentification.Models
                 entity.HasOne(d => d.VehPole)
                     .WithMany(p => p.Vehicle)
                     .HasForeignKey(d => d.VehPoleId)
-                    .HasConstraintName("FK_VEHICLE");
+                    .HasConstraintName("FK_VEHICLE_POLE");
             });
         }
     }
