@@ -175,7 +175,7 @@ namespace TestAuthentification.Controllers
             //afficher la voiture ou liste voitures disponibles
             if (location.LocState == (sbyte)Enums.LocationState.Asked)
             {
-                locDetailVm.AvailableVehicle = GetAvailableVehiculeForLocation(location);
+                //locDetailVm.AvailableVehicle = GetAvailableVehiculeForLocation(location);
 
                 locDetailVm.AvailableVehicle = new List<VehiculeViewModel>()
                 {

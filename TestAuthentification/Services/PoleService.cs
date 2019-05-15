@@ -17,7 +17,7 @@ namespace TestAuthentification.Services
         }
 
 
-        public Pole GetPole(int id)
+        public Pole GetPole(int? id)
         {
             var pole = _context.Pole.Find(id);
 

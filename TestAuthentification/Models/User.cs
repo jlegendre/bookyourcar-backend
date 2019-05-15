@@ -8,24 +8,26 @@ namespace TestAuthentification.Models
         public User()
         {
             Comments = new HashSet<Comments>();
+            Images = new HashSet<Images>();
             Location = new HashSet<Location>();
             RideUser = new HashSet<RideUser>();
         }
 
         public int UserId { get; set; }
-        public string UserName { get; set; }
-        public string UserFirstname { get; set; }
-        public string UserPhone { get; set; }
         public string UserEmail { get; set; }
+        public string UserFirstname { get; set; }
+        public string UserName { get; set; }
         public string UserNumpermis { get; set; }
-        public int? UserRightId { get; set; }
-        public int? UserPoleId { get; set; }
         public string UserPassword { get; set; }
+        public string UserPhone { get; set; }
+        public int? UserPoleId { get; set; }
+        public int? UserRightId { get; set; }
         public sbyte UserState { get; set; }
 
         public Pole UserPole { get; set; }
         public Right UserRight { get; set; }
         public ICollection<Comments> Comments { get; set; }
+        public ICollection<Images> Images { get; set; }
         public ICollection<Location> Location { get; set; }
         public ICollection<RideUser> RideUser { get; set; }
     }

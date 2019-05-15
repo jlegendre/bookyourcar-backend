@@ -16,10 +16,10 @@ namespace TestAuthentification.Models
         }
 
         public int PoleId { get; set; }
-        public string PoleName { get; set; }
-        public string PoleCity { get; set; }
         public string PoleAddress { get; set; }
+        public string PoleCity { get; set; }
         public string PoleCp { get; set; }
+        public string PoleName { get; set; }
 
         public ICollection<Location> LocationLocPoleIdendNavigation { get; set; }
         public ICollection<Location> LocationLocPoleIdstartNavigation { get; set; }

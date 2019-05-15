@@ -7,6 +7,6 @@ namespace TestAuthentification.ViewModels.Comments
         public string FriendlyName { get; set; }
         public int UserId { get; set; }
         public string Text { get; set; }
-        public DateTime DatePublication { get; set; }
+        public DateTime? DatePublication { get; set; }
     }
 }
