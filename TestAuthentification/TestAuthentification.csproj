@@ -29,7 +29,6 @@
     <None Include="wwwroot\EmailTemplates\images\img01.jpg" />
     <None Include="wwwroot\EmailTemplates\images\img01_old.jpg" />
     <None Include="wwwroot\EmailTemplates\images\img02.jpg" />
-    <None Include="wwwroot\EmailTemplates\Register.html" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties Properties_4launchSettings_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>

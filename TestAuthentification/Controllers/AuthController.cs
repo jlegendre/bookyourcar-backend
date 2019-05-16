@@ -136,8 +136,8 @@ namespace TestAuthentification.Controllers
             _context.Dispose();
 
             //await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(myFiles, user.UserFirstname), user.UserEmail);
-
-            string myFiles = System.IO.File.ReadAllText("./wwwroot/EmailTemplates/Register.html");
+            
+            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RegisterPath);
             //myFiles.Replace("\"", "\\\"");
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
             await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", myFiles, user.UserEmail);
