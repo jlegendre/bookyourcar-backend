@@ -105,8 +105,7 @@ namespace TestAuthentification.Controllers
                 UserName = registerViewModel.Nom,
                 UserPoleId = registerViewModel.PoleId,
                 UserPhone = registerViewModel.PhoneNumber,
-                UserNumpermis = registerViewModel.NumPermis,
-                UserRightId = 1  //Utilisateur
+                UserNumpermis = registerViewModel.NumPermis
             };
 
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);

@@ -172,7 +172,7 @@ namespace TestAuthentification.Services
         public IdentityResult AddToRoleAdminAsync(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
-            if (user.UserRightId != 0 || user.UserRightId != null)
+            if (user.UserRightId != 2 || user.UserRightId != null)
             {
                 errors.Add(Describer.UserAlreadyInRole(user.UserRight.RightLabel));
             }
