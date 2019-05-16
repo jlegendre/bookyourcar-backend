@@ -172,7 +172,7 @@ namespace TestAuthentification.Controllers
                 Email = user.UserEmail,
                 Pole = _context.Pole.Where(p => p.PoleId == user.UserPoleId).First().PoleName,
                 Right = _context.Right.Where(r => r.RightId == user.UserRightId).First().RightLabel,
-                LocationsCount = _context.Location.Where(l => l.LocUserId == user.UserId).Count(),
+                LocationsCount = _context.Location.Where(l => l.LocUserId == user.UserId)?.Count() ?? 0,
                 UrlProfileImage = ""
             };
 
@@ -189,8 +189,12 @@ namespace TestAuthentification.Controllers
 
         private Location GetNextLocationByUser(int userId)
         {
-            List<Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
-            Location nextLoc = locList.OrderBy(l => l.LocDatestartlocation).First();
+            Location nextLoc = null;
+            List <Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
+            if(locList.Count > 0)
+            {
+                nextLoc = locList.OrderBy(l => l.LocDatestartlocation)?.First() ?? null;
+            }
 
             return nextLoc;
         }
