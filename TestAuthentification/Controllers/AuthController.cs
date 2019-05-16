@@ -111,7 +111,9 @@ namespace TestAuthentification.Controllers
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                ModelState.AddModelError("error", result.Errors.First().Description);
+                
+                return BadRequest(ModelState);
             }
 
             IdentityResult result2 = _authService.AddToRoleUserAsync(user);
@@ -141,10 +143,7 @@ namespace TestAuthentification.Controllers
             await EmailService.SendEmailAsync("Création d'un nouveau compte - BookYourCar", myFiles, user.UserEmail);
             
 #endif
-
-
-
-
+            
             return Ok();
         }
 
