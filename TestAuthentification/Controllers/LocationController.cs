@@ -338,7 +338,11 @@ namespace TestAuthentification.Controllers
             AuthService service = new AuthService(_context);
             User user = service.GetUserConnected(token);
 
-
+            if (UserAlreadyHaveALocation(model, user))
+            {
+                ModelState.AddModelError("Error", "Il existe déjà une location enregistrée à votre nom durant cette période.");
+                return BadRequest(ModelState);
+            }
             Location location = new Location();
 
             // information commentaire
@@ -386,6 +390,28 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(e);
             }
+        }
+
+        private bool UserAlreadyHaveALocation(LocationViewModel model, User user)
+        {
+            user.Location = _context.Location.Where(l => l.LocUserId == user.UserId).ToList();
+
+            foreach (Location location in user.Location)
+            {
+                if(location.LocDatestartlocation <= model.DateDebutResa && location.LocDateendlocation >= model.DateFinResa)
+                {
+                    return true;
+                }
+                if (location.LocDateendlocation >= model.DateDebutResa && location.LocDateendlocation <= model.DateFinResa)
+                {
+                    return true;
+                }
+                if (location.LocDatestartlocation >= model.DateDebutResa && location.LocDatestartlocation <= model.DateFinResa)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
