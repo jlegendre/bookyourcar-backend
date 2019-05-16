@@ -1,6 +1,6 @@
 ﻿namespace TestAuthentification.ViewModels
 {
-    public class UserViewModel
+    public class UserInfoViewModel
     {
         public int UserId { get; set; }
         public string UserName { get; set; }
