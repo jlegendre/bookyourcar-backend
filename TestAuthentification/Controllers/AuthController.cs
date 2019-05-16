@@ -111,7 +111,7 @@ namespace TestAuthentification.Controllers
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("error", result.Errors.First().Description);
+                ModelState.AddModelError("Error", result.Errors.First().Description.ToString());
                 
                 return BadRequest(ModelState);
             }
