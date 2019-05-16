@@ -150,13 +150,18 @@ namespace TestAuthentification.Controllers
         [HttpGet, Route("users")]
         public IEnumerable<User> GetUsers()
         {
-            var test = System.IO.File.ReadAllLines("./EmailTemplates/Register.html");
 
             return _context.User.ToList();
         }
 
-        [HttpPost, Route("ResetPassword")]
-        public async Task<IActionResult> ResetPasswordAsync(string emailDestinataire)
+        /// <summary>
+        /// fonction --> mot de passe oublié
+        /// TODO a completer 
+        /// </summary>
+        /// <param name="emailDestinataire"></param>
+        /// <returns></returns>
+        [HttpPost, Route("PasswordForget")]
+        public async Task<IActionResult> PasswordForgetAsync(string emailDestinataire)
         {
 
 #if !Debug
@@ -182,6 +187,9 @@ namespace TestAuthentification.Controllers
 
 
         }
+
+
+
 
 
 
