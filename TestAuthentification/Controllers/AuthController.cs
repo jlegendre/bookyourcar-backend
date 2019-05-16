@@ -111,7 +111,7 @@ namespace TestAuthentification.Controllers
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("Error", result.Errors.First().Description.ToString());
+                ModelState.AddModelError("Error", result.Errors.First().Description);
                 
                 return BadRequest(ModelState);
             }
@@ -119,13 +119,15 @@ namespace TestAuthentification.Controllers
             IdentityResult result2 = _authService.AddToRoleUserAsync(user);
             if (!result2.Succeeded)
             {
-                return BadRequest(result2.Errors);
+                ModelState.AddModelError("Error", result2.Errors.First().Description);
+                return BadRequest(ModelState);
             }
 
             IdentityResult result3 = _authService.VerifPhoneNumber(user);
             if (!result3.Succeeded)
             {
-                return BadRequest(result3.Errors);
+                ModelState.AddModelError("Error", result3.Errors.First().Description);
+                return BadRequest(ModelState);
             }
 
 
