@@ -170,6 +170,7 @@ namespace TestAuthentification.Controllers
                 LastName = user.UserName,
                 PhoneNumber = user.UserPhone,
                 Email = user.UserEmail,
+                DrivingLicence = user.UserNumpermis,
                 Pole = _context.Pole.Where(p => p.PoleId == user.UserPoleId).First().PoleName,
                 Right = _context.Right.Where(r => r.RightId == user.UserRightId).First().RightLabel,
                 LocationsCount = _context.Location.Where(l => l.LocUserId == user.UserId)?.Count() ?? 0,
