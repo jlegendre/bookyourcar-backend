@@ -166,7 +166,8 @@ namespace TestAuthentification.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e);
+                ModelState.AddModelError("Error", "Une erreur est survenue.");
+                return BadRequest(ModelState);
             }
 
         }
