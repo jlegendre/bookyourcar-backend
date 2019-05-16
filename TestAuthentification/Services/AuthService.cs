@@ -178,7 +178,7 @@ namespace TestAuthentification.Services
             }
             else
             {
-                user.UserRightId = 1;
+                user.UserRightId = 2;
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
@@ -194,7 +194,7 @@ namespace TestAuthentification.Services
             }
             else
             {
-                user.UserRightId = 2;
+                user.UserRightId = 1;
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
