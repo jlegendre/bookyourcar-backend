@@ -400,7 +400,7 @@ namespace TestAuthentification.Controllers
                 myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToLongDateString());
                 myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
                 myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
-                await EmailService.SendEmailAsync("Vous venez de demander une Location", myFiles, user.UserEmail);
+                await EmailService.SendEmailAsync("Vous venez de demander une Location - BookYourCar", myFiles, user.UserEmail);
 #endif
 
 

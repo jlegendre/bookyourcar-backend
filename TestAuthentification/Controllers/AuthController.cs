@@ -138,7 +138,7 @@ namespace TestAuthentification.Controllers
 #if !DEBUG
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RegisterPath);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-            await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", myFiles, user.UserEmail);
+            await EmailService.SendEmailAsync("Création d'un nouveau compte - BookYourCar", myFiles, user.UserEmail);
             
 #endif
 

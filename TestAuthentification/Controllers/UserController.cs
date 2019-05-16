@@ -179,11 +179,11 @@ namespace TestAuthentification.Controllers
 
             Location nextLoc = GetNextLocationByUser(user.UserId);
 
-            if(nextLoc != null)
+            if (nextLoc != null)
             {
                 userInfos.NextLocation = nextLoc.LocDatestartlocation;
                 userInfos.NextLocationId = nextLoc.LocId;
-            }           
+            }
 
             return Ok(userInfos);
         }
@@ -191,8 +191,8 @@ namespace TestAuthentification.Controllers
         private Location GetNextLocationByUser(int userId)
         {
             Location nextLoc = null;
-            List <Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
-            if(locList.Count > 0)
+            List<Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
+            if (locList.Count > 0)
             {
                 nextLoc = locList.OrderBy(l => l.LocDatestartlocation)?.First() ?? null;
             }
@@ -209,27 +209,27 @@ namespace TestAuthentification.Controllers
         //        return BadRequest(ModelState);
         //    }
 
-            //    var token = GetToken();
-            //    if (string.IsNullOrEmpty(token))
-            //    {
-            //        return BadRequest(ModelState);
-            //    }
+        //    var token = GetToken();
+        //    if (string.IsNullOrEmpty(token))
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            //    if (TokenService.ValidateToken(token))
-            //    {
-            //        _context.User.Add(user);
-            //        await _context.SaveChangesAsync();
+        //    if (TokenService.ValidateToken(token))
+        //    {
+        //        _context.User.Add(user);
+        //        await _context.SaveChangesAsync();
 
-            //        return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-            //    }
+        //        return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+        //    }
 
-            //    return Unauthorized();
+        //    return Unauthorized();
 
 
 
-            //}
+        //}
 
-            // DELETE: api/Users/5
+        // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
@@ -379,10 +379,10 @@ namespace TestAuthentification.Controllers
                     userValidate.UserState = (sbyte)Enums.UserState.Validated;
                     _context.SaveChanges();
 #if !DEBUG
-                await EmailService.SendEmailAsync("Validation de votre compte - Book Your Car", ConstantsEmail.ValidateRegister, userValidate.UserEmail);
+                    string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ValidateRegister);
+                    myFiles = myFiles.Replace("%%USERNAME%%", userValidate.UserFirstname);
+                    await EmailService.SendEmailAsync("Validation de votre compte - BookYourCar", myFiles, userValidate.UserEmail);    
 #endif
-
-
                     return Ok();
                 }
                 else

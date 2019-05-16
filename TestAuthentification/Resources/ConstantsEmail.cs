@@ -23,12 +23,7 @@ namespace TestAuthentification.Resources
         /// <summary>
         /// message validation OK création de compte
         /// </summary>
-        public const string ValidateRegister = "Bonjour {0}, <br />" +
-                                               "Votre demande de création de compte vient d'être validé par l'Administrateur. <br />" +
-                                               "Vous pouvez maintenant accéder au logiciel Book Your Car avec vos identifiants. <br />" +
-                                               "Ceci est un email automatique merci de ne pas y répondre." +
-                                               "Cordialement, <br />" +
-                                               "L'Équipe A5D - Book Your Car ";
+        public const string ValidateRegister = "./wwwroot/EmailTemplates/ValidateRegister.html";
 
         #endregion
 
