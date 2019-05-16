@@ -168,7 +168,7 @@ namespace TestAuthentification.Controllers
 
             var userInfo = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
             //lier les commentaires à la location
-            List<CommentsViewModel> commentsList = _context.Comments.Where(c=>c.CommentLocId == location.LocId).Select(x => new CommentsViewModel()
+            List<CommentsViewModel> commentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).Select(x => new CommentsViewModel()
             {
                 UserId = x.CommentUserId.GetValueOrDefault(),
                 DatePublication = x.CommentDate,
@@ -244,9 +244,9 @@ namespace TestAuthentification.Controllers
                 // loc commence avant et fini après la loc demandée
                 // loc fini pendant la loc demandée
                 // loc commence pendant la loc demandée
-                if(vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation
-                                            || l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation
-                                            || l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation) == null)
+                if (vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation
+                                             || l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation
+                                             || l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation) == null)
                 {
                     selectedVehicles.Add(vehicle);
                 }
@@ -388,11 +388,11 @@ namespace TestAuthentification.Controllers
                 comment.CommentLocId = location.LocId;
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
-
+                
+#if !DEBUG
                 PoleService servicePole = new PoleService(_context);
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
                 var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
-
                 string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationAsk);
                 //myFiles.Replace("\"", "\\\"");
                 myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
@@ -401,6 +401,8 @@ namespace TestAuthentification.Controllers
                 myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
                 myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
                 await EmailService.SendEmailAsync("Vous venez de demander une Location", myFiles, user.UserEmail);
+#endif
+
 
 
                 return Ok();
@@ -417,7 +419,7 @@ namespace TestAuthentification.Controllers
 
             foreach (Location location in user.Location)
             {
-                if(location.LocDatestartlocation <= model.DateDebutResa && location.LocDateendlocation >= model.DateFinResa)
+                if (location.LocDatestartlocation <= model.DateDebutResa && location.LocDateendlocation >= model.DateFinResa)
                 {
                     return true;
                 }

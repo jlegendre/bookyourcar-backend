@@ -134,13 +134,14 @@ namespace TestAuthentification.Controllers
             _context.User.Add(user);
             _context.SaveChanges();
             _context.Dispose();
-
-            //await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", String.Format(myFiles, user.UserFirstname), user.UserEmail);
             
+#if !DEBUG
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RegisterPath);
-            //myFiles.Replace("\"", "\\\"");
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
             await EmailService.SendEmailAsync("Création d'un nouveau compte - Book Your Car", myFiles, user.UserEmail);
+            
+#endif
+
 
 
 
