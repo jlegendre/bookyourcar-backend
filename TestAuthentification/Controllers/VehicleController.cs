@@ -19,9 +19,9 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class VehicleController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
 
-        public VehicleController(A5dContext context)
+        public VehicleController(BookYourCarContext context)
         {
             _context = context;
             _context.Pole.ToList();

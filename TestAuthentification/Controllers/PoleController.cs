@@ -14,9 +14,9 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class PoleController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
 
-        public PoleController(A5dContext context)
+        public PoleController(BookYourCarContext context)
         {
             _context = context;
         }

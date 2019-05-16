@@ -13,9 +13,9 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class RightController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
 
-        public RightController(A5dContext context)
+        public RightController(BookYourCarContext context)
         {
             _context = context;
         }

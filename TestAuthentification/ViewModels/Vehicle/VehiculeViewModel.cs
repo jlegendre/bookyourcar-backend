@@ -21,7 +21,7 @@ namespace TestAuthentification.ViewModels
         public string VehModel { get; set; }
 
         [Display(Name = "Nombre de km")]
-        public float VehKm { get; set; }
+        public int VehKm { get; set; }
 
         [Display(Name = "Date de mise en circulation")]
         public DateTime VehDatemec { get; set; }
@@ -35,7 +35,7 @@ namespace TestAuthentification.ViewModels
         [Display(Name = "Nombre de places")]
         public int VehNumberplace { get; set; }
 
-        public bool VehIsactive { get; set; }
+        public bool? VehIsactive { get; set; }
 
         public int? PoleId { get; set; }
 

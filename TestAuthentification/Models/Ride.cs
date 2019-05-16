@@ -11,10 +11,10 @@ namespace TestAuthentification.Models
         }
 
         public int RideId { get; set; }
-        public DateTime RideHourstart { get; set; }
-        public int RideLocId { get; set; }
-        public int RidePoleIdstart { get; set; }
-        public int RidePoleIdend { get; set; }
+        public DateTime? RideHourstart { get; set; }
+        public int? RideLocId { get; set; }
+        public int? RidePoleIdend { get; set; }
+        public int? RidePoleIdstart { get; set; }
 
         public Location RideLoc { get; set; }
         public Pole RidePoleIdendNavigation { get; set; }

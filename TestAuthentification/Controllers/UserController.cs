@@ -12,6 +12,7 @@ using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
+using TestAuthentification.ViewModels.User;
 
 namespace TestAuthentification.Controllers
 {
@@ -19,9 +20,9 @@ namespace TestAuthentification.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly A5dContext _context;
+        private readonly BookYourCarContext _context;
 
-        public UserController(A5dContext context)
+        public UserController(BookYourCarContext context)
         {
             _context = context;
             _context.Pole.ToList();
@@ -152,6 +153,48 @@ namespace TestAuthentification.Controllers
             return Unauthorized();
         }
 
+        [HttpGet, Route("UserInfos")]
+        public IActionResult UserInfos()
+        {
+            var token = GetToken();
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token)) return Unauthorized();
+
+            AuthService service = new AuthService(_context);
+            User user = service.GetUserConnected(token);
+
+            UserInfosViewModel userInfos = new UserInfosViewModel()
+            {
+                FirstName = user.UserFirstname,
+                LastName = user.UserName,
+                PhoneNumber = user.UserPhone,
+                Email = user.UserEmail,
+                Pole = _context.Pole.Where(p => p.PoleId == user.UserPoleId).First().PoleName,
+                Right = _context.Right.Where(r => r.RightId == user.UserRightId).First().RightLabel,
+                LocationsCount = _context.Location.Where(l => l.LocUserId == user.UserId).Count(),
+                UrlProfileImage = ""
+            };
+
+            Location nextLoc = GetNextLocationByUser(user.UserId);
+
+            if(nextLoc != null)
+            {
+                userInfos.NextLocation = nextLoc.LocDatestartlocation;
+                userInfos.NextLocationId = nextLoc.LocId;
+            }           
+
+            return Ok(userInfos);
+        }
+
+        private Location GetNextLocationByUser(int userId)
+        {
+            List<Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
+            Location nextLoc = locList.OrderBy(l => l.LocDatestartlocation).First();
+
+            return nextLoc;
+        }
+
         // POST: api/Users
         //[HttpPost]
         //public async Task<IActionResult> PostUser([FromBody] User user)
@@ -161,27 +204,27 @@ namespace TestAuthentification.Controllers
         //        return BadRequest(ModelState);
         //    }
 
-        //    var token = GetToken();
-        //    if (string.IsNullOrEmpty(token))
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+            //    var token = GetToken();
+            //    if (string.IsNullOrEmpty(token))
+            //    {
+            //        return BadRequest(ModelState);
+            //    }
 
-        //    if (TokenService.ValidateToken(token))
-        //    {
-        //        _context.User.Add(user);
-        //        await _context.SaveChangesAsync();
+            //    if (TokenService.ValidateToken(token))
+            //    {
+            //        _context.User.Add(user);
+            //        await _context.SaveChangesAsync();
 
-        //        return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-        //    }
+            //        return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            //    }
 
-        //    return Unauthorized();
+            //    return Unauthorized();
 
 
 
-        //}
+            //}
 
-        // DELETE: api/Users/5
+            // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {

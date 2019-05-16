@@ -15,17 +15,17 @@ namespace TestAuthentification.Models
         }
 
         public int VehId { get; set; }
-        public string VehRegistration { get; set; }
         public string VehBrand { get; set; }
-        public string VehModel { get; set; }
-        public float VehKm { get; set; }
-        public DateTime VehDatemec { get; set; }
-        public string VehTypeEssence { get; set; }
         public string VehColor { get; set; }
-        public bool VehIsactive { get; set; }
-        public sbyte VehState { get; set; }
+        public DateTime VehDatemec { get; set; }
+        public bool? VehIsactive { get; set; }
+        public int VehKm { get; set; }
+        public string VehModel { get; set; }
         public int VehNumberplace { get; set; }
         public int? VehPoleId { get; set; }
+        public string VehRegistration { get; set; }
+        public sbyte VehState { get; set; }
+        public string VehTypeEssence { get; set; }
 
         public Pole VehPole { get; set; }
         public ICollection<Comments> Comments { get; set; }
