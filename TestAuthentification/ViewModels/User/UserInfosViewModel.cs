@@ -19,11 +19,13 @@ namespace TestAuthentification.ViewModels.User
 
         public string Right { get; set; }
 
+        public string DrivingLicence { get; set; }
+
         public int LocationsCount { get; set; }
 
-        public DateTime NextLocation { get; set; }
+        public DateTime? NextLocation { get; set; }
 
-        public int NextLocationId { get; set; }
+        public int? NextLocationId { get; set; }
 
         public string UrlProfileImage { get; set; }
     }

@@ -172,13 +172,13 @@ namespace TestAuthentification.Services
         public IdentityResult AddToRoleAdminAsync(User user)
         {
             List<IdentityError> errors = new List<IdentityError>();
-            if (user.UserRightId != 0 || user.UserRightId != null)
+            if (user.UserRightId != 2 || user.UserRightId != null)
             {
                 errors.Add(Describer.UserAlreadyInRole(user.UserRight.RightLabel));
             }
             else
             {
-                user.UserRightId = 1;
+                user.UserRightId = 2;
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
@@ -194,7 +194,7 @@ namespace TestAuthentification.Services
             }
             else
             {
-                user.UserRightId = 2;
+                user.UserRightId = 1;
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;

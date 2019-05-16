@@ -35,7 +35,7 @@ namespace TestAuthentification.Controllers
             var listUser = await _context.User.ToListAsync();
             if (listUser.Count > 0)
             {
-                var model = listUser.Select(x => new UserViewModel()
+                var model = listUser.Select(x => new UserInfoViewModel()
                 {
                     PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
                     UserFirstname = x.UserFirstname,
@@ -49,6 +49,7 @@ namespace TestAuthentification.Controllers
                 });
                 return Ok(model.ToList());
             }
+
             var users = new Dictionary<string, string>();
             users.Add("message", "Il n'y a pas d'utilisateurs.");
             return Ok(users);
@@ -72,7 +73,8 @@ namespace TestAuthentification.Controllers
                 {
                     return NotFound();
                 }
-                var userInfo = new UserViewModel()
+
+                var userInfo = new UserInfoViewModel()
                 {
                     UserPoleId = user.UserPoleId,
                     UserFirstname = user.UserFirstname,
@@ -93,14 +95,14 @@ namespace TestAuthentification.Controllers
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser([FromRoute] int id, [FromBody] UserViewModel userViewModel)
+        public async Task<IActionResult> PutUser([FromRoute] int id, [FromBody] UserInfoViewModel UserInfoViewModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != userViewModel.UserId)
+            if (id != UserInfoViewModel.UserId)
             {
                 return BadRequest();
             }
@@ -122,14 +124,14 @@ namespace TestAuthentification.Controllers
 
                 try
                 {
-                    user.UserEmail = userViewModel.UserEmail;
-                    user.UserFirstname = userViewModel.UserFirstname;
-                    user.UserName = userViewModel.UserName;
-                    user.UserNumpermis = userViewModel.UserNumpermis;
-                    user.UserPhone = userViewModel.UserPhone;
-                    user.UserPoleId = userViewModel.UserPoleId;
-                    user.UserRightId = userViewModel.UserRightId;
-                    user.UserPole.PoleName = userViewModel.PoleName;
+                    user.UserEmail = UserInfoViewModel.UserEmail;
+                    user.UserFirstname = UserInfoViewModel.UserFirstname;
+                    user.UserName = UserInfoViewModel.UserName;
+                    user.UserNumpermis = UserInfoViewModel.UserNumpermis;
+                    user.UserPhone = UserInfoViewModel.UserPhone;
+                    user.UserPoleId = UserInfoViewModel.UserPoleId;
+                    user.UserRightId = UserInfoViewModel.UserRightId;
+                    user.UserPole.PoleName = UserInfoViewModel.PoleName;
 
                     _context.Entry(user).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
@@ -168,9 +170,10 @@ namespace TestAuthentification.Controllers
                 LastName = user.UserName,
                 PhoneNumber = user.UserPhone,
                 Email = user.UserEmail,
+                DrivingLicence = user.UserNumpermis,
                 Pole = _context.Pole.Where(p => p.PoleId == user.UserPoleId).First().PoleName,
                 Right = _context.Right.Where(r => r.RightId == user.UserRightId).First().RightLabel,
-                LocationsCount = _context.Location.Where(l => l.LocUserId == user.UserId).Count(),
+                LocationsCount = _context.Location.Where(l => l.LocUserId == user.UserId)?.Count() ?? 0,
                 UrlProfileImage = ""
             };
 
@@ -187,8 +190,12 @@ namespace TestAuthentification.Controllers
 
         private Location GetNextLocationByUser(int userId)
         {
-            List<Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
-            Location nextLoc = locList.OrderBy(l => l.LocDatestartlocation).First();
+            Location nextLoc = null;
+            List <Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
+            if(locList.Count > 0)
+            {
+                nextLoc = locList.OrderBy(l => l.LocDatestartlocation)?.First() ?? null;
+            }
 
             return nextLoc;
         }
@@ -318,11 +325,12 @@ namespace TestAuthentification.Controllers
 
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
-                List<User> userEnAttente = _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
+                List<User> userEnAttente =
+                    _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
 
                 if (userEnAttente.Count > 0)
                 {
-                    var model = userEnAttente.Select(x => new UserViewModel()
+                    var model = userEnAttente.Select(x => new UserInfoViewModel()
                     {
                         PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
                         UserFirstname = x.UserFirstname,
@@ -383,6 +391,7 @@ namespace TestAuthentification.Controllers
                 }
 
             }
+
             return Unauthorized();
         }
 
@@ -419,8 +428,58 @@ namespace TestAuthentification.Controllers
                 }
 
             }
+
             return Unauthorized();
         }
+
+        [HttpPost, Route("EditInfoUser")]
+        public async Task<IActionResult> EditUserInfo([FromBody] UserInfoViewModel user)
+        {
+            var token = GetToken();
+            AuthService service = new AuthService(_context);
+            var userConnected = service.GetUserConnected(token);
+            if (string.IsNullOrEmpty(token) || !ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (TokenService.ValidateToken(token))
+            {
+                if (user.UserEmail.Equals(userConnected.UserEmail))
+                {
+                    userConnected.UserPoleId = user.UserPoleId;
+                    userConnected.UserFirstname = user.UserFirstname;
+                    userConnected.UserPhone = user.UserPhone;
+                    userConnected.UserName = user.UserName;
+                    userConnected.UserNumpermis = user.UserNumpermis;
+
+                    try
+                    {
+                        _context.Update(userConnected);
+                        _context.SaveChanges();
+                        return Ok();
+                    }
+                    catch (Exception e)
+                    {
+                        ModelState.AddModelError("Error", "Une erreur est survenue.");
+                        Console.WriteLine(e);
+                        return BadRequest(ModelState);
+                    }
+
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
+        }
+
     }
 }
 

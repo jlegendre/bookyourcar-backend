@@ -357,7 +357,11 @@ namespace TestAuthentification.Controllers
             AuthService service = new AuthService(_context);
             User user = service.GetUserConnected(token);
 
-
+            if (UserAlreadyHaveALocation(model, user))
+            {
+                ModelState.AddModelError("Error", "Il existe déjà une location enregistrée à votre nom durant cette période.");
+                return BadRequest(ModelState);
+            }
             Location location = new Location();
 
             // information commentaire
@@ -389,9 +393,15 @@ namespace TestAuthentification.Controllers
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
                 var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
 
-#if !DEBUG
-                await EmailService.SendEmailAsync("Vous venez de demander une Location", String.Format(ConstantsEmail.LocationAsk, user.UserFirstname, location.LocDatestartlocation, location.LocDateendlocation, poleDepart, poleArrive), user.UserEmail);
-#endif
+                string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationAsk);
+                //myFiles.Replace("\"", "\\\"");
+                myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
+                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToLongDateString());
+                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToLongDateString());
+                myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
+                myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
+                await EmailService.SendEmailAsync("Vous venez de demander une Location", myFiles, user.UserEmail);
+
 
                 return Ok();
             }
@@ -399,6 +409,28 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(e);
             }
+        }
+
+        private bool UserAlreadyHaveALocation(LocationViewModel model, User user)
+        {
+            user.Location = _context.Location.Where(l => l.LocUserId == user.UserId).ToList();
+
+            foreach (Location location in user.Location)
+            {
+                if(location.LocDatestartlocation <= model.DateDebutResa && location.LocDateendlocation >= model.DateFinResa)
+                {
+                    return true;
+                }
+                if (location.LocDateendlocation >= model.DateDebutResa && location.LocDateendlocation <= model.DateFinResa)
+                {
+                    return true;
+                }
+                if (location.LocDatestartlocation >= model.DateDebutResa && location.LocDatestartlocation <= model.DateFinResa)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

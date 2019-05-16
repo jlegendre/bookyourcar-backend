@@ -12,13 +12,7 @@ namespace TestAuthentification.Resources
         /// <summary>
         /// envoie d'email quand on créer un compte avec un recap des informations 
         /// </summary>
-        public const string Register = "Bonjour {0}, <br />" +
-                                       "Vous venez de créer un nouveau compte sur Book Your Car. <br />" +
-                                       "Vous devez maintenant attendre la validation par l'administrateur du site. <br />" +
-                                       "Vous serez tenues informées sur le statut de votre demande lors de sa réponse. <br /><br />" +
-                                       "Ceci est un email automatique merci de ne pas y répondre." +
-                                       "Cordialement, <br />" +
-                                       "L'Équipe A5D - Book Your Car ";
+        public const string RegisterPath = "./wwwroot/EmailTemplates/Register.html";
         /// <summary>
         /// message validation KO (refus) de création de compte
         /// </summary>
@@ -47,18 +41,7 @@ namespace TestAuthentification.Resources
 
         #region Location
 
-        public const string LocationAsk =   "Bonjour {0}, <br />" +
-                                            "Votre demande de location a bien été prise en compte." +
-                                            "Vous devez maintenant attendre la validation par l'administrateur du site. <br />" +
-                                            "Vous serez tenu informé sur le statut de votre demande de location lors de sa réponse. <br /><br />" +
-                                            "<b>Detail de votre location :</b>  <br /> " +
-                                            "Date de début de la location :  {1}  <br />" +
-                                            "Date de fin de la location :  {2}  <br />" +
-                                            "Pole de départ de la location :  {3}  <br />" +
-                                            "Pole de fin de la location :  {4}  <br /> <br />" +
-                                            "Ceci est un email automatique merci de ne pas y répondre." +
-                                            "Cordialement, <br />" +
-                                            "L'Équipe A5D - Book Your Car ";
+        public const string LocationAsk = "./wwwroot/EmailTemplates/AskLocation.html";
 
 
         public const string LocationValidation = "Bonjour {0}, <br />" +
