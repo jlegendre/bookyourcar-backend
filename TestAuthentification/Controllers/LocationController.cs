@@ -195,13 +195,20 @@ namespace TestAuthentification.Controllers
             if (location.LocState == (sbyte)Enums.LocationState.Asked)
             {
                 //locDetailVm.AvailableVehicle = GetAvailableVehiculeForLocation(location);
+                List<Vehicle> vehicles = _context.Vehicle.ToList();
+                locDetailVm.AvailableVehicle = new List<VehiculeViewModel>();
 
-                locDetailVm.AvailableVehicle = new List<VehiculeViewModel>()
+                foreach (Vehicle veh in vehicles)
                 {
-                    new VehiculeViewModel(){VehBrand = "Test", VehModel = "Bouchon"},
-                    new VehiculeViewModel(){VehBrand = "Ferrari", VehModel = "Rouge"},
-                    new VehiculeViewModel(){VehBrand = "Twingo", VehModel = "Verte"}
-                };
+                    VehiculeViewModel vehVM = new VehiculeViewModel()
+                    {
+                        VehId = veh.VehId,
+                        VehBrand = veh.VehBrand,
+                        VehModel = veh.VehModel
+                    };
+                    locDetailVm.AvailableVehicle.Add(vehVM);
+
+                }
             }
             else
             {
@@ -272,19 +279,49 @@ namespace TestAuthentification.Controllers
 
         // PUT: api/Locations/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] Location location)
+        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateVM location)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != location.LocId)
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(location).State = EntityState.Modified;
+            Location locInProgress = _context.Location.SingleOrDefault(l => l.LocId == id);
+
+            User user = _context.User.SingleOrDefault(u => u.UserId == locInProgress.LocUserId);
+
+            Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
+
+            Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == locInProgress.LocPoleIdstart);
+
+            Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == locInProgress.LocPoleIdend);
+
+            locInProgress.LocVehId = location.VehicleId;
+
+            locInProgress.LocState = (sbyte)Enums.LocationState.Validated;
+
+            _context.Update(locInProgress);
+
+            _context.SaveChanges();
+
+            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationValidation);
+            myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
+            myFiles = myFiles.Replace("%%DEBUTLOCATION%%", locInProgress.LocDatestartlocation.ToLongDateString());
+            myFiles = myFiles.Replace("%%FINLOCATION%%", locInProgress.LocDateendlocation.ToLongDateString());
+            myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleS.PoleName);
+            myFiles = myFiles.Replace("%%FINPOLE%%", poleE.PoleName);
+
+            myFiles = myFiles.Replace("%%MODELE%%", vehicle.VehModel);
+            myFiles = myFiles.Replace("%%MARQUE%%", vehicle.VehBrand);
+            myFiles = myFiles.Replace("%%IMMATRICULATION%%", vehicle.VehRegistration);
+            myFiles = myFiles.Replace("%%KM%%", vehicle.VehKm.ToString());
+
+
+
+
+            await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
+
 
             try
             {
@@ -302,7 +339,7 @@ namespace TestAuthentification.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Locations
