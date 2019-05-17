@@ -39,11 +39,7 @@ namespace TestAuthentification.Resources
         public const string LocationAsk = "./wwwroot/EmailTemplates/AskLocation.html";
 
 
-        public const string LocationValidation = "Bonjour {0}, <br />" +
-                                                 "Votre demande de location vient d'être validé par l'Administrateur. <br />" +
-                                                 "Vous pouvez maintenant accéder à votre location sur votre écran d'accueil. <br />" +
-                                                 "Cordialement, <br />" +
-                                                 "L'Équipe A5D - Book Your Car ";
+        public const string LocationValidation = "./wwwroot/EmailTemplates/LocationValidation.html";
         public const string LocationRefuser = "Bonjour {0}, <br />" +
                                               "Votre demande de location n'a malheureusement pas été accepté par notre Equipe. <br />" +
                                               "Ceci est un email automatique merci de ne pas y répondre." +
