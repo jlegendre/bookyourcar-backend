@@ -349,21 +349,6 @@ namespace TestAuthentification.Controllers
             return Ok();
         }
 
-        // POST: api/Locations
-        [HttpPost]
-        public async Task<IActionResult> PostLocation([FromBody] Location location)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Location.Add(location);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetLocation", new { id = location.LocId }, location);
-        }
-
         // DELETE: api/Locations/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation([FromRoute] int id)

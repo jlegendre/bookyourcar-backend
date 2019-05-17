@@ -149,13 +149,6 @@ namespace TestAuthentification.Controllers
             return Ok();
         }
 
-        [HttpGet, Route("users")]
-        public IEnumerable<User> GetUsers()
-        {
-
-            return _context.User.ToList();
-        }
-
         /// <summary>
         /// fonction --> mot de passe oublié
         /// TODO a completer 
