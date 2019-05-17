@@ -319,9 +319,16 @@ namespace TestAuthentification.Controllers
 
 
 
+            try
+            {
+                await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
+            }
+            catch (Exception)
+            {
 
-            await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
-
+                throw;
+            }
+            
 
             try
             {
