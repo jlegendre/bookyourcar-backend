@@ -15,8 +15,10 @@ namespace TestAuthentification.Resources
             Asked = 0,
             InProgress = 1,
             Validated = 2,
+            // administrateur qui refuse
             Rejected = 3,
             Finished = 4,
+            // utilisateur qui refuse
             Canceled = 5
         }
 

@@ -104,7 +104,7 @@ namespace TestAuthentification.Controllers
             {
                 User connectedUser = _authService.GetUserConnected(token);
 
-                var listLocation = await _context.Location.Where(l=> l.LocUserId == connectedUser.UserId).ToListAsync();
+                var listLocation = await _context.Location.Where(l => l.LocUserId == connectedUser.UserId).ToListAsync();
 
                 List<LocationListViewModel> locations = new List<LocationListViewModel>();
 
@@ -361,22 +361,68 @@ namespace TestAuthentification.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation([FromRoute] int id)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var location = await _context.Location.FindAsync(id);
-            if (location == null)
+            string token = GetToken();
+
+            // cas ou l'administrateur rejette la demande
+            if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
-                return NotFound();
+                var location = await _context.Location.FindAsync(id);
+                if (location == null)
+                {
+                    return NotFound();
+                }
+
+                // si la réservation à un véhicule affecté il faut l'enlever 
+                if (location.LocVehId.HasValue)
+                {
+                    // on change l'état de disponiblite du vehicule à Available
+                    var locationVehicule = _context.Vehicle.SingleOrDefault(x => x.VehId == location.LocVehId);
+                    locationVehicule.VehState = (sbyte)Enums.VehiculeState.Available;
+                    // on desafecte le vehicule
+                    location.LocVehId = null;
+                    _context.Update(locationVehicule);
+                    _context.SaveChanges();
+                }
+                _context.Location.Update(location);
+                _context.SaveChanges();
+
+                return Ok();
             }
 
-            _context.Location.Remove(location);
-            await _context.SaveChangesAsync();
+            // cas ou l'utilisateur annule sa demande
+            else if (TokenService.ValidateToken(token))
+            {
+                var location = await _context.Location.FindAsync(id);
+                if (location == null)
+                {
+                    return NotFound();
+                }
+                // si la réservation à un véhicule affecté il faut l'enlever 
+                if (location.LocVehId.HasValue)
+                {
+                    // on change l'état de disponiblite du vehicule à Available
+                    var locationVehicule = _context.Vehicle.SingleOrDefault(x => x.VehId == location.LocVehId);
+                    locationVehicule.VehState = (sbyte)Enums.VehiculeState.Available;
+                    // on desafecte le vehicule
+                    location.LocVehId = null;
+                    _context.Update(locationVehicule);
+                }
 
-            return Ok(location);
+                location.LocState = (sbyte)Enums.LocationState.Canceled;
+                _context.Location.Update(location);
+                _context.SaveChanges();
+                return Ok();
+            }
+
+            return Unauthorized();
         }
+
         /// <summary>
         /// Demande de nouvelle location pour un utilisateur
         /// </summary>
@@ -425,7 +471,7 @@ namespace TestAuthentification.Controllers
                 comment.CommentLocId = location.LocId;
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
-                
+
 #if !DEBUG
                 PoleService servicePole = new PoleService(_context);
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
