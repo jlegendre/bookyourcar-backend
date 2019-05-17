@@ -104,7 +104,7 @@ namespace TestAuthentification.Controllers
             {
                 User connectedUser = _authService.GetUserConnected(token);
 
-                var listLocation = await _context.Location.ToListAsync();
+                var listLocation = await _context.Location.Where(l=> l.LocUserId == connectedUser.UserId).ToListAsync();
 
                 List<LocationListViewModel> locations = new List<LocationListViewModel>();
 
