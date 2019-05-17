@@ -55,7 +55,7 @@ namespace TestAuthentification.Resources
         /// <summary>
         /// envoie d'un email lorsqu'un utilisateur fait une nouvelle réservation
         /// </summary>
-        public const string ValidationReservation = "";
+        public const string ValidationReservation = "./wwwroot/EmailTemplates/LocationValidation.html";
 
         /// <summary>
         /// envoie d'un email pour reset le password
