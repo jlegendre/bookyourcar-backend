@@ -52,7 +52,7 @@ namespace TestAuthentification.Controllers
                     VehDatemec = x.VehDatemec,
                     VehIsactive = x.VehIsactive,
 
-                }).ToList();
+                }).Where(x=>!x.VehState.Equals(Enums.VehiculeState.Deleted)).ToList();
                 return Ok(model);
             }
             var roles = new Dictionary<string, string>();
