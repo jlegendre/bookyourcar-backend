@@ -106,7 +106,7 @@ namespace TestAuthentification
 
             Environment.SetEnvironmentVariable("KeyAPIEmail", "8c8039f810dde01b9c8587d95a10b633");
             Environment.SetEnvironmentVariable("SecretAPIEmail", "7414cc9223d0a77e98573dba18c36fe7");
-            Environment.SetEnvironmentVariable("UrlResetPassword", "https://localhost:5001/api/auth/ChangePassword");
+            Environment.SetEnvironmentVariable("UrlResetPassword", "https://localhost:5001/api/auth/ChangePassword?token=");
             
 
 

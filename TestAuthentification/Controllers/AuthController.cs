@@ -168,7 +168,7 @@ namespace TestAuthentification.Controllers
         /// <param name="emailDestinataire"></param>
         /// <returns></returns>
         [HttpPost, Route("PasswordForget")]
-        public async Task<IActionResult> PasswordForgetAsync([FromBody] string emailDestinataire)
+        public async Task<IActionResult> PasswordForgetAsync(string emailDestinataire)
         {
             AuthService serviceAuth = new AuthService(_context);
             if (!serviceAuth.CheckEmail(emailDestinataire) || !ModelState.IsValid)
@@ -193,14 +193,14 @@ namespace TestAuthentification.Controllers
                 issuer: "http://localhost:5000",
                 audience: "http://localhost:5000",
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(1),
+                expires: DateTime.UtcNow.AddMinutes(5),
                 signingCredentials: signinCredentials
             );
 
             string tokenGenerate = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
 
 
-            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
+            string myFiles = ConstantsEmail.ResetPassword;
             myFiles = myFiles.Replace("%%TOKEN%%", tokenGenerate);
             var response = await EmailService.SendEmailAsync("Changement de mot de passe - BookYourCar", myFiles, user.UserEmail);
             if (!response.IsSuccessStatusCode)
@@ -239,12 +239,14 @@ namespace TestAuthentification.Controllers
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> ChangePassword([FromRoute] string token)
+        public async Task<IActionResult> ChangePassword(string token)
         {
             if (TokenService.ValidateToken(token))
             {
                 var message = new Dictionary<string, string>();
-                message.Add("Info", "OK LIEN");
+                message.Add("Token", token);
+
+                // on retourne la vue du formulaire pour reset les infos
                 return Ok(message);
             }
 
@@ -252,11 +254,25 @@ namespace TestAuthentification.Controllers
 
         }
 
+        /// <summary>
+        /// Permet de valider le nouveau mot de passe que l'utilisateur à saisit
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("SaveChangePassword")]
+        public async Task<IActionResult> SaveChangePassword(ResetPasswordViewModel model)
+        {
+            AuthService serviceAuth = new AuthService(_context);
+            var UserConnected = serviceAuth.GetUserConnected(model.Token);
 
+            UserConnected.UserPassword = service.HashPassword(null, model.Password);
 
-
-
-
+            //SAVE
+            _context.User.Update(UserConnected);
+            _context.SaveChanges();
+            
+            return Ok();
+        }
 
     }
 }
