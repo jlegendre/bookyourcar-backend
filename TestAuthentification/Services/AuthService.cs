@@ -49,30 +49,6 @@ namespace TestAuthentification.Services
         }
 
         /// <summary>
-        /// Recupère la liste des utilisateurs
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IList<User>> GetAllAsync()
-        {
-            return await _context.User.ToListAsync();
-        }
-
-        /// <summary>
-        /// Supprime un utilisateur en fonction de son Id
-        /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        public async Task RemoveAsync(int Id)
-        {
-            var itemToRemove = await _context.User.SingleOrDefaultAsync(r => r.UserId == Id);
-            if (itemToRemove != null)
-            {
-                _context.User.Remove(itemToRemove);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        /// <summary>
         /// Regarde si le password correspond à celui à l'utilisateur
         /// </summary>
         /// <param name="user"></param>
@@ -86,6 +62,18 @@ namespace TestAuthentification.Services
             var result = ServicePassword.VerifyHashedPassword(user, passwordHashed, passwordToDecript);
             //var verifiation = VerifyHashedPassword(user, passwordHashed, passwordToDecript);
             return result == PasswordVerificationResult.Success;
+
+        }
+
+        public bool CheckEmail(string email)
+        {
+            var result = _context.User.FirstOrDefault(x => x.UserEmail == email);
+            if (result != null)
+            {
+                return true;
+            }
+
+            return false;
 
         }
 

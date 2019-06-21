@@ -112,7 +112,7 @@ namespace TestAuthentification.Controllers
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("Error", result.Errors.First().Description);
-                
+
                 return BadRequest(ModelState);
             }
 
@@ -134,42 +134,90 @@ namespace TestAuthentification.Controllers
             // mise à jour de l'état du compte
             user.UserState = (sbyte)Enums.UserState.InWaiting;
 
+            try
+            {
+                _context.User.Add(user);
+                _context.SaveChanges();
+                _context.Dispose();
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("Error", "Une erreur est survenue.");
+                Console.WriteLine(e);
+                return BadRequest(ModelState);
+            }
 
-            _context.User.Add(user);
-            _context.SaveChanges();
-            _context.Dispose();
-            
 #if !DEBUG
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RegisterPath);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-            await EmailService.SendEmailAsync("Création d'un nouveau compte - BookYourCar", myFiles, user.UserEmail);
-            
+            var response = await EmailService.SendEmailAsync("Création d'un nouveau compte - BookYourCar", myFiles, user.UserEmail);
+            if (!response.IsSuccessStatusCode)
+            {
+                                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                return BadRequest(ModelState);
+            }
 #endif
-            
             return Ok();
+
         }
 
         /// <summary>
-        /// fonction --> mot de passe oublié
-        /// TODO a completer 
+        /// fonction -->  valider formulaire avec l'email suite à l'action mot de passe oublié
         /// </summary>
         /// <param name="emailDestinataire"></param>
         /// <returns></returns>
         [HttpPost, Route("PasswordForget")]
-        public async Task<IActionResult> PasswordForgetAsync(string emailDestinataire)
+        public async Task<IActionResult> PasswordForgetAsync([FromBody] string emailDestinataire)
         {
+            AuthService serviceAuth = new AuthService(_context);
+            if (!serviceAuth.CheckEmail(emailDestinataire) || !ModelState.IsValid)
+            {
+                ModelState.AddModelError("Error", "L'email saisie ne correspond à aucun compte.");
+                return BadRequest(ModelState);
+            }
 
-#if !Debug
-            MailjetResponse response =
-                await EmailService.SendEmailAsync("Changement de mot de passe", ConstantsEmail.ResetPassword, emailDestinataire);
-#endif
+            var user = serviceAuth.FindByEmail(emailDestinataire);
 
+            SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
+            SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+            Claim[] claims = new[]
+            {
+                new Claim(ClaimTypes.Email, user.UserEmail),
+                new Claim(ClaimTypes.Role, user.UserRight.RightLabel)
+            };
+
+            // On Définit les proprietées du token, comme ça date d'expiration
+            JwtSecurityToken tokeOptions = new JwtSecurityToken(
+                issuer: "http://localhost:5000",
+                audience: "http://localhost:5000",
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(1),
+                signingCredentials: signinCredentials
+            );
+
+            string tokenGenerate = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+
+
+            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
+            myFiles = myFiles.Replace("%%TOKEN%%", tokenGenerate);
+            var response = await EmailService.SendEmailAsync("Changement de mot de passe - BookYourCar", myFiles, user.UserEmail);
+            if (!response.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                return BadRequest(ModelState);
+            }
 
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine(string.Format("Total: {0}, Count: {1}\n", response.GetTotal(), response.GetCount()));
                 Console.WriteLine(response.GetData());
-                return Ok();
+
+                var message = new Dictionary<string, string>();
+                message.Add("Info", "Un email de rénitialisation vient de vous être envoyé.");
+                return Ok(message);
             }
             else
             {
@@ -177,9 +225,30 @@ namespace TestAuthentification.Controllers
                 Console.WriteLine(string.Format("ErrorInfo: {0}\n", response.GetErrorInfo()));
                 Console.WriteLine(response.GetData());
                 Console.WriteLine(string.Format("ErrorMessage: {0}\n", response.GetErrorMessage()));
-                return BadRequest();
+                ModelState.AddModelError("Error", "Une erreur est survenue.");
+                return BadRequest(ModelState);
             }
 
+        }
+        /// <summary>
+        /// fonction permettant de rediriger l'utilisateur(depuis le lien présent dans l'email) vers un page de rénitialisation de mot passe avec
+        /// nouveau mot de passe
+        /// confirm nouveau mot de passe
+        /// Ce lien de redirection contient en paramètre un token valide pendant 5 mins
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ChangePassword([FromRoute] string token)
+        {
+            if (TokenService.ValidateToken(token))
+            {
+                var message = new Dictionary<string, string>();
+                message.Add("Info", "OK LIEN");
+                return Ok(message);
+            }
+
+            return Unauthorized();
 
         }
 

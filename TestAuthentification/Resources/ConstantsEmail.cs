@@ -56,6 +56,6 @@ namespace TestAuthentification.Resources
         /// <summary>
         /// envoie d'un email pour reset le password
         /// </summary>
-        public static readonly string ResetPassword = "Voici le lien pour rénitialiser votre mot de passe" + Environment.GetEnvironmentVariable("UrlResetPassword");
+        public static readonly string ResetPassword = "Voici le lien pour rénitialiser votre mot de passe" + Environment.GetEnvironmentVariable("UrlResetPassword")+"/%%TOKEN%%";
     }
 }

@@ -316,37 +316,18 @@ namespace TestAuthentification.Controllers
             myFiles = myFiles.Replace("%%MARQUE%%", vehicle.VehBrand);
             myFiles = myFiles.Replace("%%IMMATRICULATION%%", vehicle.VehRegistration);
             myFiles = myFiles.Replace("%%KM%%", vehicle.VehKm.ToString());
-
-
-
-            try
-            {
-                await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
             
-
-            try
+            var response = await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
+            if (response.IsSuccessStatusCode)
             {
-                await _context.SaveChangesAsync();
+                return Ok();
             }
-            catch (DbUpdateConcurrencyException)
+            else
             {
-                if (!LocationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                return BadRequest(ModelState);
             }
-
-            return Ok();
         }
 
         // DELETE: api/Locations/5
@@ -469,13 +450,23 @@ namespace TestAuthentification.Controllers
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
                 var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
                 string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationAsk);
-                //myFiles.Replace("\"", "\\\"");
+                
                 myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
                 myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToLongDateString());
                 myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToLongDateString());
                 myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
                 myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
-                await EmailService.SendEmailAsync("Vous venez de demander une Location - BookYourCar", myFiles, user.UserEmail);
+                var response = await EmailService.SendEmailAsync("Vous venez de demander une Location - BookYourCar", myFiles, user.UserEmail);
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    ModelState.AddModelError("Error",
+                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                return BadRequest(ModelState);
+                }
 #endif
 
 
