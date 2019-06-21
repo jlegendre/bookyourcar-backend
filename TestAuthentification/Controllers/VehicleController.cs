@@ -51,8 +51,9 @@ namespace TestAuthentification.Controllers
                     VehTypeEssence = x.VehTypeEssence,
                     VehDatemec = x.VehDatemec,
                     VehIsactive = x.VehIsactive,
+                    VehState = x.VehState
 
-                }).Where(x=>!x.VehState.Equals(Enums.VehiculeState.Deleted)).ToList();
+                }).Where(x=>x.VehState != (int) Enums.VehiculeState.Deleted).ToList();
                 return Ok(model);
             }
             var roles = new Dictionary<string, string>();
