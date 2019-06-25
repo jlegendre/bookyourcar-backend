@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
@@ -22,6 +23,8 @@ namespace TestAuthentification.Controllers
     {
         private readonly BookYourCarContext _context;
         private readonly AuthService _authService;
+
+        private ILogger _logger;
 
         public LocationController(BookYourCarContext context)
         {
@@ -482,8 +485,9 @@ namespace TestAuthentification.Controllers
 
                 return Ok();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 ModelState.AddModelError("Error", "Une erreur est survenue.");
                 return BadRequest(ModelState);
             }

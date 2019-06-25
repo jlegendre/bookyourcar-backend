@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
@@ -20,6 +21,8 @@ namespace TestAuthentification.Controllers
     public class VehicleController : ControllerBase
     {
         private readonly BookYourCarContext _context;
+
+        private ILogger _logger;
 
         public VehicleController(BookYourCarContext context)
         {
@@ -164,8 +167,9 @@ namespace TestAuthentification.Controllers
                 await _context.SaveChangesAsync();
                 return Ok();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 ModelState.AddModelError("Error", "Une erreur est survenue.");
                 return BadRequest(ModelState);
             }
