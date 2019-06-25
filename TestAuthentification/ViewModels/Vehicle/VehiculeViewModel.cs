@@ -40,5 +40,7 @@ namespace TestAuthentification.ViewModels
         public int? PoleId { get; set; }
 
         public string PoleName { get; set; }
+
+        public int VehState { get; set; }
     }
 }
