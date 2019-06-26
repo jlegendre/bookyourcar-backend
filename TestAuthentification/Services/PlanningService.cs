@@ -52,28 +52,35 @@ namespace TestAuthentification.Services
                     || loc.LocDateendlocation >= startWeek && loc.LocDateendlocation <= endWeek
                 ).ToList();
 
-
             List<VehicleReservationViewModel> vehicleReservationsListVM = new List<VehicleReservationViewModel>();
 
             //Link weeklyLocation to vehicle
             foreach (Vehicle vehicle in vehicles)
             {
-                VehicleReservationViewModel vehResVM = new VehicleReservationViewModel() { VehName = vehicle.VehBrand + " " + vehicle.VehModel, Immat = vehicle.VehRegistration };
-
-                vehResVM.WeeklyReservation = locations.Where(loc => loc.LocVehId == vehicle.VehId).Select(x => new ReservationViewModel()
+                VehicleReservationViewModel vehResVM = new VehicleReservationViewModel()
                 {
-                    //TODO   DriverName = _context.User.Select(u => u.UserId == x.LocUserId).First(),
+                    VehName = vehicle.VehBrand + " " + vehicle.VehModel,
+                    Immat = vehicle.VehRegistration,
+                    WeeklyReservation = new List<ReservationViewModel>()
+                };
 
+                List<Location> locationsForVehicle = locations.Where(loc => loc.LocVehId == vehicle.VehId).ToList();
 
-                }).ToList();
-
+                foreach (Location loc in locationsForVehicle)
+                {
+                    User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
+                    if(user != null)
+                    {
+                        ReservationViewModel resVM = new ReservationViewModel();
+                        resVM.DriverName = user.UserFirstname + " " + user.UserName;
+                        resVM.StartDate = loc.LocDatestartlocation;
+                        resVM.EndDate = loc.LocDateendlocation;
+                        vehResVM.WeeklyReservation.Add(resVM);
+                    }
+                }
+                vehicleReservationsListVM.Add(vehResVM);
             }
-
-
-
-
-
-            throw new NotImplementedException();
+            return vehicleReservationsListVM;
         }
     }
 }

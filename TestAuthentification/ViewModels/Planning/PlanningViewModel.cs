@@ -7,6 +7,8 @@ namespace TestAuthentification.ViewModels.Planning
 {
     public class PlanningViewModel
     {
+        public DateTime StartWeek { get; set; }
+        public DateTime EndWeek { get; set; }
         public int StartReservationCount { get; set; }
         public int EndReservationCount { get; set; }
         public int TotalVehiclesCount { get; set; }
