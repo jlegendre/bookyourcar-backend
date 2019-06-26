@@ -205,8 +205,6 @@ namespace TestAuthentification.Services
                 }
             }
             return user;
-
         }
-
     }
 }
