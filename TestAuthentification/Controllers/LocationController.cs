@@ -558,10 +558,20 @@ namespace TestAuthentification.Controllers
                 }
             }
 
-            return selectedVehicles;
+            return new List<AvailableVehiculeViewModel>();
         }
         private VehicleDetailsViewModel GetSelectedVehicle(Location location)
         {
+            Vehicle veh = _context.Vehicle.Where(v => v.VehId == location.LocVehId).First();
+            return new VehicleDetailsViewModel()
+            {
+                VehId = veh.VehId,
+                VehCommonName = veh.VehBrand + " " + veh.VehModel,
+                Registration = veh.VehRegistration,
+                FuelName = veh.VehTypeEssence,
+                SeatCount = veh.VehNumberplace
+            };
+
             throw new NotImplementedException();
         }
         #endregion

@@ -12,6 +12,5 @@ namespace TestAuthentification.ViewModels.Vehicle
         public string Registration { get; set; }
         public int SeatCount { get; set; }
         public string FuelName { get; set; }     
-        public int FuelId { get; set; }
     }
 }
