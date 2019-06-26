@@ -283,16 +283,38 @@ namespace TestAuthentification.Controllers
         /// <summary>
         /// Pour valider une réservation
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">ID de la location</param>
         /// <param name="location"></param>
         /// <returns></returns>
         // PUT: api/Locations/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateVM location)
+        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateViewModel location)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || id == 0)
             {
                 return BadRequest(ModelState);
+            }
+            Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
+            switch (location.Action)
+            {
+
+                case "Validate":
+                    // Lorsque côté front on a cliqué sur Valider
+
+                    loc.LocState = (int)Enums.LocationState.Validated;
+
+                    //TODO affecter le véhicule
+                    break;
+                case "Finish":
+                    // Lorsque côté front on a cliqué sur Terminer la location
+                    loc.LocState = (int)Enums.LocationState.Finished;
+                    break;
+                case "Start":
+                    // Lorsque côté front on a cliqué sur Démarrer la location
+                    loc.LocState = (int)Enums.LocationState.InProgress;
+                    break;
+                default:
+                    break;
             }
 
 
