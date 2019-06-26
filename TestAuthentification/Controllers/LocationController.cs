@@ -233,7 +233,7 @@ namespace TestAuthentification.Controllers
             }
             Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
 
-            if(loc == null)
+            if (loc == null)
             {
                 return NotFound();
             }
@@ -268,33 +268,17 @@ namespace TestAuthentification.Controllers
             Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
 
             Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
-
-
             _context.Update(loc);
-
             _context.SaveChanges();
 
-            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationValidation);
-            myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-            myFiles = myFiles.Replace("%%DEBUTLOCATION%%", loc.LocDatestartlocation.ToLongDateString());
-            myFiles = myFiles.Replace("%%FINLOCATION%%", loc.LocDateendlocation.ToLongDateString());
-            myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleS.PoleName);
-            myFiles = myFiles.Replace("%%FINPOLE%%", poleE.PoleName);
-
-            myFiles = myFiles.Replace("%%MODELE%%", vehicle.VehModel);
-            myFiles = myFiles.Replace("%%MARQUE%%", vehicle.VehBrand);
-            myFiles = myFiles.Replace("%%IMMATRICULATION%%", vehicle.VehRegistration);
-            myFiles = myFiles.Replace("%%KM%%", vehicle.VehKm.ToString());
-
-            var response = await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
-            if (response.IsSuccessStatusCode)
+            if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle))
             {
                 return Ok();
             }
             else
             {
                 ModelState.AddModelError("Error",
-                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+               "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
                 return BadRequest(ModelState);
             }
         }
