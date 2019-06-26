@@ -295,13 +295,20 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
             Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
+
+            if(loc == null)
+            {
+                return NotFound();
+            }
+
             switch (location.Action)
             {
 
                 case "Validate":
-                    // Lorsque côté front on a cliqué sur Valider
+                    // Lorsque côté front on a cliqué sur Accepter
 
                     loc.LocState = (int)Enums.LocationState.Validated;
+                    loc.LocVehId = location.VehicleId;
 
                     //TODO affecter le véhicule
                     break;
@@ -317,29 +324,23 @@ namespace TestAuthentification.Controllers
                     break;
             }
 
-
-            Location locInProgress = _context.Location.SingleOrDefault(l => l.LocId == id);
-
-            User user = _context.User.SingleOrDefault(u => u.UserId == locInProgress.LocUserId);
+            User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
 
             Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
 
-            Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == locInProgress.LocPoleIdstart);
+            Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
 
-            Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == locInProgress.LocPoleIdend);
+            Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
 
-            locInProgress.LocVehId = location.VehicleId;
 
-            locInProgress.LocState = (sbyte)Enums.LocationState.Validated;
-
-            _context.Update(locInProgress);
+            _context.Update(loc);
 
             _context.SaveChanges();
 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationValidation);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-            myFiles = myFiles.Replace("%%DEBUTLOCATION%%", locInProgress.LocDatestartlocation.ToLongDateString());
-            myFiles = myFiles.Replace("%%FINLOCATION%%", locInProgress.LocDateendlocation.ToLongDateString());
+            myFiles = myFiles.Replace("%%DEBUTLOCATION%%", loc.LocDatestartlocation.ToLongDateString());
+            myFiles = myFiles.Replace("%%FINLOCATION%%", loc.LocDateendlocation.ToLongDateString());
             myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleS.PoleName);
             myFiles = myFiles.Replace("%%FINPOLE%%", poleE.PoleName);
 
