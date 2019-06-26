@@ -225,11 +225,33 @@ namespace TestAuthentification.Controllers
 
         // PUT: api/Locations/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateVM location)
+        public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateViewModel location)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || id == 0)
             {
                 return BadRequest(ModelState);
+            }
+            Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
+            switch (location.Action)
+            {
+
+                case "Validate":
+                    // Lorsque côté front on a cliqué sur Valider
+
+                    loc.LocState = (int)Enums.LocationState.Validated;
+
+                    //TODO affecter le véhicule
+                    break;
+                case "Finish":
+                    // Lorsque côté front on a cliqué sur Terminer la location
+                    loc.LocState = (int)Enums.LocationState.Finished;
+                    break;
+                case "Start":
+                    // Lorsque côté front on a cliqué sur Démarrer la location
+                    loc.LocState = (int)Enums.LocationState.InProgress;
+                    break;
+                default:
+                    break;
             }
 
 
@@ -262,7 +284,7 @@ namespace TestAuthentification.Controllers
             myFiles = myFiles.Replace("%%MARQUE%%", vehicle.VehBrand);
             myFiles = myFiles.Replace("%%IMMATRICULATION%%", vehicle.VehRegistration);
             myFiles = myFiles.Replace("%%KM%%", vehicle.VehKm.ToString());
-            
+
             var response = await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
             if (response.IsSuccessStatusCode)
             {
@@ -291,16 +313,29 @@ namespace TestAuthentification.Controllers
             // cas ou l'administrateur rejette la demande
             if (TokenService.ValidateTokenWhereIsAdmin(token))
             {
-                var location = await _context.Location.FindAsync(id);
+                Location location = await _context.Location.FindAsync(id);
                 if (location == null)
                 {
                     return NotFound();
                 }
+                ////////
+                location.LocState = (sbyte)Enums.LocationState.Rejected;
 
-                // si la réservation à un véhicule affecté il faut l'enlever 
-                if (location.LocVehId.HasValue)
+                AuthService service = new AuthService(_context);
+                User user = service.GetUserConnected(token);
+                PoleService servicePole = new PoleService(_context);
+                var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
+                var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
+                string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationRefuser);
+
+                myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
+                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToLongDateString());
+                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToLongDateString());
+                myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
+                myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
+                var response = await EmailService.SendEmailAsync("Refus de votre location - BookYourCar", myFiles, user.UserEmail);
+                if (response.IsSuccessStatusCode)
                 {
-                    //TODO CORRECT
                     // on change l'état de disponiblite du vehicule à Available
                     var locationVehicule = _context.Vehicle.SingleOrDefault(x => x.VehId == location.LocVehId);
                     locationVehicule.VehState = (sbyte)Enums.VehiculeState.Available;
@@ -309,6 +344,9 @@ namespace TestAuthentification.Controllers
                     _context.Update(locationVehicule);
                     _context.SaveChanges();
                 }
+
+
+
                 _context.Location.Update(location);
                 _context.SaveChanges();
 
@@ -318,25 +356,17 @@ namespace TestAuthentification.Controllers
             // cas ou l'utilisateur annule sa demande
             else if (TokenService.ValidateToken(token))
             {
-                var location = await _context.Location.FindAsync(id);
+                Location location = await _context.Location.FindAsync(id);
                 if (location == null)
                 {
                     return NotFound();
                 }
-                // si la réservation à un véhicule affecté il faut l'enlever 
-                if (location.LocVehId.HasValue)
-                {
-                    // on change l'état de disponiblite du vehicule à Available
-                    var locationVehicule = _context.Vehicle.SingleOrDefault(x => x.VehId == location.LocVehId);
-                    locationVehicule.VehState = (sbyte)Enums.VehiculeState.Available;
-                    // on desafecte le vehicule
-                    location.LocVehId = null;
-                    _context.Update(locationVehicule);
-                }
-
+                ////////
                 location.LocState = (sbyte)Enums.LocationState.Canceled;
+
                 _context.Location.Update(location);
                 _context.SaveChanges();
+
                 return Ok();
             }
 
