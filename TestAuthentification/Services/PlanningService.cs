@@ -59,6 +59,7 @@ namespace TestAuthentification.Services
             {
                 VehicleReservationViewModel vehResVM = new VehicleReservationViewModel()
                 {
+                    VehId = vehicle.VehId,
                     VehName = vehicle.VehBrand + " " + vehicle.VehModel,
                     Immat = vehicle.VehRegistration,
                     WeeklyReservation = new List<ReservationViewModel>()
@@ -72,6 +73,7 @@ namespace TestAuthentification.Services
                     if(user != null)
                     {
                         ReservationViewModel resVM = new ReservationViewModel();
+                        resVM.ReservationId = loc.LocId;
                         resVM.DriverName = user.UserFirstname + " " + user.UserName;
                         resVM.StartDate = loc.LocDatestartlocation;
                         resVM.EndDate = loc.LocDateendlocation;

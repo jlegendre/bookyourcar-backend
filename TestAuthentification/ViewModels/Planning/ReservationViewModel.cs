@@ -7,6 +7,7 @@ namespace TestAuthentification.ViewModels.Planning
 {
     public class ReservationViewModel
     {
+        public int ReservationId { get; set; }
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
