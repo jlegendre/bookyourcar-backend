@@ -14,6 +14,7 @@ using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 using TestAuthentification.ViewModels.Comments;
 using TestAuthentification.ViewModels.Location;
+using TestAuthentification.ViewModels.Vehicle;
 
 namespace TestAuthentification.Controllers
 {
@@ -169,116 +170,58 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            var userInfo = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
-            //lier les commentaires à la location
-            List<CommentsViewModel> commentsList = _context.Comments.Where(c => c.CommentLocId == location.LocId).Select(x => new CommentsViewModel()
+            try
             {
-                UserId = x.CommentUserId.GetValueOrDefault(),
-                DatePublication = x.CommentDate,
-                FriendlyName = string.Format("{0} {1}", userInfo.UserFirstname, userInfo.UserName),
-                Text = x.CommentText
-            }).ToList();
+                List<Pole> poles = _context.Pole.ToList();
+                User user = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
+                Comments comment = _context.Comments.FirstOrDefault(c => c.CommentLocId == location.LocId);
 
-
-            //_context.Comments.Where(c => c.CommentId == location.LocId);
-            LocationDetailsViewModel locDetailVm = new LocationDetailsViewModel()
-            {
-                UserId = _context.User.SingleOrDefault(u => u.UserId == location.LocUserId).UserId,
-                CommentsList = commentsList,
-                DateDebutResa = location.LocDatestartlocation,
-                DateFinResa = location.LocDateendlocation,
-                LocationState = GetLocationStateTrad(location.LocState),
-                LocationStateId = location.LocState,
-                PoleDestination = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName,
-                PoleDepart = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName
-
-            };
-
-            //afficher la voiture ou liste voitures disponibles
-            if (location.LocState == (sbyte)Enums.LocationState.Asked)
-            {
-                //locDetailVm.AvailableVehicle = GetAvailableVehiculeForLocation(location);
-                List<Vehicle> vehicles = _context.Vehicle.ToList();
-                locDetailVm.AvailableVehicle = new List<VehiculeViewModel>();
-
-                foreach (Vehicle veh in vehicles)
+                //Initialize ViewModel with params present everytime
+                ManageLocationViewModel locVM = new ManageLocationViewModel()
                 {
-                    VehiculeViewModel vehVM = new VehiculeViewModel()
-                    {
-                        VehId = veh.VehId,
-                        VehBrand = veh.VehBrand,
-                        VehModel = veh.VehModel
-                    };
-                    locDetailVm.AvailableVehicle.Add(vehVM);
-
-                }
-            }
-            else
-            {
-                var vehicule = _context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
-                locDetailVm.SelectedVehicle = new VehiculeViewModel()
-                {
-                    PoleName = _context.Pole.FirstOrDefault(p => p.PoleId == location.LocPoleIdend).PoleName,
-                    VehModel = vehicule.VehModel,
-                    VehId = vehicule.VehId,
-                    VehBrand = vehicule.VehBrand,
-                    VehDatemec = vehicule.VehDatemec,
-                    VehKm = vehicule.VehKm,
-                    VehNumberplace = vehicule.VehNumberplace,
-                    VehRegistration = vehicule.VehRegistration,
-                    VehTypeEssence = vehicule.VehTypeEssence,
-                    VehColor = vehicule.VehColor,
-                    VehIsactive = vehicule.VehIsactive
+                    LocId = location.LocId,
+                    LocState = GetLocationStateTrad(location.LocState),
+                    LocStateId = location.LocState,
+                    User = user.UserFirstname + " " + user.UserName,
+                    PoleStart = poles.Where(p => p.PoleId == location.LocPoleIdstart).First().PoleName,
+                    PoleEnd = poles.Where(p => p.PoleId == location.LocPoleIdend).First().PoleName,
+                    DateStart = location.LocDatestartlocation,
+                    DateEnd = location.LocDateendlocation,
+                    Comment = comment.CommentText
                 };
-            }
-            //_context.Vehicle.FirstOrDefault(v => v.VehId == location.LocVehId);
-            //Commentaires associés à la location
 
-            return Ok(locDetailVm);
+                switch (location.LocState)
+                {
+                    case (sbyte)Enums.LocationState.Asked:
+                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+                        break;
+                    case (sbyte)Enums.LocationState.InProgress:
+                        locVM.SelectedVehicle = GetSelectedVehicle(location);
+                        break;
+                    case (sbyte)Enums.LocationState.Validated:
+                        locVM.SelectedVehicle = GetSelectedVehicle(location);
+                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+
+                        break;
+                    case (sbyte)Enums.LocationState.Rejected:
+                        break;
+                    case (sbyte)Enums.LocationState.Finished:
+                        locVM.SelectedVehicle = GetSelectedVehicle(location);
+                        break;
+                    case (sbyte)Enums.LocationState.Canceled:
+                        break;
+                }
+                return Ok(locVM);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                ModelState.AddModelError("Error", "Erreur lors de la récupération de la réservation.");
+                return BadRequest(ModelState);
+                throw;
+            }
         }
 
-        private List<Vehicle> GetAvailableVehiculeForLocation(Location location)
-        {
-            List<Vehicle> vehicleList = _context.Vehicle.ToList();
-            List<Vehicle> selectedVehicles = new List<Vehicle>();
-
-            foreach (Vehicle vehicle in vehicleList)
-            {
-                vehicle.Location = _context.Location.Where(l => l.LocVehId == vehicle.VehId).ToList();
-            }
-
-            foreach (Vehicle vehicle in vehicleList)
-            {
-
-                // Si aucune loc ne respecte les 3 conditions suivantes, on ajoute le vehicule à la liste 
-                // loc commence avant et fini après la loc demandée
-                // loc fini pendant la loc demandée
-                // loc commence pendant la loc demandée
-                if (vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation
-                                             || l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation
-                                             || l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation) == null)
-                {
-                    selectedVehicles.Add(vehicle);
-                }
-            }
-
-            if (selectedVehicles.Count > 0)
-            {
-                Location lastLoc = new Location();
-
-                foreach (Vehicle vehicle in selectedVehicles)
-                {
-                    List<Location> locs = vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation).ToList();
-                    lastLoc = locs.OrderByDescending(l => l.LocDateendlocation).First();
-                    if (lastLoc.LocPoleIdend != location.LocPoleIdend)
-                    {
-                        selectedVehicles.Remove(vehicle);
-                    }
-                }
-            }
-
-            return selectedVehicles;
-        }
 
         // PUT: api/Locations/5
         [HttpPut("{id}")]
@@ -357,6 +300,7 @@ namespace TestAuthentification.Controllers
                 // si la réservation à un véhicule affecté il faut l'enlever 
                 if (location.LocVehId.HasValue)
                 {
+                    //TODO CORRECT
                     // on change l'état de disponiblite du vehicule à Available
                     var locationVehicule = _context.Vehicle.SingleOrDefault(x => x.VehId == location.LocVehId);
                     locationVehicule.VehState = (sbyte)Enums.VehiculeState.Available;
@@ -479,11 +423,12 @@ namespace TestAuthentification.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                ModelState.AddModelError("Error", "Une erreur est survenue.");
+                ModelState.AddModelError("Error", "Une erreur est survenue lors de votre demande de location.");
                 return BadRequest(ModelState);
             }
         }
 
+        #region Private methods
         private bool UserAlreadyHaveALocation(LocationViewModel model, User user)
         {
             user.Location = _context.Location.Where(l => l.LocUserId == user.UserId).ToList();
@@ -505,11 +450,6 @@ namespace TestAuthentification.Controllers
             }
             return false;
         }
-
-        /// <summary>
-        /// permet de récuperer le token
-        /// </summary>
-        /// <returns></returns>
         private string GetToken()
         {
             var token = Request.Headers["Authorization"].ToString();
@@ -521,14 +461,6 @@ namespace TestAuthentification.Controllers
 
             return token;
         }
-
-
-        private bool LocationExists(int id)
-        {
-            return _context.Location.Any(e => e.LocId == id);
-        }
-
-
         private string GetLocationStateTrad(sbyte locState)
         {
             Enums.LocationState locSt = (Enums.LocationState)locState;
@@ -556,5 +488,52 @@ namespace TestAuthentification.Controllers
             }
             return locationStateTrad;
         }
+        private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
+        {
+            List<Vehicle> vehicleList = _context.Vehicle.ToList();
+            List<Vehicle> selectedVehicles = new List<Vehicle>();
+
+            foreach (Vehicle vehicle in vehicleList)
+            {
+                vehicle.Location = _context.Location.Where(l => l.LocVehId == vehicle.VehId).ToList();
+            }
+
+            foreach (Vehicle vehicle in vehicleList)
+            {
+
+                // Si aucune loc ne respecte les 3 conditions suivantes, on ajoute le vehicule à la liste 
+                // loc commence avant et fini après la loc demandée
+                // loc fini pendant la loc demandée
+                // loc commence pendant la loc demandée
+                if (vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation
+                                             || l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation
+                                             || l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation) == null)
+                {
+                    selectedVehicles.Add(vehicle);
+                }
+            }
+
+            if (selectedVehicles.Count > 0)
+            {
+                Location lastLoc = new Location();
+
+                foreach (Vehicle vehicle in selectedVehicles)
+                {
+                    List<Location> locs = vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation).ToList();
+                    lastLoc = locs.OrderByDescending(l => l.LocDateendlocation).First();
+                    if (lastLoc.LocPoleIdend != location.LocPoleIdend)
+                    {
+                        selectedVehicles.Remove(vehicle);
+                    }
+                }
+            }
+
+            return selectedVehicles;
+        }
+        private VehicleDetailsViewModel GetSelectedVehicle(Location location)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }
