@@ -38,11 +38,7 @@ namespace TestAuthentification.Resources
 
 
         public const string LocationValidation = "./wwwroot/EmailTemplates/LocationValidation.html";
-        public const string LocationRefuser = "Bonjour {0}, <br />" +
-                                              "Votre demande de location n'a malheureusement pas été accepté par notre Equipe. <br />" +
-                                              "Ceci est un email automatique merci de ne pas y répondre." +
-                                              "Cordialement, <br />" +
-                                              "L'Équipe A5D - Book Your Car ";
+        public const string LocationRefuser = "./wwwroot/EmailTemplates/LocationRefus.html";
         //(ConstantsEmail.LocationAsk, user.UserFirstname, location.LocDatestartlocation, location.LocDateendlocation, poleDepart, poleArrive)
         #endregion
 
