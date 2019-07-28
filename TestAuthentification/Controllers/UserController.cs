@@ -447,12 +447,31 @@ namespace TestAuthentification.Controllers
             {
                 if (user.UserEmail.Equals(userConnected.UserEmail))
                 {
-                    userConnected.UserPoleId = user.UserPoleId;
-                    userConnected.UserFirstname = user.UserFirstname;
-                    userConnected.UserPhone = user.UserPhone;
-                    userConnected.UserName = user.UserName;
-                    userConnected.UserNumpermis = user.UserNumpermis;
+                    if (user.UserPoleId != null)
+                    {
+                        userConnected.UserPoleId = user.UserPoleId;
+                    }
 
+                    if (user.UserFirstname != null)
+                    {
+                        userConnected.UserFirstname = user.UserFirstname;
+                    }
+
+                    if (user.UserPhone != null)
+                    {
+                        userConnected.UserPhone = user.UserPhone;
+                    }
+
+                    if (user.UserName != null)
+                    {
+                         userConnected.UserName = user.UserName;
+                    }
+
+                    if (user.UserNumpermis != null)
+                    {
+                        userConnected.UserNumpermis = user.UserNumpermis;
+                    }
+                    
                     try
                     {
                         _context.Update(userConnected);
