@@ -445,50 +445,42 @@ namespace TestAuthentification.Controllers
 
             if (TokenService.ValidateToken(token))
             {
-                if (user.UserEmail.Equals(userConnected.UserEmail))
+                if (user.UserPoleId != null)
                 {
-                    if (user.UserPoleId != null)
-                    {
-                        userConnected.UserPoleId = user.UserPoleId;
-                    }
-
-                    if (user.UserFirstname != null)
-                    {
-                        userConnected.UserFirstname = user.UserFirstname;
-                    }
-
-                    if (user.UserPhone != null)
-                    {
-                        userConnected.UserPhone = user.UserPhone;
-                    }
-
-                    if (user.UserName != null)
-                    {
-                         userConnected.UserName = user.UserName;
-                    }
-
-                    if (user.UserNumpermis != null)
-                    {
-                        userConnected.UserNumpermis = user.UserNumpermis;
-                    }
-                    
-                    try
-                    {
-                        _context.Update(userConnected);
-                        _context.SaveChanges();
-                        return Ok();
-                    }
-                    catch (Exception e)
-                    {
-                        ModelState.AddModelError("Error", "Une erreur est survenue.");
-                        Console.WriteLine(e);
-                        return BadRequest(ModelState);
-                    }
-
+                    userConnected.UserPoleId = user.UserPoleId;
                 }
-                else
+
+                if (user.UserFirstname != null)
                 {
-                    return Unauthorized();
+                    userConnected.UserFirstname = user.UserFirstname;
+                }
+
+                if (user.UserPhone != null)
+                {
+                    userConnected.UserPhone = user.UserPhone;
+                }
+
+                if (user.UserName != null)
+                {
+                     userConnected.UserName = user.UserName;
+                }
+
+                if (user.UserNumpermis != null)
+                {
+                    userConnected.UserNumpermis = user.UserNumpermis;
+                }
+                
+                try
+                {
+                    _context.Update(userConnected);
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError("Error", "Une erreur est survenue.");
+                    Console.WriteLine(e);
+                    return BadRequest(ModelState);
                 }
 
             }
