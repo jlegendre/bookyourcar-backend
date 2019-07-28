@@ -268,7 +268,7 @@ namespace TestAuthentification.Controllers
                 var tab = token.Split(" ");
                 token = tab[1];
             }
-            
+
             AuthService serviceAuth = new AuthService(_context);
             var UserConnected = serviceAuth.GetUserConnected(token);
 
