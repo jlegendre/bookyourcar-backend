@@ -28,6 +28,5 @@ namespace TestAuthentification.ViewModels
             get;
             set;
         }
-        public string Token { get; set; }
     }
 }

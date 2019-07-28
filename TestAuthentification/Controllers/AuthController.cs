@@ -262,8 +262,15 @@ namespace TestAuthentification.Controllers
         [HttpPost, Route("SaveChangePassword")]
         public async Task<IActionResult> SaveChangePassword(ResetPasswordViewModel model)
         {
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+            
             AuthService serviceAuth = new AuthService(_context);
-            var UserConnected = serviceAuth.GetUserConnected(model.Token);
+            var UserConnected = serviceAuth.GetUserConnected(token);
 
             UserConnected.UserPassword = service.HashPassword(null, model.Password);
 
