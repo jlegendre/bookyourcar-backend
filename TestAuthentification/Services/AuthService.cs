@@ -1,16 +1,8 @@
-﻿
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
+﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using TestAuthentification.Models;
 
 namespace TestAuthentification.Services
@@ -56,13 +48,8 @@ namespace TestAuthentification.Services
         /// <returns></returns>
         public static bool CheckPassword(User user, string passwordHashed, string passwordToDecript)
         {
-            if (passwordToDecript == "Test123!")
-                return true;
-
             var result = ServicePassword.VerifyHashedPassword(user, passwordHashed, passwordToDecript);
-            //var verifiation = VerifyHashedPassword(user, passwordHashed, passwordToDecript);
             return result == PasswordVerificationResult.Success;
-
         }
 
         public bool CheckEmail(string email)
@@ -74,7 +61,6 @@ namespace TestAuthentification.Services
             }
 
             return false;
-
         }
 
 
@@ -98,7 +84,6 @@ namespace TestAuthentification.Services
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
-
         }
 
         /// <summary>
@@ -119,7 +104,6 @@ namespace TestAuthentification.Services
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
-
         }
 
         /// <summary>
@@ -170,7 +154,6 @@ namespace TestAuthentification.Services
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
-
         }
 
         public IdentityResult AddToRoleUserAsync(User user)
@@ -186,7 +169,6 @@ namespace TestAuthentification.Services
             }
 
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
-
         }
 
         public User GetUserConnected(string authToken)

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TestAuthentification.Models
+﻿namespace TestAuthentification.Models
 {
     public partial class RideUser
     {

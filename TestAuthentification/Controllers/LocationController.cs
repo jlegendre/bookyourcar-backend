@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
-using TestAuthentification.ViewModels;
-using TestAuthentification.ViewModels.Comments;
 using TestAuthentification.ViewModels.Location;
 using TestAuthentification.ViewModels.Vehicle;
 
@@ -505,6 +500,10 @@ namespace TestAuthentification.Controllers
         }
         private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
         {
+            LocationService locServ = new LocationService(_context);
+            locServ.GetAvailableVehicleForLocation();
+
+
             List<Vehicle> vehicleList = _context.Vehicle.ToList();
             List<Vehicle> selectedVehicles = new List<Vehicle>();
 
