@@ -182,7 +182,7 @@ namespace TestAuthentification.Controllers
                     PoleEnd = poles.Where(p => p.PoleId == location.LocPoleIdend).First().PoleName,
                     DateStart = location.LocDatestartlocation,
                     DateEnd = location.LocDateendlocation,
-                    Comment = comment.CommentText
+                    Comment = comment == null ? "" : comment.CommentText
                 };
 
                 switch (location.LocState)
