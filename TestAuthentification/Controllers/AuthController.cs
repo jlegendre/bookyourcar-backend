@@ -188,16 +188,16 @@ namespace TestAuthentification.Controllers
                 issuer: "http://localhost:5000",
                 audience: "http://localhost:5000",
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(5),
+                expires: DateTime.UtcNow.AddMinutes(1),
                 signingCredentials: signinCredentials
             );
 
             string tokenGenerate = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
 
 
-            string myFiles = ConstantsEmail.ResetPassword;
-            myFiles = myFiles.Replace("%%TOKEN%%", tokenGenerate);
-            var response = await EmailService.SendEmailAsync("Changement de mot de passe - BookYourCar", myFiles, user.UserEmail);
+            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
+            myFiles = myFiles.Replace("%%LIEN%%", Environment.GetEnvironmentVariable("UrlResetPassword")+tokenGenerate);
+            var response = await EmailService.SendEmailAsync("Réinitialisation du mot de passe - BookYourCar", myFiles, user.UserEmail);
             if (!response.IsSuccessStatusCode)
             {
                 ModelState.AddModelError("Error",
@@ -264,16 +264,25 @@ namespace TestAuthentification.Controllers
                 token = tab[1];
             }
 
-            AuthService serviceAuth = new AuthService(_context);
-            var UserConnected = serviceAuth.GetUserConnected(token);
+            if (TokenService.ValidateToken(token))
+            {
+                AuthService serviceAuth = new AuthService(_context);
+                var userConnected = serviceAuth.GetUserConnected(token);
 
-            UserConnected.UserPassword = service.HashPassword(null, model.Password);
+                userConnected.UserPassword = service.HashPassword(null, model.Password);
 
-            //SAVE
-            _context.User.Update(UserConnected);
-            _context.SaveChanges();
-            
-            return Ok();
+                //SAVE
+                _context.User.Update(userConnected);
+                _context.SaveChanges();
+
+                return Ok();
+            }
+
+            var message = new Dictionary<string, string>();
+            message.Add("Info", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
+
+            return Ok(message);
+
         }
 
     }
