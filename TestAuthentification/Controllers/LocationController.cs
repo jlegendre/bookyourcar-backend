@@ -501,10 +501,9 @@ namespace TestAuthentification.Controllers
         private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
         {
             LocationService locServ = new LocationService(_context);
-            locServ.GetAvailableVehicleForLocation();
+            List<Vehicle> vehicleList = locServ.GetAvailableVehicleForLocation(location.LocDatestartlocation, location.LocDateendlocation,
+                location.LocPoleIdstart, location.LocPoleIdend);
 
-
-            List<Vehicle> vehicleList = _context.Vehicle.ToList();
             List<Vehicle> selectedVehicles = new List<Vehicle>();
 
             foreach (Vehicle vehicle in vehicleList)

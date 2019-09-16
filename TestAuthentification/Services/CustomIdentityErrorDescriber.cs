@@ -13,7 +13,7 @@ namespace TestAuthentification.Services
         public override IdentityError InvalidUserName(string userName) { return new IdentityError { Code = "Error", Description = $"L'utilisateur '{userName}' est invalide, il ne peut contenir que des lettres ou des chiffres." }; }
         public override IdentityError InvalidEmail(string email) { return new IdentityError { Code = "Error", Description = $"L'email '{email}' est invalide" }; }
         public override IdentityError DuplicateUserName(string userName) { return new IdentityError { Code = "Error", Description = $"Le nom '{userName}' est déja pris." }; }
-        public override IdentityError DuplicateEmail(string email) { return new IdentityError { Code = "Error", Description = $"L'email '{email}' est déja pris."}; }
+        public override IdentityError DuplicateEmail(string email) { return new IdentityError { Code = "Error", Description = $"L'email '{email}' est déja prise."}; }
         public override IdentityError InvalidRoleName(string role) { return new IdentityError { Code = "Error", Description = $"Le role '{role}' est invalide." }; }
         public override IdentityError DuplicateRoleName(string role) { return new IdentityError { Code = "Error", Description = $"Le role '{role}' is already taken." }; }
         public override IdentityError UserAlreadyHasPassword() { return new IdentityError { Code = "Error", Description = "L'utilisateur à déja un password." }; }
@@ -25,6 +25,6 @@ namespace TestAuthentification.Services
         public override IdentityError PasswordRequiresDigit() { return new IdentityError { Code = "Error", Description = "Les mots de passe doivent comporter au moins un chiffre('0'-'9')." }; }
         public override IdentityError PasswordRequiresLower() { return new IdentityError { Code = "Error", Description = "Les mots de passe doivent comporter au moins une minuscule ('a'-'z')." }; }
         public override IdentityError PasswordRequiresUpper() { return new IdentityError { Code = "Error", Description = "Les mots de passe doivent comporter au moins une majuscule ('A'-'Z')." }; }
-        public IdentityError InvalidPhoneNumber(string userPhone) { return new IdentityError { Code = "Error", Description = $"Le numéro de téléphone '{userPhone}' est déja pris." }; }
+        public IdentityError InvalidPhoneNumber(string userPhone) { return new IdentityError { Code = "Error", Description = $"Le numéro de téléphone '{userPhone}' est déja prise." }; }
     }
 }
