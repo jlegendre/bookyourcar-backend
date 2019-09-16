@@ -29,6 +29,17 @@ namespace TestAuthentification.Services
             }
         }
 
+        public static bool VerifDateExpiration(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var simplePrinciple = handler.ReadJwtToken(token);
+
+            // si la date d'expiration est toujours valide
+
+            return DateTime.Now < simplePrinciple.ValidTo.ToLocalTime();
+            
+        }
+
         public static bool ValidateTokenWhereIsAdmin(string authToken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

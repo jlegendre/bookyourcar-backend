@@ -34,7 +34,7 @@ namespace TestAuthentification.Controllers
         {
             string token = GetToken();
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 User connectedUser = _authService.GetUserConnected(token);
 
@@ -99,7 +99,7 @@ namespace TestAuthentification.Controllers
         {
             string token = GetToken();
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 User connectedUser = _authService.GetUserConnected(token);
 
@@ -291,7 +291,7 @@ namespace TestAuthentification.Controllers
             string token = GetToken();
 
             // cas ou l'administrateur rejette la demande
-            if (TokenService.ValidateTokenWhereIsAdmin(token))
+            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
             {
                 Location location = await _context.Location.FindAsync(id);
                 if (location == null)
@@ -334,7 +334,7 @@ namespace TestAuthentification.Controllers
             }
 
             // cas ou l'utilisateur annule sa demande
-            else if (TokenService.ValidateToken(token))
+            else if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 Location location = await _context.Location.FindAsync(id);
                 if (location == null)
@@ -364,7 +364,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             AuthService service = new AuthService(_context);

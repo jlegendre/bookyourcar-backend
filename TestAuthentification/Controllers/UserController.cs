@@ -63,7 +63,7 @@ namespace TestAuthentification.Controllers
             }
 
             var token = GetToken();
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
 
                 var user = await _context.User.FindAsync(id);
@@ -117,7 +117,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
 
                 try
@@ -157,7 +157,7 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             AuthService service = new AuthService(_context);
             User user = service.GetUserConnected(token);
@@ -248,7 +248,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 _context.User.Remove(user);
                 await _context.SaveChangesAsync();
@@ -293,7 +293,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 var handler = new JwtSecurityTokenHandler();
                 var simplePrinciple = handler.ReadJwtToken(token);
@@ -321,7 +321,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateTokenWhereIsAdmin(token))
+            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
             {
                 List<User> userEnAttente =
                     _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
@@ -368,7 +368,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateTokenWhereIsAdmin(token))
+            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
             {
                 User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
 
@@ -407,7 +407,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateTokenWhereIsAdmin(token))
+            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
             {
                 User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
 
@@ -444,7 +444,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 if (user.UserPoleId != null)
                 {

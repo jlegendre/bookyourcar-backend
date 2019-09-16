@@ -109,8 +109,7 @@ namespace TestAuthentification
 #if DEBUG
             Environment.SetEnvironmentVariable("UrlResetPassword", "https://localhost:5001/api/auth/ChangePassword?token=");
 #else
-            //todo a remplir le lien
-            Environment.SetEnvironmentVariable("UrlResetPassword", "TODO/api/auth/ChangePassword?token=");
+            Environment.SetEnvironmentVariable("UrlResetPassword", "https://a5d-dotnet.mvinet.fr/api/auth/ChangePassword?token=");
 #endif
 
 

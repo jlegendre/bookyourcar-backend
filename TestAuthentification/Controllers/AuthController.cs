@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -62,7 +63,7 @@ namespace TestAuthentification.Controllers
                     issuer: "http://localhost:5000",
                     audience: "http://localhost:5000",
                     claims: claims,
-                    expires: loginViewModel.RememberMe ? DateTime.UtcNow.AddDays(5) : DateTime.UtcNow.AddMinutes(10),
+                    expires: loginViewModel.RememberMe ? DateTime.UtcNow.AddDays(5).ToLocalTime() : DateTime.UtcNow.AddMinutes(10).ToLocalTime(),
                     signingCredentials: signinCredentials
                 );
 
@@ -180,15 +181,22 @@ namespace TestAuthentification.Controllers
             Claim[] claims = new[]
             {
                 new Claim(ClaimTypes.Email, user.UserEmail),
-                new Claim(ClaimTypes.Role, user.UserRight.RightLabel)
+                new Claim(ClaimTypes.Role, user.UserRight.RightLabel),
             };
 
             // On Définit les proprietées du token, comme ça date d'expiration
+
+            var frenchTime = DateTime.Now;
+            var frenchTime1 = DateTime.Now.AddMinutes(1);
+            var frenchTime2 = DateTime.Now.ToLocalTime();
+
+
+
             JwtSecurityToken tokeOptions = new JwtSecurityToken(
                 issuer: "http://localhost:5000",
                 audience: "http://localhost:5000",
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(1),
+                expires: DateTime.Now.AddMinutes(1).ToLocalTime(),
                 signingCredentials: signinCredentials
             );
 
@@ -196,7 +204,7 @@ namespace TestAuthentification.Controllers
 
 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
-            myFiles = myFiles.Replace("%%LIEN%%", Environment.GetEnvironmentVariable("UrlResetPassword")+tokenGenerate);
+            myFiles = myFiles.Replace("%%LIEN%%", Environment.GetEnvironmentVariable("UrlResetPassword") + tokenGenerate);
             var response = await EmailService.SendEmailAsync("Réinitialisation du mot de passe - BookYourCar", myFiles, user.UserEmail);
             if (!response.IsSuccessStatusCode)
             {
@@ -236,18 +244,24 @@ namespace TestAuthentification.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> ChangePassword(string token)
         {
-            if (TokenService.ValidateToken(token))
-            {
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            {// on vérifie si la date d'expiration du token est valide
+
                 var message = new Dictionary<string, string>();
                 message.Add("Token", token);
 
                 // on retourne la vue du formulaire pour reset les infos
                 return Ok(message);
             }
-
-            return Unauthorized();
-
+            else
+            {
+                return Unauthorized();
+            }
         }
+
+
+
+
 
         /// <summary>
         /// Permet de valider le nouveau mot de passe que l'utilisateur à saisit
@@ -264,7 +278,7 @@ namespace TestAuthentification.Controllers
                 token = tab[1];
             }
 
-            if (TokenService.ValidateToken(token))
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
                 AuthService serviceAuth = new AuthService(_context);
                 var userConnected = serviceAuth.GetUserConnected(token);

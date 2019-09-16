@@ -174,7 +174,7 @@ namespace TestAuthentification.Services
         public User GetUserConnected(string authToken)
         {
             User user = new User();
-            if (TokenService.ValidateToken(authToken))
+            if (TokenService.ValidateToken(authToken) && TokenService.VerifDateExpiration(authToken))
             {
                 var handler = new JwtSecurityTokenHandler();
                 var simplePrinciple = handler.ReadJwtToken(authToken);
