@@ -415,8 +415,11 @@ namespace TestAuthentification.Controllers
                 {
                     userValidate.UserState = (sbyte)Enums.UserState.Rejected;
                     _context.SaveChanges();
+
 #if !DEBUG
-                    await EmailService.SendEmailAsync("Refus de votre compte - Book Your Car", String.Format(ConstantsEmail.RefusRegister, userValidate.UserFirstname), userValidate.UserEmail);
+                    string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RefusRegister);
+                    myFiles = myFiles.Replace("%%USERNAME%%", userValidate.UserFirstname);
+                    await EmailService.SendEmailAsync("Refus de création de votre compte - BookYourCar", myFiles, userValidate.UserEmail);    
 #endif
                     return Ok();
                 }
