@@ -419,7 +419,7 @@ namespace TestAuthentification.Controllers
 #if !DEBUG
                     string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RefusRegister);
                     myFiles = myFiles.Replace("%%USERNAME%%", userValidate.UserFirstname);
-                    await EmailService.SendEmailAsync("Refus de création de votre compte - BookYourCar", myFiles, userValidate.UserEmail);    
+                    await EmailService.SendEmailAsync("Refus de votre compte - BookYourCar", myFiles, userValidate.UserEmail);    
 #endif
                     return Ok();
                 }
