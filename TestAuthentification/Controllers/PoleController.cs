@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TestAuthentification.Models;
+using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 
 namespace TestAuthentification.Controllers
@@ -23,6 +24,9 @@ namespace TestAuthentification.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPole()
         {
+            var token = GetToken();
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
             var listPole = await _context.Pole.ToListAsync();
             if (listPole.Count > 0)
             {
@@ -47,10 +51,10 @@ namespace TestAuthentification.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPole([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var pole = await _context.Pole.FindAsync(id);
             if (pole != null)
@@ -73,10 +77,10 @@ namespace TestAuthentification.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPole([FromRoute] int id, [FromBody] PoleViewModel poleModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var poleToModifie = await _context.Pole.FindAsync(id);
 
@@ -110,10 +114,11 @@ namespace TestAuthentification.Controllers
         [HttpPost]
         public async Task<IActionResult> PostPole([FromBody] PoleViewModel poleModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
             var pole = new Pole()
             {
                 PoleAddress = poleModel.PoleAddress,
@@ -132,11 +137,10 @@ namespace TestAuthentification.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePole([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            
             var pole = await _context.Pole.FindAsync(id);
             if (pole == null)
             {
@@ -153,5 +157,22 @@ namespace TestAuthentification.Controllers
         {
             return _context.Pole.Any(e => e.PoleId == id);
         }
+
+
+        #region utilitaire Token
+        private string GetToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+
+            return token;
+        }
+
+
+        #endregion
     }
 }

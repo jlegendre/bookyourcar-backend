@@ -154,67 +154,77 @@ namespace TestAuthentification.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLocation([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            string token = GetToken();
 
-            Location location = await _context.Location.FindAsync(id);
-            if (location == null)
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
-                return NotFound();
-            }
 
-            try
-            {
-                List<Pole> poles = _context.Pole.ToList();
-                User user = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
-                Comments comment = _context.Comments.FirstOrDefault(c => c.CommentLocId == location.LocId);
-
-                //Initialize ViewModel with params present everytime
-                ManageLocationViewModel locVM = new ManageLocationViewModel()
+                if (!ModelState.IsValid)
                 {
-                    LocId = location.LocId,
-                    LocState = GetLocationStateTrad(location.LocState),
-                    LocStateId = location.LocState,
-                    User = user.UserFirstname + " " + user.UserName,
-                    PoleStart = poles.Where(p => p.PoleId == location.LocPoleIdstart).First().PoleName,
-                    PoleEnd = poles.Where(p => p.PoleId == location.LocPoleIdend).First().PoleName,
-                    DateStart = location.LocDatestartlocation,
-                    DateEnd = location.LocDateendlocation,
-                    Comment = comment == null ? "" : comment.CommentText
-                };
-
-                switch (location.LocState)
-                {
-                    case (sbyte)Enums.LocationState.Asked:
-                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
-                        break;
-                    case (sbyte)Enums.LocationState.InProgress:
-                        locVM.SelectedVehicle = GetSelectedVehicle(location);
-                        break;
-                    case (sbyte)Enums.LocationState.Validated:
-                        locVM.SelectedVehicle = GetSelectedVehicle(location);
-                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
-
-                        break;
-                    case (sbyte)Enums.LocationState.Rejected:
-                        break;
-                    case (sbyte)Enums.LocationState.Finished:
-                        locVM.SelectedVehicle = GetSelectedVehicle(location);
-                        break;
-                    case (sbyte)Enums.LocationState.Canceled:
-                        break;
+                    return BadRequest(ModelState);
                 }
-                return Ok(locVM);
+
+                Location location = await _context.Location.FindAsync(id);
+                if (location == null)
+                {
+                    return NotFound();
+                }
+
+                try
+                {
+                    List<Pole> poles = _context.Pole.ToList();
+                    User user = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
+                    Comments comment = _context.Comments.FirstOrDefault(c => c.CommentLocId == location.LocId);
+
+                    //Initialize ViewModel with params present everytime
+                    ManageLocationViewModel locVM = new ManageLocationViewModel()
+                    {
+                        LocId = location.LocId,
+                        LocState = GetLocationStateTrad(location.LocState),
+                        LocStateId = location.LocState,
+                        User = user.UserFirstname + " " + user.UserName,
+                        PoleStart = poles.Where(p => p.PoleId == location.LocPoleIdstart).First().PoleName,
+                        PoleEnd = poles.Where(p => p.PoleId == location.LocPoleIdend).First().PoleName,
+                        DateStart = location.LocDatestartlocation,
+                        DateEnd = location.LocDateendlocation,
+                        Comment = comment == null ? "" : comment.CommentText
+                    };
+
+                    switch (location.LocState)
+                    {
+                        case (sbyte)Enums.LocationState.Asked:
+                            locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+                            break;
+                        case (sbyte)Enums.LocationState.InProgress:
+                            locVM.SelectedVehicle = GetSelectedVehicle(location);
+                            break;
+                        case (sbyte)Enums.LocationState.Validated:
+                            locVM.SelectedVehicle = GetSelectedVehicle(location);
+                            locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+
+                            break;
+                        case (sbyte)Enums.LocationState.Rejected:
+                            break;
+                        case (sbyte)Enums.LocationState.Finished:
+                            locVM.SelectedVehicle = GetSelectedVehicle(location);
+                            break;
+                        case (sbyte)Enums.LocationState.Canceled:
+                            break;
+                    }
+
+                    return Ok(locVM);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                    ModelState.AddModelError("Error", "Erreur lors de la récupération de la réservation.");
+                    return BadRequest(ModelState);
+                    throw;
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                ModelState.AddModelError("Error", "Erreur lors de la récupération de la réservation.");
-                return BadRequest(ModelState);
-                throw;
-            }
+
+            return Unauthorized();
+
         }
 
 
@@ -222,60 +232,70 @@ namespace TestAuthentification.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateViewModel location)
         {
-            if (!ModelState.IsValid || id == 0)
-            {
-                return BadRequest(ModelState);
-            }
-            Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
 
-            if (loc == null)
-            {
-                return NotFound();
-            }
+            string token = GetToken();
 
-            switch (location.Action)
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
             {
 
-                case "Validate":
-                    // Lorsque côté front on a cliqué sur Accepter
+                if (!ModelState.IsValid || id == 0)
+                {
+                    return BadRequest(ModelState);
+                }
 
-                    loc.LocState = (int)Enums.LocationState.Validated;
-                    loc.LocVehId = location.VehicleId;
+                Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
 
-                    //TODO affecter le véhicule
-                    break;
-                case "Finish":
-                    // Lorsque côté front on a cliqué sur Terminer la location
-                    loc.LocState = (int)Enums.LocationState.Finished;
-                    break;
-                case "Start":
-                    // Lorsque côté front on a cliqué sur Démarrer la location
-                    loc.LocState = (int)Enums.LocationState.InProgress;
-                    break;
-                default:
-                    break;
+                if (loc == null)
+                {
+                    return NotFound();
+                }
+
+                switch (location.Action)
+                {
+
+                    case "Validate":
+                        // Lorsque côté front on a cliqué sur Accepter
+
+                        loc.LocState = (int)Enums.LocationState.Validated;
+                        loc.LocVehId = location.VehicleId;
+
+                        //TODO affecter le véhicule
+                        break;
+                    case "Finish":
+                        // Lorsque côté front on a cliqué sur Terminer la location
+                        loc.LocState = (int)Enums.LocationState.Finished;
+                        break;
+                    case "Start":
+                        // Lorsque côté front on a cliqué sur Démarrer la location
+                        loc.LocState = (int)Enums.LocationState.InProgress;
+                        break;
+                    default:
+                        break;
+                }
+
+                User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
+
+                Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
+
+                Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
+
+                Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
+                _context.Update(loc);
+                _context.SaveChanges();
+
+                if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    ModelState.AddModelError("Error",
+                        "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                    return BadRequest(ModelState);
+                }
             }
 
-            User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
-
-            Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
-
-            Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
-
-            Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
-            _context.Update(loc);
-            _context.SaveChanges();
-
-            if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle))
-            {
-                return Ok();
-            }
-            else
-            {
-                ModelState.AddModelError("Error",
-               "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
-                return BadRequest(ModelState);
-            }
+            return Unauthorized();
         }
 
         // DELETE: api/Locations/5
@@ -561,7 +581,7 @@ namespace TestAuthentification.Controllers
             {
                 return new VehicleDetailsViewModel();
             }
-            
+
         }
         #endregion
     }

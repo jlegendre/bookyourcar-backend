@@ -30,6 +30,11 @@ namespace TestAuthentification.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUser()
         {
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
             var listUser = await _context.User.ToListAsync();
             if (listUser.Count > 0)
             {
@@ -57,48 +62,42 @@ namespace TestAuthentification.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var token = GetToken();
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
+            var user = await _context.User.FindAsync(id);
+            if (user == null)
             {
-
-                var user = await _context.User.FindAsync(id);
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                var userInfo = new UserInfoViewModel()
-                {
-                    UserPoleId = user.UserPoleId,
-                    UserFirstname = user.UserFirstname,
-                    UserRightId = user.UserRightId,
-                    UserId = user.UserId,
-                    UserName = user.UserName,
-                    UserEmail = user.UserEmail,
-                    UserNumpermis = user.UserNumpermis,
-                    UserPhone = user.UserPhone,
-                    PoleName = user.UserPole != null ? user.UserPole.PoleName : "",
-                };
-
-                return Ok(userInfo);
+                return NotFound();
             }
 
-            return Unauthorized();
+            var userInfo = new UserInfoViewModel()
+            {
+                UserPoleId = user.UserPoleId,
+                UserFirstname = user.UserFirstname,
+                UserRightId = user.UserRightId,
+                UserId = user.UserId,
+                UserName = user.UserName,
+                UserEmail = user.UserEmail,
+                UserNumpermis = user.UserNumpermis,
+                UserPhone = user.UserPhone,
+                PoleName = user.UserPole != null ? user.UserPole.PoleName : "",
+            };
+
+            return Ok(userInfo);
+
         }
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser([FromRoute] int id, [FromBody] UserInfoViewModel UserInfoViewModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             if (id != UserInfoViewModel.UserId)
             {
@@ -111,44 +110,34 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            var token = GetToken();
-            if (string.IsNullOrEmpty(token))
+
+            try
             {
-                return BadRequest(ModelState);
+                user.UserEmail = UserInfoViewModel.UserEmail;
+                user.UserFirstname = UserInfoViewModel.UserFirstname;
+                user.UserName = UserInfoViewModel.UserName;
+                user.UserNumpermis = UserInfoViewModel.UserNumpermis;
+                user.UserPhone = UserInfoViewModel.UserPhone;
+                user.UserPoleId = UserInfoViewModel.UserPoleId;
+                user.UserRightId = UserInfoViewModel.UserRightId;
+                user.UserPole.PoleName = UserInfoViewModel.PoleName;
+
+                _context.Entry(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return Ok();
             }
-
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            catch (DbUpdateConcurrencyException)
             {
-
-                try
+                if (!UserExists(id))
                 {
-                    user.UserEmail = UserInfoViewModel.UserEmail;
-                    user.UserFirstname = UserInfoViewModel.UserFirstname;
-                    user.UserName = UserInfoViewModel.UserName;
-                    user.UserNumpermis = UserInfoViewModel.UserNumpermis;
-                    user.UserPhone = UserInfoViewModel.UserPhone;
-                    user.UserPoleId = UserInfoViewModel.UserPoleId;
-                    user.UserRightId = UserInfoViewModel.UserRightId;
-                    user.UserPole.PoleName = UserInfoViewModel.PoleName;
-
-                    _context.Entry(user).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
-                    return Ok();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!UserExists(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
             }
 
-            return Unauthorized();
         }
 
         [HttpGet, Route("UserInfos")]
@@ -231,21 +220,15 @@ namespace TestAuthentification.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var user = await _context.User.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
-            }
-
-            var token = GetToken();
-            if (string.IsNullOrEmpty(token))
-            {
-                return BadRequest(ModelState);
             }
 
             if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
@@ -288,23 +271,18 @@ namespace TestAuthentification.Controllers
         public IActionResult GetUserRole()
         {
             var token = GetToken();
-            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var simplePrinciple = handler.ReadJwtToken(token);
-                var role = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-                var roles = new Dictionary<string, string>();
-                roles.Add("role", role);
 
-                return Ok(roles);
-            }
+            var handler = new JwtSecurityTokenHandler();
+            var simplePrinciple = handler.ReadJwtToken(token);
+            var role = simplePrinciple.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+            var roles = new Dictionary<string, string>();
+            roles.Add("role", role);
 
-            return Unauthorized();
+            return Ok(roles);
+
 
         }
 
@@ -316,41 +294,34 @@ namespace TestAuthentification.Controllers
         public IActionResult GetUserInWaiting()
         {
             var token = GetToken();
-            if (string.IsNullOrEmpty(token))
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
+            List<User> userEnAttente =
+                _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
+
+            if (userEnAttente.Count > 0)
             {
-                return BadRequest(ModelState);
+                var model = userEnAttente.Select(x => new UserInfoViewModel()
+                {
+                    PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                    UserFirstname = x.UserFirstname,
+                    UserId = x.UserId,
+                    UserRightId = x.UserRightId,
+                    UserName = x.UserName,
+                    UserEmail = x.UserEmail,
+                    UserPoleId = x.UserPoleId,
+                    UserPhone = x.UserPhone,
+                    UserNumpermis = x.UserNumpermis
+                });
+                return Ok(model);
             }
-
-            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
+            else
             {
-                List<User> userEnAttente =
-                    _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
-
-                if (userEnAttente.Count > 0)
-                {
-                    var model = userEnAttente.Select(x => new UserInfoViewModel()
-                    {
-                        PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
-                        UserFirstname = x.UserFirstname,
-                        UserId = x.UserId,
-                        UserRightId = x.UserRightId,
-                        UserName = x.UserName,
-                        UserEmail = x.UserEmail,
-                        UserPoleId = x.UserPoleId,
-                        UserPhone = x.UserPhone,
-                        UserNumpermis = x.UserNumpermis
-                    });
-                    return Ok(model);
-                }
-                else
-                {
-                    //Retourne une liste vide
-                    return Ok(new List<User>());
-                }
-
+                //Retourne une liste vide
+                return Ok(new List<User>());
             }
-
-            return Unauthorized();
 
         }
 
@@ -363,34 +334,29 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> ValidateUserInWaiting([FromRoute] int id)
         {
             var token = GetToken();
-            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
-            {
-                User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
 
-                if (userValidate != null)
-                {
-                    userValidate.UserState = (sbyte)Enums.UserState.Validated;
-                    _context.SaveChanges();
+
+            User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
+
+            if (userValidate != null)
+            {
+                userValidate.UserState = (sbyte)Enums.UserState.Validated;
+                _context.SaveChanges();
 #if !DEBUG
                     string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ValidateRegister);
                     myFiles = myFiles.Replace("%%USERNAME%%", userValidate.UserFirstname);
                     await EmailService.SendEmailAsync("Validation de votre compte - BookYourCar", myFiles, userValidate.UserEmail);    
 #endif
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest(ModelState);
-                }
-
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ModelState);
             }
 
-            return Unauthorized();
         }
 
         /// <summary>
@@ -402,35 +368,27 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> RefuseUserInWaiting([FromRoute] int id)
         {
             var token = GetToken();
-            if (string.IsNullOrEmpty(token) || (!ModelState.IsValid))
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            if (TokenService.ValidateTokenWhereIsAdmin(token) && TokenService.VerifDateExpiration(token))
-            {
-                User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
 
-                if (userValidate != null)
-                {
-                    userValidate.UserState = (sbyte)Enums.UserState.Rejected;
-                    _context.SaveChanges();
+
+            User userValidate = await _context.User.FirstOrDefaultAsync(x => x.UserId == id);
+
+            if (userValidate != null)
+            {
+                userValidate.UserState = (sbyte)Enums.UserState.Rejected;
+                _context.SaveChanges();
 
 #if !DEBUG
                     string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RefusRegister);
                     myFiles = myFiles.Replace("%%USERNAME%%", userValidate.UserFirstname);
                     await EmailService.SendEmailAsync("Refus de votre compte - BookYourCar", myFiles, userValidate.UserEmail);    
 #endif
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest(ModelState);
-                }
-
+                return Ok();
             }
+            return BadRequest(ModelState);
 
-            return Unauthorized();
         }
 
         [HttpPost, Route("EditInfoUser")]
@@ -463,14 +421,14 @@ namespace TestAuthentification.Controllers
 
                 if (user.UserName != null)
                 {
-                     userConnected.UserName = user.UserName;
+                    userConnected.UserName = user.UserName;
                 }
 
                 if (user.UserNumpermis != null)
                 {
                     userConnected.UserNumpermis = user.UserNumpermis;
                 }
-                
+
                 try
                 {
                     _context.Update(userConnected);

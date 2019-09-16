@@ -27,10 +27,10 @@ namespace TestAuthentification.Controllers
         [HttpGet("{date}")]
         public async Task<IActionResult> GetPlanning([FromRoute] DateTime date)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             try
             {
@@ -75,5 +75,22 @@ namespace TestAuthentification.Controllers
 
             return new Tuple<DateTime,DateTime>(fisrtDay, lastDay);
         }
+
+
+        #region utilitaire Token
+        private string GetToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+
+            return token;
+        }
+
+
+        #endregion
     }
 }

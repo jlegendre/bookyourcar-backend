@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TestAuthentification.Models;
 using TestAuthentification.Resources;
+using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
 
 namespace TestAuthentification.Controllers
@@ -30,6 +31,11 @@ namespace TestAuthentification.Controllers
         [HttpGet]
         public async Task<IActionResult> GetVehicle()
         {
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
 
             List<Vehicle> listVehicle = _context.Vehicle.ToList();
 
@@ -64,10 +70,10 @@ namespace TestAuthentification.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVehicle([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var vehicle = await _context.Vehicle.FindAsync(id);
             if (vehicle != null)
@@ -97,10 +103,10 @@ namespace TestAuthentification.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVehicle([FromRoute] int id, [FromBody] VehiculeViewModel vehicle)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var vehiculeToModifie = await _context.Vehicle.FindAsync(id);
             vehiculeToModifie.VehDatemec = vehicle.VehDatemec;
@@ -139,10 +145,10 @@ namespace TestAuthentification.Controllers
         [HttpPost]
         public async Task<IActionResult> PostVehicle([FromBody] VehiculeViewModel vehicle)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
             var vehiculeToAdd = new Vehicle()
             {
                 VehBrand = vehicle.VehBrand,
@@ -176,10 +182,10 @@ namespace TestAuthentification.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+             var token = GetToken();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var vehicle = await _context.Vehicle.FindAsync(id);
             if (vehicle == null)
