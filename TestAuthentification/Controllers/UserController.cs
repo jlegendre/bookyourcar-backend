@@ -54,7 +54,7 @@ namespace TestAuthentification.Controllers
             }
 
             var users = new Dictionary<string, string>();
-            users.Add("message", "Il n'y a pas d'utilisateurs.");
+            users.Add("Info", "Il n'y a pas d'utilisateurs en attente de validation.");
             return Ok(users);
         }
 
