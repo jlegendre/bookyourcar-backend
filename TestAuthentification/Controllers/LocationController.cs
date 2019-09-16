@@ -545,17 +545,23 @@ namespace TestAuthentification.Controllers
         }
         private VehicleDetailsViewModel GetSelectedVehicle(Location location)
         {
-            Vehicle veh = _context.Vehicle.Where(v => v.VehId == location.LocVehId).First();
-            return new VehicleDetailsViewModel()
+            if (location.LocVehId != null)
             {
-                VehId = veh.VehId,
-                VehCommonName = veh.VehBrand + " " + veh.VehModel,
-                Registration = veh.VehRegistration,
-                FuelName = veh.VehTypeEssence,
-                SeatCount = veh.VehNumberplace
-            };
-
-            throw new NotImplementedException();
+                Vehicle veh = _context.Vehicle.Where(v => v.VehId == location.LocVehId).First();
+                return new VehicleDetailsViewModel()
+                {
+                    VehId = veh.VehId,
+                    VehCommonName = veh.VehBrand + " " + veh.VehModel,
+                    Registration = veh.VehRegistration,
+                    FuelName = veh.VehTypeEssence,
+                    SeatCount = veh.VehNumberplace
+                };
+            }
+            else
+            {
+                return new VehicleDetailsViewModel();
+            }
+            
         }
         #endregion
     }
