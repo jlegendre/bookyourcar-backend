@@ -35,8 +35,6 @@ namespace TestAuthentification.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-
-
             List<Vehicle> listVehicle = _context.Vehicle.ToList();
 
             if (listVehicle.Count > 0)
@@ -45,7 +43,7 @@ namespace TestAuthentification.Controllers
                 {
                     PoleId = x.VehPoleId,
                     VehModel = x.VehModel,
-                    PoleName = _context.Pole.Where(p => p.PoleId == x.VehPoleId).Count() > 0 ? _context.Pole.SingleOrDefault(p => p.PoleId == x.VehPoleId).PoleName : "",
+                    PoleName = _context.Pole.Any(p => p.PoleId == x.VehPoleId) ? _context.Pole.SingleOrDefault(p => p.PoleId == x.VehPoleId)?.PoleName : "",
                     VehId = x.VehId,
                     VehBrand = x.VehBrand,
                     VehColor = x.VehColor,
@@ -57,7 +55,7 @@ namespace TestAuthentification.Controllers
                     VehIsactive = x.VehIsactive,
                     VehState = x.VehState
 
-                }).Where(x=>x.VehState != (int) Enums.VehiculeState.Deleted).ToList();
+                }).Where(x => x.VehState != (int)Enums.VehiculeState.Deleted).ToList();
                 return Ok(model);
             }
             var roles = new Dictionary<string, string>();
@@ -74,27 +72,39 @@ namespace TestAuthentification.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-
-            var vehicle = await _context.Vehicle.FindAsync(id);
-            if (vehicle != null)
+            try
             {
-                VehiculeViewModel model = new VehiculeViewModel
+                var vehicle = await _context.Vehicle.FindAsync(id);
+                if (vehicle != null)
                 {
-                    VehId = vehicle.VehId,
-                    VehBrand = vehicle.VehBrand,
-                    VehColor = vehicle.VehColor,
-                    VehDatemec = vehicle.VehDatemec,
-                    VehIsactive = vehicle.VehIsactive,
-                    VehKm = vehicle.VehKm,
-                    VehModel = vehicle.VehModel,
-                    VehNumberplace = vehicle.VehNumberplace,
-                    VehRegistration = vehicle.VehRegistration,
-                    VehTypeEssence = vehicle.VehTypeEssence,
-                    PoleName = vehicle.VehPole.PoleName,
-                };
+                    VehiculeViewModel model = new VehiculeViewModel
+                    {
+                        VehId = vehicle.VehId,
+                        VehBrand = vehicle.VehBrand,
+                        VehColor = vehicle.VehColor,
+                        VehDatemec = vehicle.VehDatemec,
+                        VehIsactive = vehicle.VehIsactive,
+                        VehKm = vehicle.VehKm,
+                        VehModel = vehicle.VehModel,
+                        VehNumberplace = vehicle.VehNumberplace,
+                        VehRegistration = vehicle.VehRegistration,
+                        VehTypeEssence = vehicle.VehTypeEssence,
+                        PoleName = vehicle.VehPole.PoleName,
+                        VehState = vehicle.VehState
+                    };
 
-                return Ok(model);
+                    return Ok(model);
+                }
             }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite.");
+                return BadRequest(ModelState);
+            }
+
             return NotFound();
 
         }
@@ -119,6 +129,7 @@ namespace TestAuthentification.Controllers
             vehiculeToModifie.VehTypeEssence = vehicle.VehTypeEssence;
             vehiculeToModifie.VehIsactive = vehicle.VehIsactive;
             vehiculeToModifie.VehPole.PoleName = vehicle.PoleName;
+            vehiculeToModifie.VehState = (sbyte)vehicle.VehState;
 
             _context.Entry(vehiculeToModifie).State = EntityState.Modified;
 
@@ -126,16 +137,18 @@ namespace TestAuthentification.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
                 if (!VehicleExists(id))
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite lors de la modification du vehicule : ." + vehicle.VehModel);
+                return BadRequest(ModelState);
+
             }
 
             return NoContent();
@@ -147,7 +160,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             var vehiculeToAdd = new Vehicle()
             {
@@ -160,7 +173,8 @@ namespace TestAuthentification.Controllers
                 VehKm = vehicle.VehKm,
                 VehNumberplace = vehicle.VehNumberplace,
                 VehIsactive = vehicle.VehIsactive,
-                VehPoleId = vehicle.PoleId
+                VehPoleId = vehicle.PoleId,
+                VehState = (sbyte)Enums.VehiculeState.Available,
             };
 
             try
@@ -182,7 +196,7 @@ namespace TestAuthentification.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle([FromRoute] int id)
         {
-             var token = GetToken();
+            var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 

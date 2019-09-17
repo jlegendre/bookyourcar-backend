@@ -178,7 +178,12 @@ namespace TestAuthentification.Controllers
 
 
 
-
+        /// <summary>
+        /// Permet de vérifier un compte grâce à l'adresse mail
+        /// L'utilisateur reçoit un lien de vérification qui une fois cliqué valide l'email. 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
         [HttpGet("VerifEmail/{token}")]
         public async Task<IActionResult> VerifEmail(string token)
         {

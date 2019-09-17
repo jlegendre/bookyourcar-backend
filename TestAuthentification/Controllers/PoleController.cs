@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,21 +53,29 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
-
-
-            var pole = await _context.Pole.FindAsync(id);
-            if (pole != null)
+            try
             {
-                var model = new PoleViewModel()
+                var pole = await _context.Pole.FindAsync(id);
+                if (pole != null)
                 {
-                    PoleName = pole.PoleName,
-                    PoleId = pole.PoleId,
-                    PoleAddress = pole.PoleAddress,
-                    PoleCp = pole.PoleCp,
-                    PoleCity = pole.PoleCity
-                };
-                return Ok(model);
+                    var model = new PoleViewModel()
+                    {
+                        PoleName = pole.PoleName,
+                        PoleId = pole.PoleId,
+                        PoleAddress = pole.PoleAddress,
+                        PoleCp = pole.PoleCp,
+                        PoleCity = pole.PoleCity
+                    };
+                    return Ok(model);
+                }
             }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                throw;
+            }
+
             return NotFound();
 
         }
@@ -93,16 +102,18 @@ namespace TestAuthentification.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
                 if (!PoleExists(id))
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite lors de la modification du pole : ." + poleModel.PoleName);
+                return BadRequest(ModelState);
+
             }
 
             return NoContent();
@@ -115,7 +126,7 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
-
+            
 
             var pole = new Pole()
             {
@@ -124,11 +135,22 @@ namespace TestAuthentification.Controllers
                 PoleCp = poleModel.PoleCp,
                 PoleName = poleModel.PoleName
             };
+            try
+            {
+                _context.Pole.Add(pole);
+                await _context.SaveChangesAsync();
 
-            _context.Pole.Add(pole);
-            await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite lors de l'ajout du pole : ." + poleModel.PoleName);
+                return BadRequest(ModelState);
+            }
 
-            return CreatedAtAction("GetPole", new { id = pole.PoleId }, pole);
+            return CreatedAtAction("GetPole", new { id = poleModel.PoleId }, poleModel);
         }
 
         // DELETE: api/Poles/5
@@ -138,15 +160,26 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
-            
+
             var pole = await _context.Pole.FindAsync(id);
             if (pole == null)
             {
                 return NotFound();
             }
 
-            _context.Pole.Remove(pole);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Pole.Remove(pole);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite lors de la suppression du pole : " + pole.PoleName);
+                return BadRequest(ModelState);
+            }
 
             return NoContent();
         }

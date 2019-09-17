@@ -14,6 +14,8 @@ namespace TestAuthentification.Services
 
         public static bool ValidateToken(string authToken)
         {
+            if (string.IsNullOrEmpty(authToken)) return false;
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var validationParameters = GetValidationParameters();
 
