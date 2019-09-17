@@ -190,7 +190,7 @@ namespace TestAuthentification.Controllers
                 try
                 {
                     User user = _authService.GetUserConnected(token);
-                    if (user.UserState != (sbyte)Enums.UserState.InWaiting)
+                    if (user.UserState == (sbyte)Enums.UserState.InWaiting)
                     {
                         user.UserState = (sbyte)Enums.UserState.EmailVerif;
                         _context.User.Update(user);

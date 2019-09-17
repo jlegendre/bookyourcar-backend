@@ -55,15 +55,15 @@ namespace TestAuthentification.Resources
         public enum UserState
         {
             // en attente
-            InWaiting,
+            InWaiting = 0,
             // compte validé par l'admin
-            Validated,
+            Validated = 1,
             // compte refusé par l'admin
-            Rejected,
+            Rejected = 2,
             // compte bloqué
-            Blocked,
+            Blocked = 3,
             //compte qui a été vérifié par email
-            EmailVerif
+            EmailVerif = 4
         }
     }
 }
