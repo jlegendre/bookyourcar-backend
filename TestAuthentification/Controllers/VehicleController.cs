@@ -101,7 +101,7 @@ namespace TestAuthentification.Controllers
                 if (e.Source != null)
                     Console.WriteLine("IOException source: {0}", e.Source);
                 ModelState.AddModelError("Error",
-                    "Une erreur s'est produite.");
+                    "Une erreur s'est produite." + e.Message);
                 return BadRequest(ModelState);
             }
 
@@ -186,7 +186,7 @@ namespace TestAuthentification.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                ModelState.AddModelError("Error", "Une erreur est survenue.");
+                ModelState.AddModelError("Error", "Une erreur est survenue lors de la modification du véhicule. " + ex.Message);
                 return BadRequest(ModelState);
             }
 
@@ -207,10 +207,23 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-            vehicle.VehState = (sbyte)Enums.VehiculeState.Deleted;
-            await _context.SaveChangesAsync();
+            try
+            {
+                vehicle.VehState = (sbyte)Enums.VehiculeState.Deleted;
+                await _context.SaveChangesAsync();
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite lors de la suppression du vehicule : . " + vehicle.VehModel + "Erreur :  " + e.Message);
+                return BadRequest(ModelState);
+            }
+
+
         }
 
 
@@ -226,16 +239,25 @@ namespace TestAuthentification.Controllers
         /// <returns></returns>
         private string GetToken()
         {
-            var token = Request.Headers["Authorization"].ToString();
-            if (token.StartsWith("Bearer"))
+            try
             {
-                var tab = token.Split(" ");
-                token = tab[1];
+                var token = Request.Headers["Authorization"].ToString();
+                if (token.StartsWith("Bearer"))
+                {
+                    var tab = token.Split(" ");
+                    token = tab[1];
+                }
+
+                return token;
+            }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                return "";
             }
 
-            return token;
         }
-
 
     }
 }
