@@ -149,7 +149,7 @@ namespace TestAuthentification.Controllers
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("Error", "Une erreur est survenue.");
+                ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
                 Console.WriteLine(e);
                 return BadRequest(ModelState);
             }
@@ -169,7 +169,7 @@ namespace TestAuthentification.Controllers
             catch (Exception e)
             {
                 ModelState.AddModelError("Error",
-                    "Une erreur s'est produite sur l'envoi de mail.");
+                    "Une erreur s'est produite sur l'envoi de mail." + e.Message);
                 return BadRequest(ModelState);
             }
 
@@ -188,39 +188,33 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> VerifEmail(string token)
         {
             var message = new Dictionary<string, string>();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            //si l'utilisateur a un statut différent de InWaiting alors on valide ça verification de compte sinon on informe l'utilisateur qu'il a déja verifié son compte
+            try
             {
-                //si l'utilisateur a un statut différent de InWaiting alors on valide ça verification de compte sinon on informe l'utilisateur qu'il a déja verifié son compte
-                try
+                User user = _authService.GetUserConnected(token);
+                if (user.UserState == (sbyte)Enums.UserState.InWaiting)
                 {
-                    User user = _authService.GetUserConnected(token);
-                    if (user.UserState == (sbyte)Enums.UserState.InWaiting)
-                    {
-                        user.UserState = (sbyte)Enums.UserState.EmailVerif;
-                        _context.User.Update(user);
-                        _context.SaveChanges();
+                    user.UserState = (sbyte)Enums.UserState.EmailVerif;
+                    _context.User.Update(user);
+                    _context.SaveChanges();
 
-                        message.Add("Info", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
-                        return Ok(message);
-                    }
-                    else
-                    {
-                        message.Add("Info", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
-                        return Ok(message);
-                    }
-
+                    message.Add("Info", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
+                    return Ok(message);
                 }
-                catch (Exception e)
+                else
                 {
-                    if (e.Source != null)
-                        Console.WriteLine("IOException source: {0}", e.Source);
-                    throw;
+                    message.Add("Info", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
+                    return Ok(message);
                 }
+
             }
-            else
+            catch (Exception e)
             {
-                return Unauthorized();
+                if (e.Source != null)
+                    Console.WriteLine("IOException source: {0}", e.Source);
+                throw;
             }
         }
 
@@ -232,6 +226,7 @@ namespace TestAuthentification.Controllers
         /// <param name="emailDestinataire"></param>
         /// <returns></returns>
         [HttpPost, Route("PasswordForget")]
+        [AllowAnonymous]
         public async Task<IActionResult> PasswordForgetAsync(string emailDestinataire)
         {
             AuthService serviceAuth = new AuthService(_context);
@@ -287,24 +282,15 @@ namespace TestAuthentification.Controllers
         [HttpGet("ChangePassword/{token}")]
         public async Task<IActionResult> ChangePassword(string token)
         {
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
-            {
-                // on vérifie si la date d'expiration du token est valide
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+            // on vérifie si la date d'expiration du token est valide
 
-                var message = new Dictionary<string, string>();
-                message.Add("Token", token);
+            var message = new Dictionary<string, string>();
+            message.Add("Token", token);
 
-                // on retourne la vue du formulaire pour reset les infos
-                return Ok(message);
-            }
-            else
-            {
-                return Unauthorized();
-            }
+            // on retourne la vue du formulaire pour reset les infos
+            return Ok(message);
         }
-
-
-
 
 
         /// <summary>

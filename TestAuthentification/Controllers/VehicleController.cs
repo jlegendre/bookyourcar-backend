@@ -33,7 +33,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             List<Vehicle> listVehicle = _context.Vehicle.ToList();
 
@@ -70,7 +70,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if(!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             try
             {
@@ -115,7 +115,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var vehiculeToModifie = await _context.Vehicle.FindAsync(id);
@@ -198,7 +198,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var vehicle = await _context.Vehicle.FindAsync(id);

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using TestAuthentification.Models;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels;
@@ -23,6 +24,7 @@ namespace TestAuthentification.Controllers
 
         // GET: api/Poles
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPole()
         {
 
@@ -52,7 +54,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
             try
             {
                 var pole = await _context.Pole.FindAsync(id);
@@ -86,7 +88,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var poleToModifie = await _context.Pole.FindAsync(id);
@@ -125,8 +127,8 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
-            
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+
 
             var pole = new Pole()
             {
@@ -159,7 +161,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             var pole = await _context.Pole.FindAsync(id);
             if (pole == null)

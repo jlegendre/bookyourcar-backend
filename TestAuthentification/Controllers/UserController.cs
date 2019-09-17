@@ -32,7 +32,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var listUser = await _context.User.ToListAsync();
@@ -64,7 +64,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var user = await _context.User.FindAsync(id);
@@ -96,7 +96,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             if (id != UserInfoViewModel.UserId)
@@ -146,7 +146,7 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             AuthService service = new AuthService(_context);
             User user = service.GetUserConnected(token);
@@ -222,7 +222,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var user = await _context.User.FindAsync(id);
@@ -272,7 +272,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             var handler = new JwtSecurityTokenHandler();
@@ -295,7 +295,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             List<User> userEnAttente =
@@ -335,7 +335,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
 
@@ -369,7 +369,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
 

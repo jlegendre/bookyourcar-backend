@@ -33,77 +33,14 @@ namespace TestAuthentification.Controllers
         public async Task<IActionResult> GetAllLocation()
         {
             string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+
+            User connectedUser = _authService.GetUserConnected(token);
+
+            if (connectedUser.UserRight.RightLabel == Enums.Roles.Admin.ToString())
             {
-                User connectedUser = _authService.GetUserConnected(token);
-
-                if (connectedUser.UserRight.RightLabel == Enums.Roles.Admin.ToString())
-                {
-                    var listLocation = await _context.Location.ToListAsync();
-
-                    List<LocationListViewModel> locations = new List<LocationListViewModel>();
-
-                    if (listLocation.Count > 0)
-                    {
-                        foreach (Location loc in listLocation)
-                        {
-                            LocationListViewModel locVM = new LocationListViewModel();
-                            locVM.LocationId = loc.LocId;
-                            locVM.DateDebutResa = loc.LocDatestartlocation;
-                            locVM.DateFinResa = loc.LocDateendlocation;
-
-                            User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
-                            locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
-
-                            Pole poleStart = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdstart).First();
-                            locVM.PoleDepart = poleStart.PoleName;
-                            Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
-                            locVM.PoleDestination = poleEnd.PoleName;
-
-                            if (loc.LocVehId != null)
-                            {
-                                Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
-                                locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
-                            }
-                            else
-                            {
-                                locVM.VehicleFriendlyName = "Pas de vehicule associé";
-                            }
-
-
-                            locVM.LocationState = GetLocationStateTrad(loc.LocState);
-                            locVM.LocationStateId = loc.LocState;
-
-                            locations.Add(locVM);
-                        }
-                        return Ok(locations.ToList());
-                    }
-                    return Ok(locations.ToList());
-                }
-                else
-                {
-                    return Unauthorized();
-                }
-            }
-            else
-            {
-                return Unauthorized();
-            }
-        }
-
-
-        // GET: api/Locations
-        [HttpGet]
-        public async Task<IActionResult> GetLocation()
-        {
-            string token = GetToken();
-
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
-            {
-                User connectedUser = _authService.GetUserConnected(token);
-
-                var listLocation = await _context.Location.Where(l => l.LocUserId == connectedUser.UserId).ToListAsync();
+                var listLocation = await _context.Location.ToListAsync();
 
                 List<LocationListViewModel> locations = new List<LocationListViewModel>();
 
@@ -140,6 +77,7 @@ namespace TestAuthentification.Controllers
 
                         locations.Add(locVM);
                     }
+                    return Ok(locations.ToList());
                 }
                 return Ok(locations.ToList());
             }
@@ -150,80 +88,128 @@ namespace TestAuthentification.Controllers
 
         }
 
+
+        // GET: api/Locations
+        [HttpGet]
+        public async Task<IActionResult> GetLocation()
+        {
+            string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+            User connectedUser = _authService.GetUserConnected(token);
+
+            var listLocation = await _context.Location.Where(l => l.LocUserId == connectedUser.UserId).ToListAsync();
+
+            List<LocationListViewModel> locations = new List<LocationListViewModel>();
+
+            if (listLocation.Count > 0)
+            {
+                foreach (Location loc in listLocation)
+                {
+                    LocationListViewModel locVM = new LocationListViewModel();
+                    locVM.LocationId = loc.LocId;
+                    locVM.DateDebutResa = loc.LocDatestartlocation;
+                    locVM.DateFinResa = loc.LocDateendlocation;
+
+                    User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
+                    locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
+
+                    Pole poleStart = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdstart).First();
+                    locVM.PoleDepart = poleStart.PoleName;
+                    Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
+                    locVM.PoleDestination = poleEnd.PoleName;
+
+                    if (loc.LocVehId != null)
+                    {
+                        Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
+                        locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
+                    }
+                    else
+                    {
+                        locVM.VehicleFriendlyName = "Pas de vehicule associé";
+                    }
+
+
+                    locVM.LocationState = GetLocationStateTrad(loc.LocState);
+                    locVM.LocationStateId = loc.LocState;
+
+                    locations.Add(locVM);
+                }
+            }
+            return Ok(locations.ToList());
+
+        }
+
+
         // GET: api/Locations/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLocation([FromRoute] int id)
         {
             string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            if (!ModelState.IsValid)
             {
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                Location location = await _context.Location.FindAsync(id);
-                if (location == null)
-                {
-                    return NotFound();
-                }
-
-                try
-                {
-                    List<Pole> poles = _context.Pole.ToList();
-                    User user = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
-                    Comments comment = _context.Comments.FirstOrDefault(c => c.CommentLocId == location.LocId);
-
-                    //Initialize ViewModel with params present everytime
-                    ManageLocationViewModel locVM = new ManageLocationViewModel()
-                    {
-                        LocId = location.LocId,
-                        LocState = GetLocationStateTrad(location.LocState),
-                        LocStateId = location.LocState,
-                        User = user.UserFirstname + " " + user.UserName,
-                        PoleStart = poles.Where(p => p.PoleId == location.LocPoleIdstart).First().PoleName,
-                        PoleEnd = poles.Where(p => p.PoleId == location.LocPoleIdend).First().PoleName,
-                        DateStart = location.LocDatestartlocation,
-                        DateEnd = location.LocDateendlocation,
-                        Comment = comment == null ? "" : comment.CommentText
-                    };
-
-                    switch (location.LocState)
-                    {
-                        case (sbyte)Enums.LocationState.Asked:
-                            locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
-                            break;
-                        case (sbyte)Enums.LocationState.InProgress:
-                            locVM.SelectedVehicle = GetSelectedVehicle(location);
-                            break;
-                        case (sbyte)Enums.LocationState.Validated:
-                            locVM.SelectedVehicle = GetSelectedVehicle(location);
-                            locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
-
-                            break;
-                        case (sbyte)Enums.LocationState.Rejected:
-                            break;
-                        case (sbyte)Enums.LocationState.Finished:
-                            locVM.SelectedVehicle = GetSelectedVehicle(location);
-                            break;
-                        case (sbyte)Enums.LocationState.Canceled:
-                            break;
-                    }
-
-                    return Ok(locVM);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.Message);
-                    ModelState.AddModelError("Error", "Erreur lors de la récupération de la réservation.");
-                    return BadRequest(ModelState);
-                    throw;
-                }
+                return BadRequest(ModelState);
             }
 
-            return Unauthorized();
+            Location location = await _context.Location.FindAsync(id);
+            if (location == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                List<Pole> poles = _context.Pole.ToList();
+                User user = _context.User.FirstOrDefault(x => x.UserId == location.LocUserId);
+                Comments comment = _context.Comments.FirstOrDefault(c => c.CommentLocId == location.LocId);
+
+                //Initialize ViewModel with params present everytime
+                ManageLocationViewModel locVM = new ManageLocationViewModel()
+                {
+                    LocId = location.LocId,
+                    LocState = GetLocationStateTrad(location.LocState),
+                    LocStateId = location.LocState,
+                    User = user.UserFirstname + " " + user.UserName,
+                    PoleStart = poles.Where(p => p.PoleId == location.LocPoleIdstart).First().PoleName,
+                    PoleEnd = poles.Where(p => p.PoleId == location.LocPoleIdend).First().PoleName,
+                    DateStart = location.LocDatestartlocation,
+                    DateEnd = location.LocDateendlocation,
+                    Comment = comment == null ? "" : comment.CommentText
+                };
+
+                switch (location.LocState)
+                {
+                    case (sbyte)Enums.LocationState.Asked:
+                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+                        break;
+                    case (sbyte)Enums.LocationState.InProgress:
+                        locVM.SelectedVehicle = GetSelectedVehicle(location);
+                        break;
+                    case (sbyte)Enums.LocationState.Validated:
+                        locVM.SelectedVehicle = GetSelectedVehicle(location);
+                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+
+                        break;
+                    case (sbyte)Enums.LocationState.Rejected:
+                        break;
+                    case (sbyte)Enums.LocationState.Finished:
+                        locVM.SelectedVehicle = GetSelectedVehicle(location);
+                        break;
+                    case (sbyte)Enums.LocationState.Canceled:
+                        break;
+                }
+
+                return Ok(locVM);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                ModelState.AddModelError("Error", "Erreur lors de la récupération de la réservation.");
+                return BadRequest(ModelState);
+                throw;
+            }
 
         }
 
@@ -234,68 +220,56 @@ namespace TestAuthentification.Controllers
         {
 
             string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!ModelState.IsValid || id == 0) return BadRequest(ModelState);
+            
+            Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
+            if (loc == null) return NotFound();
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            switch (location.Action)
             {
 
-                if (!ModelState.IsValid || id == 0)
-                {
-                    return BadRequest(ModelState);
-                }
+                case "Validate":
+                    // Lorsque côté front on a cliqué sur Accepter
 
-                Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
+                    loc.LocState = (int)Enums.LocationState.Validated;
+                    loc.LocVehId = location.VehicleId;
 
-                if (loc == null)
-                {
-                    return NotFound();
-                }
-
-                switch (location.Action)
-                {
-
-                    case "Validate":
-                        // Lorsque côté front on a cliqué sur Accepter
-
-                        loc.LocState = (int)Enums.LocationState.Validated;
-                        loc.LocVehId = location.VehicleId;
-
-                        //TODO affecter le véhicule
-                        break;
-                    case "Finish":
-                        // Lorsque côté front on a cliqué sur Terminer la location
-                        loc.LocState = (int)Enums.LocationState.Finished;
-                        break;
-                    case "Start":
-                        // Lorsque côté front on a cliqué sur Démarrer la location
-                        loc.LocState = (int)Enums.LocationState.InProgress;
-                        break;
-                    default:
-                        break;
-                }
-
-                User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
-
-                Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
-
-                Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
-
-                Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
-                _context.Update(loc);
-                _context.SaveChanges();
-
-                if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle))
-                {
-                    return Ok();
-                }
-                else
-                {
-                    ModelState.AddModelError("Error",
-                        "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
-                    return BadRequest(ModelState);
-                }
+                    //TODO affecter le véhicule
+                    break;
+                case "Finish":
+                    // Lorsque côté front on a cliqué sur Terminer la location
+                    loc.LocState = (int)Enums.LocationState.Finished;
+                    break;
+                case "Start":
+                    // Lorsque côté front on a cliqué sur Démarrer la location
+                    loc.LocState = (int)Enums.LocationState.InProgress;
+                    break;
+                default:
+                    break;
             }
 
-            return Unauthorized();
+            User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
+
+            Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
+
+            Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
+
+            Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
+            _context.Update(loc);
+            _context.SaveChanges();
+
+            if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle))
+            {
+                return Ok();
+            }
+            else
+            {
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                return BadRequest(ModelState);
+            }
+
         }
 
         // DELETE: api/Locations/5
@@ -384,7 +358,7 @@ namespace TestAuthentification.Controllers
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
 
             AuthService service = new AuthService(_context);
