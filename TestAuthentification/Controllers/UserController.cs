@@ -287,7 +287,7 @@ namespace TestAuthentification.Controllers
         }
 
         /// <summary>
-        /// Retourne la liste des utilisateurs qui n'ont pas encore été validé par l'administrateur
+        /// Retourne la liste des utilisateurs qui n'ont pas encore été validé par l'administrateur et ou l'utilisateur a vérifié son email 
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("userInWaiting")]
@@ -299,7 +299,7 @@ namespace TestAuthentification.Controllers
 
 
             List<User> userEnAttente =
-                _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.InWaiting)).ToList();
+                _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.EmailVerif)).ToList();
 
             if (userEnAttente.Count > 0)
             {

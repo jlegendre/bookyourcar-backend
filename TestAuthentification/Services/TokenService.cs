@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
+using TestAuthentification.Models;
 
 namespace TestAuthentification.Services
 {
@@ -29,6 +30,43 @@ namespace TestAuthentification.Services
             }
         }
 
+        /// <summary>
+        /// Permet de générer un token
+        /// Par défault (si rien n'est renseigné) il expire au bout de 10 minutes
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="ExpireFromInMinutes"></param>
+        /// <param name="ExpireFromInHours"></param>
+        /// <returns></returns>
+        public static string GenerateToken(User user, int? ExpireFromInMinutes = null, int? ExpireFromInHours = null)
+        {
+            SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
+            SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+            Claim[] claims = new[]
+            {
+                new Claim(ClaimTypes.Email, user.UserEmail),
+                new Claim(ClaimTypes.Role, user.UserRight.RightLabel),
+            };
+
+            JwtSecurityToken tokeOptions = new JwtSecurityToken(
+                issuer: "http://localhost:5000",
+                audience: "http://localhost:5000",
+                claims: claims,
+                // Si ExpireFromInMinutes est renseigné 
+                //      on prends ça valeur pour l'expiration du token
+                // Sinon si ExpireFromInHours est renseigné 
+                //      on prend ça valeur pour l'expiration du token
+                // Sinon 
+                //      On met 10 minutes par default
+                expires: ExpireFromInMinutes.HasValue ? DateTime.Now.AddMinutes(ExpireFromInMinutes.Value).ToLocalTime() : ExpireFromInHours.HasValue ? DateTime.Now.AddHours(ExpireFromInHours.Value).ToLocalTime() : DateTime.Now.AddMinutes(10).ToLocalTime(),
+                //expires: DateTime.Now.AddMinutes(ExpireFrom).ToLocalTime(),
+                signingCredentials: signinCredentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+        }
+
+
         public static bool VerifDateExpiration(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -37,7 +75,7 @@ namespace TestAuthentification.Services
             // si la date d'expiration est toujours valide
 
             return DateTime.Now < simplePrinciple.ValidTo.ToLocalTime();
-            
+
         }
 
         public static bool ValidateTokenWhereIsAdmin(string authToken)
@@ -65,8 +103,6 @@ namespace TestAuthentification.Services
                 return false;
             }
         }
-
-
 
         public static TokenValidationParameters GetValidationParameters()
         {

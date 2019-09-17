@@ -24,8 +24,6 @@ namespace TestAuthentification.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPole()
         {
-            var token = GetToken();
-            if (!TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             var listPole = await _context.Pole.ToListAsync();
             if (listPole.Count > 0)

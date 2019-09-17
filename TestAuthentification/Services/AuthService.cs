@@ -171,6 +171,11 @@ namespace TestAuthentification.Services
             return errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
         }
 
+        /// <summary>
+        /// recupère l'user connecté en fonction du token renseigné
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <returns></returns>
         public User GetUserConnected(string authToken)
         {
             User user = new User();

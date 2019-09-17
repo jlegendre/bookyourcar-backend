@@ -44,6 +44,14 @@ namespace TestAuthentification.Resources
             Admin
         }
 
+        /// <summary>
+        /// Dans l'ordre on a
+        /// - InWaiting quand l'utilisateur créé son compte
+        /// - EmailVerif quand l'utilisateur a vérifier son email
+        /// - Validated quand l'administrateur a validé le nouveau compte
+        /// - Rejected quand l'administrateur a refusé le nouveau compte
+        /// - Blocked quand l'administrateur a bloqué le compte
+        /// </summary>
         public enum UserState
         {
             // en attente
@@ -53,7 +61,9 @@ namespace TestAuthentification.Resources
             // compte refusé par l'admin
             Rejected,
             // compte bloqué
-            Blocked
+            Blocked,
+            //compte qui a été vérifié par email
+            EmailVerif
         }
     }
 }

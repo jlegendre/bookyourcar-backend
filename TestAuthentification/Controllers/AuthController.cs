@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
 using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
@@ -71,6 +72,7 @@ namespace TestAuthentification.Controllers
                 return Ok(new { Token = tokenString });
                 //return CreatedAtAction(nameof(GetUserInfo), new { Token = tokenString });
             }
+            // si on est ici c'est que le compte n'est pas encore activé 
             else if (myUser != null && !myUser.UserState.Equals((sbyte)Enums.UserState.Validated))
             {
                 ModelState.AddModelError("Error", "Votre compte n'est pas encore activé");
@@ -83,6 +85,11 @@ namespace TestAuthentification.Controllers
             }
         }
 
+        /// <summary>
+        /// Création d'un compte 
+        /// </summary>
+        /// <param name="registerViewModel"></param>
+        /// <returns></returns>
         // POST api/Account/Register
         [AllowAnonymous]
         [HttpPost]
@@ -93,6 +100,7 @@ namespace TestAuthentification.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             User user = new User()
             {
                 UserPassword = service.HashPassword(null, registerViewModel.Password),
@@ -104,6 +112,7 @@ namespace TestAuthentification.Controllers
                 UserNumpermis = registerViewModel.NumPermis
             };
 
+            //Vérification de l'email
             IdentityResult result = _authService.VerifUser(user, registerViewModel.Password);
             if (!result.Succeeded)
             {
@@ -112,6 +121,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
+            // Ajout du rôle à l'utilisateur 
             IdentityResult result2 = _authService.AddToRoleUserAsync(user);
             if (!result2.Succeeded)
             {
@@ -119,6 +129,7 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
+            // verification de l'unicité du téléphone
             IdentityResult result3 = _authService.VerifPhoneNumber(user);
             if (!result3.Succeeded)
             {
@@ -127,7 +138,7 @@ namespace TestAuthentification.Controllers
             }
 
 
-            // mise à jour de l'état du compte
+            // mise à jour de l'état du compte à en attente 
             user.UserState = (sbyte)Enums.UserState.InWaiting;
 
             try
@@ -143,20 +154,72 @@ namespace TestAuthentification.Controllers
                 return BadRequest(ModelState);
             }
 
-#if !DEBUG
+            // token valide 10 mins
+            var tokenGenerate = TokenService.GenerateToken(user);
+
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.RegisterPath);
+            myFiles = myFiles.Replace("%%LIEN%%", Environment.GetEnvironmentVariable("UrlVerifEmail") + tokenGenerate);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-            var response = await EmailService.SendEmailAsync("Création d'un nouveau compte - BookYourCar", myFiles, user.UserEmail);
-            if (!response.IsSuccessStatusCode)
+
+            try
             {
-                                ModelState.AddModelError("Error",
-                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                var response =
+                    await EmailService.SendEmailAsync("confirmez votre e-mail - BookYourCar", myFiles, user.UserEmail);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("Error",
+                    "Une erreur s'est produite sur l'envoi de mail.");
                 return BadRequest(ModelState);
             }
-#endif
-            return Ok();
 
+            return Ok();
         }
+
+
+
+
+        [HttpGet("VerifEmail/{token}")]
+        public async Task<IActionResult> VerifEmail(string token)
+        {
+            var message = new Dictionary<string, string>();
+
+            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            {
+                //si l'utilisateur a un statut différent de InWaiting alors on valide ça verification de compte sinon on informe l'utilisateur qu'il a déja verifié son compte
+                try
+                {
+                    User user = _authService.GetUserConnected(token);
+                    if (user.UserState != (sbyte)Enums.UserState.InWaiting)
+                    {
+                        user.UserState = (sbyte)Enums.UserState.EmailVerif;
+                        _context.User.Update(user);
+                        _context.SaveChanges();
+
+                        message.Add("Info", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
+                        return Ok(message);
+                    }
+                    else
+                    {
+                        message.Add("Info", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
+                        return Ok(message);
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    if (e.Source != null)
+                        Console.WriteLine("IOException source: {0}", e.Source);
+                    throw;
+                }
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
+
 
         /// <summary>
         /// fonction -->  valider formulaire avec l'email suite à l'action mot de passe oublié
@@ -185,11 +248,6 @@ namespace TestAuthentification.Controllers
             };
 
             // On Définit les proprietées du token, comme ça date d'expiration
-
-            var frenchTime = DateTime.Now;
-            var frenchTime1 = DateTime.Now.AddMinutes(1);
-            var frenchTime2 = DateTime.Now.ToLocalTime();
-
 
 
             JwtSecurityToken tokeOptions = new JwtSecurityToken(
@@ -241,11 +299,12 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpGet("ChangePassword/{token}")]
         public async Task<IActionResult> ChangePassword(string token)
         {
             if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
-            {// on vérifie si la date d'expiration du token est valide
+            {
+                // on vérifie si la date d'expiration du token est valide
 
                 var message = new Dictionary<string, string>();
                 message.Add("Token", token);
