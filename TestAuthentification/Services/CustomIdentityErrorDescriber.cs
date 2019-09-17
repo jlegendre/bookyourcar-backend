@@ -25,6 +25,6 @@ namespace TestAuthentification.Services
         public override IdentityError PasswordRequiresDigit() { return new IdentityError { Code = "Error", Description = "Les mots de passe doivent comporter au moins un chiffre('0'-'9')." }; }
         public override IdentityError PasswordRequiresLower() { return new IdentityError { Code = "Error", Description = "Les mots de passe doivent comporter au moins une minuscule ('a'-'z')." }; }
         public override IdentityError PasswordRequiresUpper() { return new IdentityError { Code = "Error", Description = "Les mots de passe doivent comporter au moins une majuscule ('A'-'Z')." }; }
-        public IdentityError InvalidPhoneNumber(string userPhone) { return new IdentityError { Code = "Error", Description = $"Le numéro de téléphone '{userPhone}' est déja prise." }; }
+        public IdentityError InvalidPhoneNumber(string userPhone) { return new IdentityError { Code = "Error", Description = $"Le numéro de téléphone '{userPhone}' est déja pris." }; }
     }
 }
