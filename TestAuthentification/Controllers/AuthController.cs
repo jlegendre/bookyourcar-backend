@@ -238,27 +238,7 @@ namespace TestAuthentification.Controllers
 
             var user = serviceAuth.FindByEmail(emailDestinataire);
 
-            SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("A5DeveloppeurSecureKey"));
-            SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-
-            Claim[] claims = new[]
-            {
-                new Claim(ClaimTypes.Email, user.UserEmail),
-                new Claim(ClaimTypes.Role, user.UserRight.RightLabel),
-            };
-
-            // On Définit les proprietées du token, comme ça date d'expiration
-
-
-            JwtSecurityToken tokeOptions = new JwtSecurityToken(
-                issuer: "http://localhost:5000",
-                audience: "http://localhost:5000",
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(1).ToLocalTime(),
-                signingCredentials: signinCredentials
-            );
-
-            string tokenGenerate = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+            string tokenGenerate = TokenService.GenerateToken(user, 1);
 
 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
