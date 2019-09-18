@@ -164,7 +164,7 @@ namespace TestAuthentification.Controllers
             try
             {
                 var response =
-                    await EmailService.SendEmailAsync("confirmez votre e-mail - BookYourCar", myFiles, user.UserEmail);
+                    await EmailService.SendEmailAsync("Confirmez votre e-mail - BookYourCar", myFiles, user.UserEmail);
             }
             catch (Exception e)
             {
@@ -200,14 +200,11 @@ namespace TestAuthentification.Controllers
                     _context.User.Update(user);
                     _context.SaveChanges();
 
-
-                    ModelState.AddModelError("Success", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
-                    return Ok(ModelState);
+                    return Content("Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
                 }
                 else
                 {
-                    ModelState.AddModelError("Error", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
-                    return Ok(ModelState);
+                    return Content("L'adresse mail a déja été verifié. Vous pouvez <strong>fermer</strong> l'onglet.");
                 }
 
             }
