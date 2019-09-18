@@ -308,23 +308,31 @@ namespace TestAuthentification.Controllers
                 token = tab[1];
             }
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            try
             {
-                AuthService serviceAuth = new AuthService(_context);
-                var userConnected = serviceAuth.GetUserConnected(token);
+                if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+                {
+                    AuthService serviceAuth = new AuthService(_context);
+                    var userConnected = serviceAuth.GetUserConnected(token);
 
-                userConnected.UserPassword = service.HashPassword(null, model.Password);
+                    userConnected.UserPassword = service.HashPassword(null, model.Password);
 
-                //SAVE
-                _context.User.Update(userConnected);
-                _context.SaveChanges();
+                    //SAVE
+                    _context.User.Update(userConnected);
+                    _context.SaveChanges();
 
-                return Ok();
+                    return Ok();
+                }
+            }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    return BadRequest(e.Message);
             }
 
             var message = new Dictionary<string, string>();
             message.Add("Info", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
-
+            
             return Ok(message);
 
         }
