@@ -329,6 +329,10 @@ namespace TestAuthentification.Controllers
         [HttpGet, Route("CountUserInWaiting")]
         public async Task<IActionResult> CountUserInWaiting()
         {
+            var token = GetToken();
+            if (!TokenService.ValidateTokenWhereIsAdmin(token) || !TokenService.VerifDateExpiration(token))
+                return Unauthorized();
+            
             return new ObjectResult(_context.User.Count(x => x.UserState.Equals((sbyte)Enums.UserState.EmailVerif)));
         }
 
