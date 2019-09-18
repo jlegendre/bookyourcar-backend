@@ -238,7 +238,7 @@ namespace TestAuthentification.Controllers
 
             var user = serviceAuth.FindByEmail(emailDestinataire);
 
-            string tokenGenerate = TokenService.GenerateToken(user, 2);
+            string tokenGenerate = TokenService.GenerateToken(user, 5);
 
 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
