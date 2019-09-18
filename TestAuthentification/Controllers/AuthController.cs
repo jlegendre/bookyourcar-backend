@@ -200,13 +200,14 @@ namespace TestAuthentification.Controllers
                     _context.User.Update(user);
                     _context.SaveChanges();
 
-                    message.Add("Info", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
-                    return Ok(message);
+
+                    ModelState.AddModelError("Success", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
+                    return Ok(ModelState);
                 }
                 else
                 {
-                    message.Add("Info", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
-                    return Ok(message);
+                    ModelState.AddModelError("Error", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
+                    return Ok(ModelState);
                 }
 
             }
@@ -258,7 +259,8 @@ namespace TestAuthentification.Controllers
 
                 var message = new Dictionary<string, string>();
                 message.Add("Info", "Un email de rénitialisation vient de vous être envoyé.");
-                return Ok(message);
+                ModelState.AddModelError("Success", "Un email de rénitialisation vient de vous être envoyé.");
+                return Ok(ModelState);
             }
             else
             {
