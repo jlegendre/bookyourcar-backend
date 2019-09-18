@@ -106,7 +106,6 @@ namespace TestAuthentification
 #if DEBUG
             Environment.SetEnvironmentVariable("UrlVerifEmail", "https://localhost:5001/api/auth/VerifEmail/");
 #else
-            Environment.SetEnvironmentVariable("UrlResetPassword", https://bookyourcar.tk/changePassword/");
             Environment.SetEnvironmentVariable("UrlVerifEmail", "https://a5d-dotnet.mvinet.fr/api/auth/VerifEmail/");
 #endif
 
