@@ -52,7 +52,7 @@ namespace TestAuthentification.Controllers
                 });
                 return Ok(model.ToList());
             }
-            
+
             return Ok(listUser.ToList());
         }
 
@@ -139,7 +139,7 @@ namespace TestAuthentification.Controllers
         }
 
         [HttpGet, Route("UserInfos")]
-        public IActionResult UserInfos()
+        public async Task<IActionResult> UserInfos()
         {
             var token = GetToken();
 
@@ -266,7 +266,7 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("userRole")]
-        public IActionResult GetUserRole()
+        public async Task<IActionResult> GetUserRole()
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -289,7 +289,7 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("userInWaiting")]
-        public IActionResult GetUserInWaiting()
+        public async Task<IActionResult> GetUserInWaiting()
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -321,6 +321,15 @@ namespace TestAuthentification.Controllers
                 return Ok(new List<User>());
             }
 
+        }
+        /// <summary>
+        /// Compte le nombre d'utilisateur en attente
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("CountUserInWaiting")]
+        public async Task<IActionResult> CountUserInWaiting()
+        {
+            return new ObjectResult(_context.User.Count(x => x.UserState.Equals((sbyte)Enums.UserState.EmailVerif)));
         }
 
         /// <summary>
