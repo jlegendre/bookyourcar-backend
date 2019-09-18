@@ -117,30 +117,94 @@ namespace TestAuthentification.Services
             }
             return locationStateTrad;
         }
-        /**using (var connection = new MySqlConnection("server=mvinet.fr;port=3306;database=BookYourCar;uid=a5d;password=pwtk@[gh$!7Z#&wX"))
+
+        internal void ValidateLocationAndSetVehicule(Location loc, int vehicleId)
         {
-            var command = new MySqlCommand("getAvailableVehicle", connection);
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new MySqlParameter("DATEDEBUT", dateDebut));
-            command.Parameters.Add(new MySqlParameter("DATEFIN", dateFin));
-            command.Parameters.Add(new MySqlParameter("POLESTART", poleDebut));
-            command.Parameters.Add(new MySqlParameter("POLEEND", poleFin));
-            command.Connection.Open();
-            var result = command.ExecuteReader();
-            command.Connection.Close();
-
-            var listeVehicule = new List<Vehicle>();
-            foreach (var vehicule in result)
+            if (loc.LocState == (sbyte)Enums.LocationState.Asked)
             {
-                var veh = new Vehicle();
-                while (result.HasRows)
-                {
-                    //TODO recuperer les valeurs et les mettres dans un objet Vehicule
-                }
-
+                loc.LocState = (int)Enums.LocationState.Validated;
+                loc.LocVehId = vehicleId;
             }
+            else
+            {
+                throw (new Exception(message: "le statut de location ne permet cette action"));
+            }
+        }
 
-        }**/
+        internal void UpdateLocationAndVehicule(Location loc, int vehicleId)
+        {
+            if (loc.LocState == (sbyte)Enums.LocationState.Validated)
+            {
+                loc.LocState = (int)Enums.LocationState.Validated;
+                loc.LocVehId = vehicleId;
+            }
+            else
+            {
+                throw (new Exception(message: "le statut de location ne permet cette action"));
+            }
+        }
+
+        internal void CancelLocation(Location loc)
+        {
+            if(loc.LocState == (sbyte)Enums.LocationState.Asked || loc.LocState == (sbyte)Enums.LocationState.Validated)
+            {
+                loc.LocState = (int)Enums.LocationState.Rejected;
+                loc.LocVehId = null;
+            }
+            else
+            {
+                throw(new Exception(message:"le statut de location ne permet cette action"));
+            }
+        }
+
+        internal void StartLocation(Location loc)
+        {
+            if (loc.LocState == (sbyte)Enums.LocationState.Validated)
+            {
+                loc.LocState = (int)Enums.LocationState.InProgress;
+            }
+            else
+            {
+                throw (new Exception(message: "le statut de location ne permet cette action"));
+            }
+        }
+
+        internal void FinishLocation(Location loc)
+        {
+            if (loc.LocState == (sbyte)Enums.LocationState.InProgress)
+            {
+                loc.LocState = (int)Enums.LocationState.Finished;
+            }
+            else
+            {
+                throw (new Exception(message: "le statut de location ne permet cette action"));
+            }
+        }
+
+        /**using (var connection = new MySqlConnection("server=mvinet.fr;port=3306;database=BookYourCar;uid=a5d;password=pwtk@[gh$!7Z#&wX"))
+{
+   var command = new MySqlCommand("getAvailableVehicle", connection);
+   command.CommandType = CommandType.StoredProcedure;
+   command.Parameters.Add(new MySqlParameter("DATEDEBUT", dateDebut));
+   command.Parameters.Add(new MySqlParameter("DATEFIN", dateFin));
+   command.Parameters.Add(new MySqlParameter("POLESTART", poleDebut));
+   command.Parameters.Add(new MySqlParameter("POLEEND", poleFin));
+   command.Connection.Open();
+   var result = command.ExecuteReader();
+   command.Connection.Close();
+
+   var listeVehicule = new List<Vehicle>();
+   foreach (var vehicule in result)
+   {
+       var veh = new Vehicle();
+       while (result.HasRows)
+       {
+           //TODO recuperer les valeurs et les mettres dans un objet Vehicule
+       }
+
+   }
+
+}**/
 
         //_context.Database.ExecuteSqlCommand("getAvailableVehicle @p0, @p1, @p2, @p3", parameters: new[] { DateTime.Now.ToString(), DateTime.Now.ToString(), 1.ToString(), 1.ToString() });
 

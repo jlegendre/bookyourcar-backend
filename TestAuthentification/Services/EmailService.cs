@@ -35,7 +35,6 @@ namespace TestAuthentification.Services
                         }},
                         {"Subject", Titre},
                         {"HTMLPart", Contenu }
-                        //{"HTMLPart", "<h3>Dear passenger 1, welcome to <a href=\"https://www.mailjet.com/\">Mailjet</a>!</h3><br />May the delivery force be with you!"}
                     }
                 });
 
@@ -45,9 +44,9 @@ namespace TestAuthentification.Services
         /// <summary>
         /// Email lorsqu'on valide une rservation
         /// </summary>
-        public static async Task<bool> SendEmailPutLocationAsync(Models.User user, Location loc, Pole poleS, Pole poleE, Vehicle vehicle)
+        public static async Task<bool> SendEmailPutLocationAsync(Models.User user, Location loc, Pole poleS, Pole poleE, Vehicle vehicle, string action)
         {
-
+            //TODO : Send specific mail on action 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationValidation);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
             myFiles = myFiles.Replace("%%DEBUTLOCATION%%", loc.LocDatestartlocation.ToLongDateString());

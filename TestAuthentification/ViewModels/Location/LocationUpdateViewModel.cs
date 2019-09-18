@@ -18,6 +18,5 @@ namespace TestAuthentification.ViewModels.Location
         ///     Start
         /// </summary>
         public string Action { get; set; }
-
     }
 }

@@ -208,58 +208,74 @@ namespace TestAuthentification.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateViewModel location)
         {
-
+            #region Prerequisites
             string token = GetToken();
-            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
-            if (!ModelState.IsValid || id == 0) return BadRequest(ModelState);
-            
-            Location loc = _context.Location.FirstOrDefault(l => l.LocVehId == id);
-            if (loc == null) return NotFound();
-
-            switch (location.Action)
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token))
             {
-
-                case "Validate":
-                    // Lorsque côté front on a cliqué sur Accepter
-
-                    loc.LocState = (int)Enums.LocationState.Validated;
-                    loc.LocVehId = location.VehicleId;
-
-                    //TODO affecter le véhicule
-                    break;
-                case "Finish":
-                    // Lorsque côté front on a cliqué sur Terminer la location
-                    loc.LocState = (int)Enums.LocationState.Finished;
-                    break;
-                case "Start":
-                    // Lorsque côté front on a cliqué sur Démarrer la location
-                    loc.LocState = (int)Enums.LocationState.InProgress;
-                    break;
-                default:
-                    break;
+                return Unauthorized();
             }
-
-            User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
-
-            Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
-
-            Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
-
-            Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
-            _context.Update(loc);
-            _context.SaveChanges();
-
-            if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle))
+            if (!ModelState.IsValid || id == 0)
             {
-                return Ok();
-            }
-            else
-            {
-                ModelState.AddModelError("Error",
-                    "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
                 return BadRequest(ModelState);
             }
+            Location loc = _context.Location.FirstOrDefault(l => l.LocId == id);
+            if (loc == null)
+            {
+                return NotFound();
+            }
+            #endregion
 
+            try
+            {
+                LocationService locServ = new LocationService(_context);
+
+                switch (location.Action)
+                {
+                    case "Cancel":
+                        locServ.CancelLocation(loc);
+                        break;
+                    case "Validate":
+                        locServ.ValidateLocationAndSetVehicule(loc, location.VehicleId);
+                        break;
+                    case "Update":
+                        locServ.UpdateLocationAndVehicule(loc, location.VehicleId);
+                        break;
+                    case "Start":
+                        locServ.StartLocation(loc);
+                        break;
+                    case "Finish":
+                        locServ.FinishLocation(loc);
+                        break;
+                    default:
+                        return BadRequest("l'action demandée est inconnue");
+                }
+                _context.Update(loc);
+                _context.SaveChanges();
+
+                User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
+
+                Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
+
+                Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
+
+                Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
+
+
+                if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle, location.Action))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    ModelState.AddModelError("Error",
+                        "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
+                    return BadRequest(ModelState);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Une erreur s'est produite durant la mise à jour de la location. Cause : {ex.Message}");
+            }
         }
 
         // DELETE: api/Locations/5
