@@ -24,6 +24,9 @@ namespace TestAuthentification.Resources
         /// </summary>
         public const string ValidateRegister = "./wwwroot/EmailTemplates/ValidateRegister.html";
 
+
+        public static readonly string VerifEmail = "./wwwroot/EmailTemplates/VerifEmail.html";
+
         #endregion
 
         #region Login (mdp oublié)
@@ -33,6 +36,8 @@ namespace TestAuthentification.Resources
         /// </summary>
         //public static readonly string ResetPassword = "Voici le lien pour rénitialiser votre mot de passe " + Environment.GetEnvironmentVariable("UrlResetPassword") + "%%TOKEN%%";
         public static readonly string ResetPassword = "./wwwroot/EmailTemplates/ResetPassword.html";
+
+       
 
 
         #endregion

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -164,7 +165,7 @@ namespace TestAuthentification.Controllers
             try
             {
                 var response =
-                    await EmailService.SendEmailAsync("confirmez votre e-mail - BookYourCar", myFiles, user.UserEmail);
+                    await EmailService.SendEmailAsync("Confirmez votre e-mail - BookYourCar", myFiles, user.UserEmail);
             }
             catch (Exception e)
             {
@@ -187,27 +188,34 @@ namespace TestAuthentification.Controllers
         [HttpGet("VerifEmail/{token}")]
         public async Task<IActionResult> VerifEmail(string token)
         {
-            var message = new Dictionary<string, string>();
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
+            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.VerifEmail);
 
             //si l'utilisateur a un statut différent de InWaiting alors on valide ça verification de compte sinon on informe l'utilisateur qu'il a déja verifié son compte
             try
             {
+                var message = "";
                 User user = _authService.GetUserConnected(token);
                 if (user.UserState == (sbyte)Enums.UserState.InWaiting)
                 {
                     user.UserState = (sbyte)Enums.UserState.EmailVerif;
                     _context.User.Update(user);
                     _context.SaveChanges();
-
-                    message.Add("Info", "Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
-                    return Ok(message);
+                    message = "Votre email vient d'être confirmé !";
                 }
                 else
                 {
-                    message.Add("Info", "L'adresse mail a déja été verifié. Vous pouvez fermer l'onglet.");
-                    return Ok(message);
+                    message = "L'adresse mail a déja été verifié. Si l'administrateur a accepté votre demande vous pouvez d'ores et déja vous connecter !";
                 }
+                myFiles = myFiles.Replace("%%MESSAGE%%", message);
+                
+                return new ContentResult()
+                {
+                    Content = myFiles,
+                    ContentType = "text/html"
+                };
 
             }
             catch (Exception e)
@@ -238,7 +246,7 @@ namespace TestAuthentification.Controllers
 
             var user = serviceAuth.FindByEmail(emailDestinataire);
 
-            string tokenGenerate = TokenService.GenerateToken(user, 2);
+            string tokenGenerate = TokenService.GenerateToken(user, 5);
 
 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.ResetPassword);
@@ -258,7 +266,8 @@ namespace TestAuthentification.Controllers
 
                 var message = new Dictionary<string, string>();
                 message.Add("Info", "Un email de rénitialisation vient de vous être envoyé.");
-                return Ok(message);
+                ModelState.AddModelError("Success", "Un email de rénitialisation vient de vous être envoyé.");
+                return Ok(ModelState);
             }
             else
             {
@@ -308,24 +317,32 @@ namespace TestAuthentification.Controllers
                 token = tab[1];
             }
 
-            if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+            try
             {
-                AuthService serviceAuth = new AuthService(_context);
-                var userConnected = serviceAuth.GetUserConnected(token);
+                if (TokenService.ValidateToken(token) && TokenService.VerifDateExpiration(token))
+                {
+                    AuthService serviceAuth = new AuthService(_context);
+                    var userConnected = serviceAuth.GetUserConnected(token);
 
-                userConnected.UserPassword = service.HashPassword(null, model.Password);
+                    userConnected.UserPassword = service.HashPassword(null, model.Password);
 
-                //SAVE
-                _context.User.Update(userConnected);
-                _context.SaveChanges();
+                    //SAVE
+                    _context.User.Update(userConnected);
+                    _context.SaveChanges();
 
-                return Ok();
+                    return Ok();
+                }
+            }
+            catch (Exception e)
+            {
+                if (e.Source != null)
+                    return BadRequest(e.Message);
             }
 
-            var message = new Dictionary<string, string>();
-            message.Add("Info", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
-
-            return Ok(message);
+            //var message = new Dictionary<string, string>();
+            //message.Add("Error", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
+            ModelState.AddModelError("Error", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
+            return BadRequest(ModelState);
 
         }
 

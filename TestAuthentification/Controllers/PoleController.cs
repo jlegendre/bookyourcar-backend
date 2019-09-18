@@ -42,9 +42,7 @@ namespace TestAuthentification.Controllers
 
                 return Ok(model.ToList());
             }
-            var poles = new Dictionary<string, string>();
-            poles.Add("message", "Il n'y a pas de Poles.");
-            return Ok(poles);
+            return Ok(new List<Pole>());
 
         }
 
