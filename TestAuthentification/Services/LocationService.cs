@@ -5,6 +5,10 @@ using System.Data;
 using MySql.Data.MySqlClient;
 using TestAuthentification.Models;
 using TestAuthentification.Services.DbConfig;
+using TestAuthentification.ViewModels.Location;
+using System.Linq;
+using System.Threading.Tasks;
+using TestAuthentification.Resources;
 
 namespace TestAuthentification.Services
 {
@@ -43,10 +47,76 @@ namespace TestAuthentification.Services
             }
         }
 
+        async internal Task<List<LocationListViewModel>> GetAllLocation()
+        {
+            List<Location> listLocation = await _context.Location.ToListAsync();
+
+            List<LocationListViewModel> locations = new List<LocationListViewModel>();
+
+            if (listLocation.Count > 0)
+            {
+                foreach (Location loc in listLocation)
+                {
+                    LocationListViewModel locVM = new LocationListViewModel();
+                    locVM.LocationId = loc.LocId;
+                    locVM.DateDebutResa = loc.LocDatestartlocation;
+                    locVM.DateFinResa = loc.LocDateendlocation;
+
+                    User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
+                    locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
+
+                    Pole poleStart = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdstart).First();
+                    locVM.PoleDepart = poleStart.PoleName;
+                    Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
+                    locVM.PoleDestination = poleEnd.PoleName;
+
+                    if (loc.LocVehId != null)
+                    {
+                        Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
+                        locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
+                    }
+                    else
+                    {
+                        locVM.VehicleFriendlyName = "Pas de vehicule associé";
+                    }
+
+                    locVM.LocationState = GetLocationStateTrad(loc.LocState);
+                    locVM.LocationStateId = loc.LocState;
+
+                    locations.Add(locVM);
+                }
+            }
+            return locations;
+        }
 
 
-
-
+        private string GetLocationStateTrad(sbyte locState)
+        {
+            Enums.LocationState locSt = (Enums.LocationState)locState;
+            string locationStateTrad = "";
+            switch (locSt)
+            {
+                case Enums.LocationState.Asked:
+                    locationStateTrad = "Demandée";
+                    break;
+                case Enums.LocationState.InProgress:
+                    locationStateTrad = "En cours";
+                    break;
+                case Enums.LocationState.Validated:
+                    locationStateTrad = "Validée";
+                    break;
+                case Enums.LocationState.Rejected:
+                    locationStateTrad = "Refusée";
+                    break;
+                case Enums.LocationState.Finished:
+                    locationStateTrad = "Terminée";
+                    break;
+                case Enums.LocationState.Canceled:
+                    locationStateTrad = "Annulée";
+                    break;
+            }
+            return locationStateTrad;
+        }
         /**using (var connection = new MySqlConnection("server=mvinet.fr;port=3306;database=BookYourCar;uid=a5d;password=pwtk@[gh$!7Z#&wX"))
         {
             var command = new MySqlCommand("getAvailableVehicle", connection);
