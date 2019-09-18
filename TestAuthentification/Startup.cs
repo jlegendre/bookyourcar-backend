@@ -101,7 +101,7 @@ namespace TestAuthentification
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            Environment.SetEnvironmentVariable("DomaineName", "https://bookyourcar.tk/changePassword/");
+            Environment.SetEnvironmentVariable("UrlResetPassword", "https://bookyourcar.tk/changePassword/");
             Environment.SetEnvironmentVariable("KeyAPIEmail", "8c8039f810dde01b9c8587d95a10b633");
             Environment.SetEnvironmentVariable("SecretAPIEmail", "7414cc9223d0a77e98573dba18c36fe7");
 #if DEBUG
