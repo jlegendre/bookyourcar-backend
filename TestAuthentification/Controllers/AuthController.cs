@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -187,25 +188,34 @@ namespace TestAuthentification.Controllers
         [HttpGet("VerifEmail/{token}")]
         public async Task<IActionResult> VerifEmail(string token)
         {
-            var message = new Dictionary<string, string>();
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+
+            string myFiles = System.IO.File.ReadAllText(ConstantsEmail.VerifEmail);
 
             //si l'utilisateur a un statut différent de InWaiting alors on valide ça verification de compte sinon on informe l'utilisateur qu'il a déja verifié son compte
             try
             {
+                var message = "";
                 User user = _authService.GetUserConnected(token);
                 if (user.UserState == (sbyte)Enums.UserState.InWaiting)
                 {
                     user.UserState = (sbyte)Enums.UserState.EmailVerif;
                     _context.User.Update(user);
                     _context.SaveChanges();
-
-                    return Content("Merci ! L'adresse mail vient d'être confirmé. Vous pouvez fermer l'onglet.");
+                    message = "Votre email vient d'être confirmé !";
                 }
                 else
                 {
-                    return Content("L'adresse mail a déja été verifié. Vous pouvez <strong>fermer</strong> l'onglet.");
+                    message = "L'adresse mail a déja été verifié. Si l'administrateur a accepté votre demande vous pouvez d'ores et déja vous connecter !";
                 }
+                myFiles = myFiles.Replace("%%MESSAGE%%", message);
+                
+                return new ContentResult()
+                {
+                    Content = myFiles,
+                    ContentType = "text/html"
+                };
 
             }
             catch (Exception e)
