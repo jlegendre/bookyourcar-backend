@@ -330,10 +330,10 @@ namespace TestAuthentification.Controllers
                     return BadRequest(e.Message);
             }
 
-            var message = new Dictionary<string, string>();
-            message.Add("Info", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
-            
-            return Ok(message);
+            //var message = new Dictionary<string, string>();
+            //message.Add("Error", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
+            ModelState.AddModelError("Error", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
+            return BadRequest(ModelState);
 
         }
 
