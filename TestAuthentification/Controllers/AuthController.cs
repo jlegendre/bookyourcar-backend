@@ -333,7 +333,7 @@ namespace TestAuthentification.Controllers
             //var message = new Dictionary<string, string>();
             //message.Add("Error", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
             ModelState.AddModelError("Error", "Le token a expiré. Veuillez recommencer la procédure de rénitialisation.");
-            return Ok(ModelState);
+            return BadRequest(ModelState);
 
         }
 
