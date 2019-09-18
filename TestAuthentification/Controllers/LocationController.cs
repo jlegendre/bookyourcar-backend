@@ -79,7 +79,7 @@ namespace TestAuthentification.Controllers
                     }
                     return Ok(locations.ToList());
                 }
-                return Ok(locations.ToList());
+                return Ok(new List<Location>());
             }
             else
             {

@@ -58,9 +58,7 @@ namespace TestAuthentification.Controllers
                 }).Where(x => x.VehState != (int)Enums.VehiculeState.Deleted).ToList();
                 return Ok(model);
             }
-            var roles = new Dictionary<string, string>();
-            roles.Add("message", "Il n'y a pas de véhicules.");
-            return Ok(roles);
+            return Ok(new List<Vehicle>());
 
         }
 

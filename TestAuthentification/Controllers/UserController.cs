@@ -52,10 +52,8 @@ namespace TestAuthentification.Controllers
                 });
                 return Ok(model.ToList());
             }
-
-            var users = new Dictionary<string, string>();
-            users.Add("Info", "Il n'y a pas d'utilisateurs en attente de validation.");
-            return Ok(users);
+            
+            return Ok(listUser.ToList());
         }
 
         // GET: api/Users/5

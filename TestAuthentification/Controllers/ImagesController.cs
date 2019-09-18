@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthentification.Models;
+using TestAuthentification.Services;
 
 namespace TestAuthentification.Controllers
 {
@@ -68,7 +69,16 @@ namespace TestAuthentification.Controllers
         [HttpPost, Route("UploadImageVehicule")]
         public async Task<IActionResult> UploadImageVehicule(IFormFile file, int vehiculeId)
         {
-            if (file == null || file.Length == 0) return Content("file not selected");
+            var token = GetToken();
+
+            if (!TokenService.ValidateTokenWhereIsAdmin(token) || !TokenService.VerifDateExpiration(token))
+                return Unauthorized();
+            
+            if (file == null || file.Length == 0)
+            {
+                ModelState.AddModelError("Error", "Veuillez choisir un fichier.");
+                return BadRequest(ModelState);
+            }
 
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
 
@@ -96,7 +106,9 @@ namespace TestAuthentification.Controllers
 
             return Ok("Files upload");
 
+
         }
+
 
         /// <summary>
         /// retourne le lien d'une image en fonction d'un utilisateur
@@ -104,6 +116,7 @@ namespace TestAuthentification.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet, Route("GetImageByUser")]
+
         public async Task<IActionResult> GetImageByUser(int userId)
         {
             return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri);
@@ -114,13 +127,30 @@ namespace TestAuthentification.Controllers
         /// </summary>
         /// <param name="vehiculeId"></param>
         /// <returns></returns>
-        [HttpGet, Route("GetImageByVehicule")]
+        [
+
+        HttpGet, Route("GetImageByVehicule")]
+
         public async Task<IActionResult> GetImageByVehicule(int vehiculeId)
         {
             return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == vehiculeId)?.ImageUri);
         }
 
+        private string GetToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer"))
+            {
+                var tab = token.Split(" ");
+                token = tab[1];
+            }
+
+            return token;
+        }
+
 
     }
-    
+
+
+
 }
