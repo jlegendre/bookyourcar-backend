@@ -95,7 +95,7 @@ namespace TestAuthentification.Controllers
                     }
 
 
-                    locVM.LocationState = GetLocationStateTrad(loc.LocState);
+                    locVM.LocationState = Enums.GetLocationStateTrad(loc.LocState);
                     locVM.LocationStateId = loc.LocState;
 
                     locations.Add(locVM);
@@ -103,34 +103,6 @@ namespace TestAuthentification.Controllers
             }
             return Ok(locations.ToList());
 
-        }
-
-        private string GetLocationStateTrad(sbyte locState)
-        {
-            Enums.LocationState locSt = (Enums.LocationState)locState;
-            string locationStateTrad = "";
-            switch (locSt)
-            {
-                case Enums.LocationState.Asked:
-                    locationStateTrad = "Demandée";
-                    break;
-                case Enums.LocationState.InProgress:
-                    locationStateTrad = "En cours";
-                    break;
-                case Enums.LocationState.Validated:
-                    locationStateTrad = "Validée";
-                    break;
-                case Enums.LocationState.Rejected:
-                    locationStateTrad = "Refusée";
-                    break;
-                case Enums.LocationState.Finished:
-                    locationStateTrad = "Terminée";
-                    break;
-                case Enums.LocationState.Canceled:
-                    locationStateTrad = "Annulée";
-                    break;
-            }
-            return locationStateTrad;
         }
 
         // GET: api/Locations/5
@@ -161,7 +133,7 @@ namespace TestAuthentification.Controllers
                 ManageLocationViewModel locVM = new ManageLocationViewModel()
                 {
                     LocId = location.LocId,
-                    LocState = GetLocationStateTrad(location.LocState),
+                    LocState = Enums.GetLocationStateTrad(location.LocState),
                     LocStateId = location.LocState,
                     User = user.UserFirstname + " " + user.UserName,
                     PoleStart = poles.Where(p => p.PoleId == location.LocPoleIdstart).First().PoleName,
@@ -402,7 +374,7 @@ namespace TestAuthentification.Controllers
                 comment.CommentLocId = location.LocId;
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
-#if!DEBUG
+
 
                 PoleService servicePole = new PoleService(_context);
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
@@ -425,7 +397,7 @@ namespace TestAuthentification.Controllers
                     "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
                 return BadRequest(ModelState);
                 }
-#endif
+
 
 
 
