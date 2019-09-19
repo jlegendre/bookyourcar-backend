@@ -42,8 +42,8 @@ namespace TestAuthentification.Controllers
 
             if (connectedUser.UserRight.RightLabel == Enums.Roles.Admin.ToString())
             {
-                
-                List<LocationListViewModel> locations = await _locServ.GetAllLocationAsync(); 
+
+                List<LocationListViewModel> locations = await _locServ.GetAllLocationAsync();
                 return Ok(locations.ToList());
             }
             else
@@ -249,23 +249,22 @@ namespace TestAuthentification.Controllers
                         locServ.FinishLocation(loc);
                         break;
                     default:
-                        return BadRequest("l'action demandée est inconnue");
+                        ModelState.AddModelError("Error", "L'action demandée est inconnue");
+                        return BadRequest(ModelState);
                 }
                 _context.Update(loc);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
-
                 Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
-
                 Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
-
                 Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
 
-
+                //TODO le corps et le titre de l'email doit differeer en fonction de l'action
                 if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle, location.Action))
                 {
-                    return Ok();
+                    ModelState.AddModelError("Success", "La location a bien été modifée.");
+                    return Ok(ModelState);
                 }
                 else
                 {
@@ -403,16 +402,16 @@ namespace TestAuthentification.Controllers
                 comment.CommentLocId = location.LocId;
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
+#if!DEBUG
 
-#if !DEBUG
                 PoleService servicePole = new PoleService(_context);
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
                 var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
                 string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationAsk);
                 
                 myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToLongDateString());
-                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToLongDateString());
+                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToString("d"));
+                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToString("d"));
                 myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
                 myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
                 var response = await EmailService.SendEmailAsync("Vous venez de demander une Location - BookYourCar", myFiles, user.UserEmail);
@@ -473,11 +472,10 @@ namespace TestAuthentification.Controllers
 
             return token;
         }
-        
-        private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
+
+        private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocationOld(Location location)
         {
-            LocationService locServ = new LocationService(_context);
-            List<Vehicle> vehicleList = locServ.GetAvailableVehicleForLocation(location.LocDatestartlocation, location.LocDateendlocation,
+            List<Vehicle> vehicleList = _locServ.GetAvailableVehicleForLocation(location.LocDatestartlocation, location.LocDateendlocation,
                 location.LocPoleIdstart, location.LocPoleIdend);
 
             List<Vehicle> selectedVehicles = new List<Vehicle>();
@@ -519,6 +517,84 @@ namespace TestAuthentification.Controllers
 
             return new List<AvailableVehiculeViewModel>();
         }
+
+        private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
+        {
+            List<Vehicle> listAllVehicule = _context.Vehicle.ToList();
+
+            // on ajoutera a cette liste tout les vehicules qui respecteront pas les conditions pour être valide a cette location
+            List<int> listVehiculeNonDisponible = new List<int>();
+
+            //On regarde pour chaque vehicule les locations qu'il a déja
+            foreach (Vehicle vehicule in listAllVehicule)
+            {
+                //la liste des reservations du premier vehicule de la liste, puis du second etc
+                List<Location> listDeslocationDuVehicule = _context.Location.Where(x => x.LocVehId == vehicule.VehId).ToList();
+
+                //Pour chaque location de ce vehicule on va regarder les dates de ces reservations 
+                foreach (Location locationDuVehicule in listDeslocationDuVehicule)
+                {
+                    // première condition 
+                    // si il a une location qui débute avant la location en cours alors le vehicule n'est pas dispo et on ne l'ajoute pas à la liste
+                    if (locationDuVehicule.LocDatestartlocation < location.LocDatestartlocation)
+                    {
+                        // si le vehicule n'est pas déja dans la liste des vehicules non dispo
+                        if (!listVehiculeNonDisponible.Contains(locationDuVehicule.LocVehId.GetValueOrDefault()))
+                            listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
+                    }
+
+                    // 2 eme condition 
+                    // On regarde ces reservations et si il en aune qui finit après la date de fin de la location en cours alors le vehicule n'est pas disponible
+                    // et on l'ajoute à la liste
+                    if (locationDuVehicule.LocDateendlocation > location.LocDateendlocation)
+                    {
+                        // si le vehicule n'est pas déja dans la liste des vehicules non dispo
+                        if (!listVehiculeNonDisponible.Contains(locationDuVehicule.LocVehId.GetValueOrDefault()))
+                            listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
+                    }
+
+                    // 3 eme condition
+                    // si la date d'une des reservations debute après la date de debut de la location en cours et que en plus la date de la reservation finit avant la date de la location
+                    // alors le vehicule n'est pas disponible
+                    if (locationDuVehicule.LocDatestartlocation > location.LocDatestartlocation &&
+                        locationDuVehicule.LocDateendlocation < location.LocDateendlocation)
+                    {
+                        if (!listVehiculeNonDisponible.Contains(locationDuVehicule.LocVehId.GetValueOrDefault()))
+                            listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
+                    }
+
+                    // 4 eme condition
+                    // si la date d'une des reservations debute avant la location en cours et finit après la date de fin de la location en cours
+                    if (locationDuVehicule.LocDatestartlocation < location.LocDatestartlocation &&
+                        locationDuVehicule.LocDateendlocation > location.LocDateendlocation)
+                    {
+                        if (!listVehiculeNonDisponible.Contains(locationDuVehicule.LocVehId.GetValueOrDefault()))
+                            listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
+                    }
+
+                }
+            }
+            // on construit maintenant la liste des vehicules disponible en prenant tout les vehicules en base en enlevant ceux present dans la liste listVehiculeNonDisponible
+            List<AvailableVehiculeViewModel> listDesVehiculeDispo = new List<AvailableVehiculeViewModel>();
+            foreach (var vehicule in listAllVehicule)
+            {
+                if (!listVehiculeNonDisponible.Contains(vehicule.VehId))
+                {
+                    AvailableVehiculeViewModel vehiculeModel = new AvailableVehiculeViewModel()
+                    {
+                        VehId = vehicule.VehId,
+                        Registration = vehicule.VehRegistration,
+                        VehCommonName = vehicule.VehBrand + " " + vehicule.VehModel
+                    };
+                    listDesVehiculeDispo.Add(vehiculeModel);
+                }
+            }
+
+            return listDesVehiculeDispo;
+        }
+
+
+
         private VehicleDetailsViewModel GetSelectedVehicle(Location location)
         {
             if (location.LocVehId != null)
