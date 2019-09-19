@@ -380,7 +380,7 @@ namespace TestAuthentification.Controllers
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
                 var poleArrive = servicePole.GetPole(location.LocPoleIdend).PoleName;
                 string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationAsk);
-                
+
                 myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
                 myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToString("d"));
                 myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToString("d"));
@@ -395,7 +395,7 @@ namespace TestAuthentification.Controllers
                 {
                     ModelState.AddModelError("Error",
                     "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
-                return BadRequest(ModelState);
+                    return BadRequest(ModelState);
                 }
 
 
@@ -552,13 +552,22 @@ namespace TestAuthentification.Controllers
             {
                 if (!listVehiculeNonDisponible.Contains(vehicule.VehId))
                 {
-                    AvailableVehiculeViewModel vehiculeModel = new AvailableVehiculeViewModel()
-                    {
-                        VehId = vehicule.VehId,
-                        Registration = vehicule.VehRegistration,
-                        VehCommonName = vehicule.VehBrand + " " + vehicule.VehModel
-                    };
-                    listDesVehiculeDispo.Add(vehiculeModel);
+                    //TODO ajouter les conditions avec les pôles sur la liste [listDesVehiculeDispo]
+                    //if (Pole Ok pour la location)
+                    //{
+                        AvailableVehiculeViewModel vehiculeModel = new AvailableVehiculeViewModel()
+                        {
+                            VehId = vehicule.VehId,
+                            Registration = vehicule.VehRegistration,
+                            VehCommonName = vehicule.VehBrand + " " + vehicule.VehModel
+                        };
+                        listDesVehiculeDispo.Add(vehiculeModel);
+                        
+                    //}
+                    //else
+                    //{
+                    //}
+
                 }
             }
 
