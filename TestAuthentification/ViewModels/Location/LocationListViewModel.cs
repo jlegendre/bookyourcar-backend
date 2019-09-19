@@ -35,12 +35,12 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// date de début d'une reservation
         /// </summary>
-        public DateTime DateDebutResa { get; set; }
+        public string DateDebutResa { get; set; }
 
         /// <summary>
         /// date de fin d'une reservation
         /// </summary>
-        public DateTime DateFinResa { get; set; }
+        public string DateFinResa { get; set; }
 
         /// <summary>
         /// id du pôle de prise charge du véhicule
