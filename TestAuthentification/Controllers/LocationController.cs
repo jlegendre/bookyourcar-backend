@@ -507,7 +507,7 @@ namespace TestAuthentification.Controllers
                 foreach (Location locationDuVehicule in listDeslocationDuVehicule)
                 {
                     // première condition 
-                    // si il a une location qui débute avant la location en cours alors le vehicule n'est pas dispo et on ne l'ajoute pas à la liste
+                    // si il a une location qui débute avant la location en cours alors le vehicule n'est pas dispo
                     if (locationDuVehicule.LocDatestartlocation < location.LocDatestartlocation)
                     {
                         // si le vehicule n'est pas déja dans la liste des vehicules non dispo
@@ -544,6 +544,25 @@ namespace TestAuthentification.Controllers
                             listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
                     }
 
+                    //todo ajouter les conditions sur les pôles
+                    // 5 eme condition sur les pôles
+                    // Si la date de fin des locations du vehicule finissent entre aujourd'hui et la date de debut de la location alors on regarde si son pole dernier pole d'arrive (de la voiture) correspond au pole de depart de la location
+                    if (locationDuVehicule.LocDateendlocation >= DateTime.Now.ToLocalTime() &&
+                        locationDuVehicule.LocDateendlocation <= location.LocDatestartlocation)
+                    {
+                        // on recupère la dernière location pour cette voiture pour verifier le dernier pole  d'arrive de la voiture connu 
+                        Location derniereLocDuVehicule = _context.Location
+                            .Where(x => x.LocVehId == locationDuVehicule.LocVehId)
+                            .OrderByDescending(y => y.LocDateendlocation).FirstOrDefault();
+
+                        //alors on regarde si son pole d'arrive correspond au pole de depart
+                        if (derniereLocDuVehicule != null && derniereLocDuVehicule.LocPoleIdend != location.LocPoleIdstart)
+                        {
+                            listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
+                        }
+                    }
+
+
                 }
             }
             // on construit maintenant la liste des vehicules disponible en prenant tout les vehicules en base en enlevant ceux present dans la liste listVehiculeNonDisponible
@@ -552,22 +571,14 @@ namespace TestAuthentification.Controllers
             {
                 if (!listVehiculeNonDisponible.Contains(vehicule.VehId))
                 {
-                    //TODO ajouter les conditions avec les pôles sur la liste [listDesVehiculeDispo]
-                    //if (Pole Ok pour la location)
-                    //{
-                        AvailableVehiculeViewModel vehiculeModel = new AvailableVehiculeViewModel()
-                        {
-                            VehId = vehicule.VehId,
-                            Registration = vehicule.VehRegistration,
-                            VehCommonName = vehicule.VehBrand + " " + vehicule.VehModel
-                        };
-                        listDesVehiculeDispo.Add(vehiculeModel);
-                        
-                    //}
-                    //else
-                    //{
-                    //}
 
+                    AvailableVehiculeViewModel vehiculeModel = new AvailableVehiculeViewModel()
+                    {
+                        VehId = vehicule.VehId,
+                        Registration = vehicule.VehRegistration,
+                        VehCommonName = vehicule.VehBrand + " " + vehicule.VehModel
+                    };
+                    listDesVehiculeDispo.Add(vehiculeModel);
                 }
             }
 
