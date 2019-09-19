@@ -47,7 +47,7 @@ namespace TestAuthentification.Services
             }
         }
 
-        async internal Task<List<LocationListViewModel>> GetAllLocation()
+        public async Task<List<LocationListViewModel>> GetAllLocationAsync()
         {
             List<Location> listLocation = await _context.Location.ToListAsync();
 

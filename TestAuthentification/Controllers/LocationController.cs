@@ -19,6 +19,7 @@ namespace TestAuthentification.Controllers
     {
         private readonly BookYourCarContext _context;
         private readonly AuthService _authService;
+        private LocationService _locServ;
 
         private ILogger _logger;
 
@@ -26,6 +27,7 @@ namespace TestAuthentification.Controllers
         {
             _context = context;
             _authService = new AuthService(context);
+            _locServ = new LocationService(context);
         }
 
         // GET: api/Locations
@@ -40,9 +42,9 @@ namespace TestAuthentification.Controllers
 
             if (connectedUser.UserRight.RightLabel == Enums.Roles.Admin.ToString())
             {
-                LocationService locServ = new LocationService(_context);
-                Task<List<LocationListViewModel>> locations = locServ.GetAllLocation(); 
-                return Ok(locations.ToAsyncEnumerable());
+                
+                List<LocationListViewModel> locations = await _locServ.GetAllLocationAsync(); 
+                return Ok(locations.ToList());
             }
             else
             {
