@@ -73,8 +73,8 @@ namespace TestAuthentification.Controllers
                 {
                     LocationListViewModel locVM = new LocationListViewModel();
                     locVM.LocationId = loc.LocId;
-                    locVM.DateDebutResa = loc.LocDatestartlocation.ToShortDateString();
-                    locVM.DateFinResa = loc.LocDateendlocation.ToShortDateString();
+                    locVM.DateDebutResa = loc.LocDatestartlocation.ToLocalTime().ToShortDateString();
+                    locVM.DateFinResa = loc.LocDateendlocation.ToLocalTime().ToShortDateString();
 
                     User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
                     locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
