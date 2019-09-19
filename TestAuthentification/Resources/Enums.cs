@@ -22,6 +22,35 @@ namespace TestAuthentification.Resources
             Canceled = 5
         }
 
+        public static string GetLocationStateTrad(sbyte locState)
+        {
+            Enums.LocationState locSt = (Enums.LocationState)locState;
+            string locationStateTrad = "";
+            switch (locSt)
+            {
+                case Enums.LocationState.Asked:
+                    locationStateTrad = "Demandée";
+                    break;
+                case Enums.LocationState.InProgress:
+                    locationStateTrad = "En cours";
+                    break;
+                case Enums.LocationState.Validated:
+                    locationStateTrad = "Validée";
+                    break;
+                case Enums.LocationState.Rejected:
+                    locationStateTrad = "Refusée";
+                    break;
+                case Enums.LocationState.Finished:
+                    locationStateTrad = "Terminée";
+                    break;
+                case Enums.LocationState.Canceled:
+                    locationStateTrad = "Annulée";
+                    break;
+            }
+            return locationStateTrad;
+        }
+
+
         public enum VehiculeState
         {
             // en utilisation
