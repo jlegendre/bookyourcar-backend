@@ -427,10 +427,11 @@ namespace TestAuthentification.Controllers
                     userConnected.UserFirstname = user.UserFirstname;
                 }
 
-                if (user.UserPhone != null)
+                if (user.UserPhone != null && user.UserPhone != userConnected.UserPhone)
                 {
-                    var control = _context.User.FirstOrDefault(x => x.UserPhone == user.UserPhone);
-                    if (control != null)
+                    // affecter le nouveau numéro seulement si il n'est pas déja présent en base pour une autre personne 
+                    var control = _context.User.Any(x => x.UserPhone == user.UserPhone && x.UserId != user.UserId);
+                    if (control)
                     {
                         ModelState.AddModelError("Error", "Le numéro de téléphone est déja pris.");
                         return BadRequest(ModelState);
