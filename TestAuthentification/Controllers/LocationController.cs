@@ -560,9 +560,9 @@ namespace TestAuthentification.Controllers
                         locationDuVehicule.LocDateendlocation <= location.LocDatestartlocation)
                     {
                         // on recupère la dernière location pour cette voiture pour verifier le dernier pole  d'arrive de la voiture connu 
-                        Location derniereLocDuVehicule = _context.Location
-                            .Where(x => x.LocVehId == locationDuVehicule.LocVehId)
-                            .OrderByDescending(y => y.LocDateendlocation).FirstOrDefault();
+                        Location derniereLocDuVehicule = _context.Location.Where(x => x.LocVehId == locationDuVehicule.LocVehId && x.LocDatestartlocation >= DateTime.Now)
+                            .OrderBy(x => x.LocDateendlocation).FirstOrDefault();
+
 
                         //alors on regarde si son pole d'arrive correspond au pole de depart
                         if (derniereLocDuVehicule != null && derniereLocDuVehicule.LocPoleIdend != location.LocPoleIdstart)
