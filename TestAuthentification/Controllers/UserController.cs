@@ -175,14 +175,16 @@ namespace TestAuthentification.Controllers
 
         private Location GetNextLocationByUser(int userId)
         {
-            Location nextLoc = null;
-            List<Location> locList = _context.Location.Where(l => l.LocUserId == userId && l.LocDatestartlocation >= DateTime.Now.AddDays(-1)).ToList();
-            if (locList.Count > 0)
-            {
-                nextLoc = locList.OrderBy(l => l.LocDatestartlocation)?.First() ?? null;
-            }
+            var locationToReturn = _context.Location.Where(x => x.LocUserId == userId && x.LocDatestartlocation >=  DateTime.Now)
+                .OrderBy(x => x.LocDateendlocation).FirstOrDefault();
 
-            return nextLoc;
+            if (locationToReturn == null)
+            {
+                locationToReturn = _context.Location.Where(x => x.LocUserId == userId && x.LocDatestartlocation <= DateTime.Now)
+                    .OrderByDescending(x => x.LocDateendlocation).FirstOrDefault();
+            }
+            
+            return locationToReturn;
         }
 
         // POST: api/Users

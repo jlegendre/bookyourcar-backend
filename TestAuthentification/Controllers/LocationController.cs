@@ -500,15 +500,24 @@ namespace TestAuthentification.Controllers
             //On regarde pour chaque vehicule les locations qu'il a déja
             foreach (Vehicle vehicule in listAllVehicule)
             {
+                // Gestion du cas ou le véhicule n'a pas encore de reservation il faut donc regarder le pole du vehicule directement 
+                if (_context.Location.Count(x => x.LocVehId == vehicule.VehId) == 0 && vehicule.VehPoleId != location.LocPoleIdstart)
+                {
+                    if (!listVehiculeNonDisponible.Contains(vehicule.VehId))
+                        listVehiculeNonDisponible.Add(vehicule.VehId);
+                }
+
                 //la liste des reservations du premier vehicule de la liste, puis du second etc
                 List<Location> listDeslocationDuVehicule = _context.Location.Where(x => x.LocVehId == vehicule.VehId).ToList();
+                
 
                 //Pour chaque location de ce vehicule on va regarder les dates de ces reservations 
                 foreach (Location locationDuVehicule in listDeslocationDuVehicule)
                 {
+
                     // première condition 
                     // si il a une location qui débute avant la location en cours alors le vehicule n'est pas dispo
-                    if (locationDuVehicule.LocDatestartlocation < location.LocDatestartlocation)
+                    if (locationDuVehicule.LocDatestartlocation < location.LocDatestartlocation && locationDuVehicule.LocDateendlocation > location.LocDatestartlocation)
                     {
                         // si le vehicule n'est pas déja dans la liste des vehicules non dispo
                         if (!listVehiculeNonDisponible.Contains(locationDuVehicule.LocVehId.GetValueOrDefault()))
@@ -547,20 +556,13 @@ namespace TestAuthentification.Controllers
                     //todo ajouter les conditions sur les pôles
                     // 5 eme condition sur les pôles
                     // Si la date de fin des locations du vehicule finissent entre aujourd'hui et la date de debut de la location alors on regarde si son pole dernier pole d'arrive (de la voiture) correspond au pole de depart de la location
-                    if (locationDuVehicule.LocDateendlocation >= DateTime.Now.ToLocalTime() &&
-                        locationDuVehicule.LocDateendlocation <= location.LocDatestartlocation)
-                    {
-                        // on recupère la dernière location pour cette voiture pour verifier le dernier pole  d'arrive de la voiture connu 
-                        Location derniereLocDuVehicule = _context.Location
-                            .Where(x => x.LocVehId == locationDuVehicule.LocVehId)
-                            .OrderByDescending(y => y.LocDateendlocation).FirstOrDefault();
+                    Location locationLaPlusRecente = _context.Location
+                        .Where(x => x.LocVehId == locationDuVehicule.LocVehId && x.LocDateendlocation < DateTime.Now)
+                        .OrderByDescending(x => x.LocDateendlocation).FirstOrDefault();
 
-                        //alors on regarde si son pole d'arrive correspond au pole de depart
-                        if (derniereLocDuVehicule != null && derniereLocDuVehicule.LocPoleIdend != location.LocPoleIdstart)
-                        {
-                            listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
-                        }
-                    }
+
+
+
 
 
                 }
