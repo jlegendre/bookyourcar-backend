@@ -181,7 +181,7 @@ namespace TestAuthentification.Controllers
             if (locationToReturn == null)
             {
                 locationToReturn = _context.Location.Where(x => x.LocUserId == userId && x.LocDatestartlocation <= DateTime.Now)
-                    .OrderByDescending(x => x.LocDateendlocation).FirstOrDefault();
+                    .OrderBy(x => x.LocDateendlocation).FirstOrDefault();
             }
             
             return locationToReturn;
@@ -429,6 +429,12 @@ namespace TestAuthentification.Controllers
 
                 if (user.UserPhone != null)
                 {
+                    var control = _context.User.FirstOrDefault(x => x.UserPhone == user.UserPhone);
+                    if (control != null)
+                    {
+                        ModelState.AddModelError("Error", "Le numéro de téléphone est déja pris.");
+                        return BadRequest(ModelState);
+                    }
                     userConnected.UserPhone = user.UserPhone;
                 }
 
