@@ -135,6 +135,7 @@ namespace TestAuthentification.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLocation([FromRoute] int id)
         {
+            #region Prerequisites
             string token = GetToken();
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
@@ -148,6 +149,7 @@ namespace TestAuthentification.Controllers
             {
                 return NotFound();
             }
+            #endregion
 
             try
             {
