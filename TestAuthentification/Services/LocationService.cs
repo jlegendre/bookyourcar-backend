@@ -47,7 +47,7 @@ namespace TestAuthentification.Services
             }
         }
 
-        async internal Task<List<LocationListViewModel>> GetAllLocation()
+        public async Task<List<LocationListViewModel>> GetAllLocationAsync()
         {
             List<Location> listLocation = await _context.Location.ToListAsync();
 
@@ -59,8 +59,8 @@ namespace TestAuthentification.Services
                 {
                     LocationListViewModel locVM = new LocationListViewModel();
                     locVM.LocationId = loc.LocId;
-                    locVM.DateDebutResa = loc.LocDatestartlocation;
-                    locVM.DateFinResa = loc.LocDateendlocation;
+                    locVM.DateDebutResa = loc.LocDatestartlocation.ToString("d");
+                    locVM.DateFinResa = loc.LocDateendlocation.ToString("d");
 
                     User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
                     locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
@@ -146,14 +146,14 @@ namespace TestAuthentification.Services
 
         internal void CancelLocation(Location loc)
         {
-            if(loc.LocState == (sbyte)Enums.LocationState.Asked || loc.LocState == (sbyte)Enums.LocationState.Validated)
+            if (loc.LocState == (sbyte)Enums.LocationState.Asked || loc.LocState == (sbyte)Enums.LocationState.Validated)
             {
                 loc.LocState = (int)Enums.LocationState.Rejected;
                 loc.LocVehId = null;
             }
             else
             {
-                throw(new Exception(message:"le statut de location ne permet cette action"));
+                throw (new Exception(message: "le statut de location ne permet cette action"));
             }
         }
 
@@ -162,6 +162,21 @@ namespace TestAuthentification.Services
             if (loc.LocState == (sbyte)Enums.LocationState.Validated)
             {
                 loc.LocState = (int)Enums.LocationState.InProgress;
+                // changer statut du vehicule
+                try
+                {
+                    Vehicle vehicleAboutLocation = _context.Vehicle.FirstOrDefault(x => x.VehId == loc.LocVehId);
+                    if (vehicleAboutLocation != null)
+                    {
+                        vehicleAboutLocation.VehState = (sbyte)Enums.VehiculeState.InUse;
+                        _context.Vehicle.Update(vehicleAboutLocation);
+                        _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw (new Exception(message: "Une erreur c'est produite sur la location. " + e.Message));
+                }
             }
             else
             {
@@ -174,6 +189,26 @@ namespace TestAuthentification.Services
             if (loc.LocState == (sbyte)Enums.LocationState.InProgress)
             {
                 loc.LocState = (int)Enums.LocationState.Finished;
+
+                // mettre le pole de fin de location à la voiture de la location
+                try
+                {
+                    Vehicle vehicleAboutLocation = _context.Vehicle.FirstOrDefault(x => x.VehId == loc.LocVehId);
+                    if (vehicleAboutLocation != null)
+                    {
+                        vehicleAboutLocation.VehPoleId = loc.LocPoleIdend;
+                        vehicleAboutLocation.VehState = (sbyte)Enums.VehiculeState.Available;
+                        _context.Vehicle.Update(vehicleAboutLocation);
+                        _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw (new Exception(message: "Une erreur c'est produite sur la location. " + e.Message));
+                }
+
+
+
             }
             else
             {

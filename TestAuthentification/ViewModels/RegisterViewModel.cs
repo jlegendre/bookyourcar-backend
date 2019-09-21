@@ -5,6 +5,7 @@ namespace TestAuthentification.ViewModels
     public partial class RegisterViewModel
     {
         [Required]
+        [DataType(DataType.EmailAddress)]
         [EmailAddress]
         [Display(Name = "Courrier électronique")]
         public string Email { get; set; }

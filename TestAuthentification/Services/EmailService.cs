@@ -42,7 +42,7 @@ namespace TestAuthentification.Services
         }
 
         /// <summary>
-        /// Email lorsqu'on valide une rservation
+        /// Email lorsqu'on valide une reservation
         /// </summary>
         public static async Task<bool> SendEmailPutLocationAsync(Models.User user, Location loc, Pole poleS, Pole poleE, Vehicle vehicle, string action)
         {

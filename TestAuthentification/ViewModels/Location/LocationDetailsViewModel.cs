@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using TestAuthentification.Models;
@@ -17,6 +19,7 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// Etat de la location
         /// </summary>
+        [DisplayName("Etat de la location")]
         public string LocationState { get; set; }
 
         /// <summary>
@@ -27,21 +30,27 @@ namespace TestAuthentification.ViewModels.Location
         /// <summary>
         /// date de début d'une reservation
         /// </summary>
+        [DataType(DataType.DateTime)]
+        [DisplayName("Date de debut")]
         public DateTime DateDebutResa { get; set; }
 
         /// <summary>
         /// date de fin d'une reservation
         /// </summary>
+        [DataType(DataType.DateTime)]
+        [DisplayName("Date de fin")]
         public DateTime DateFinResa { get; set; }
 
         /// <summary>
         /// id du pôle de prise charge du véhicule
         /// </summary>
+        [DisplayName("Pole de depart")]
         public string PoleDepart { get; set; }
 
         /// <summary>
         /// id du pôle de retour du véhicule
         /// </summary>
+        [DisplayName("Pole de fin")]
         public string PoleDestination { get; set; }
 
         /// <summary>
