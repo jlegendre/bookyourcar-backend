@@ -204,11 +204,8 @@ namespace TestAuthentification.Services
                 }
                 catch (Exception e)
                 {
-                    throw (new Exception(message: "Une erreur c'est produite sur la location. " + e.Message));
+                    throw (new Exception(message: "Une erreur s'est produite sur la location. " + e.Message));
                 }
-
-
-
             }
             else
             {

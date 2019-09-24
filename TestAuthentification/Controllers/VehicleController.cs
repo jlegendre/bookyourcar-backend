@@ -87,6 +87,7 @@ namespace TestAuthentification.Controllers
                         VehNumberplace = vehicle.VehNumberplace,
                         VehRegistration = vehicle.VehRegistration,
                         VehTypeEssence = vehicle.VehTypeEssence,
+                        PoleId = vehicle.VehPoleId,
                         PoleName = _context.Pole.Any(p => p.PoleId == vehicle.VehPoleId) ? _context.Pole.SingleOrDefault(p => p.PoleId == vehicle.VehPoleId)?.PoleName : "",
                         VehState = vehicle.VehState
                     };

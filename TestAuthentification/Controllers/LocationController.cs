@@ -148,15 +148,16 @@ namespace TestAuthentification.Controllers
                 switch (location.LocState)
                 {
                     case (sbyte)Enums.LocationState.Asked:
-                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
+                        List<Vehicle> plop = GetAvailableVehiculeForLocationOld(location);
+                        locVM.AvailableVehicles = null;
                         break;
                     case (sbyte)Enums.LocationState.InProgress:
                         locVM.SelectedVehicle = GetSelectedVehicle(location);
                         break;
                     case (sbyte)Enums.LocationState.Validated:
                         locVM.SelectedVehicle = GetSelectedVehicle(location);
-                        locVM.AvailableVehicles = GetAvailableVehiculeForLocation(location);
-
+                        List<Vehicle> plop2 = GetAvailableVehiculeForLocationOld(location);
+                        locVM.AvailableVehicles = null;
                         break;
                     case (sbyte)Enums.LocationState.Rejected:
                         break;
@@ -447,12 +448,14 @@ namespace TestAuthentification.Controllers
             return token;
         }
 
-        private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocationOld(Location location)
+        private List<Vehicle> GetAvailableVehiculeForLocationOld(Location location)
         {
             List<Vehicle> vehicleList = _locServ.GetAvailableVehicleForLocation(location.LocDatestartlocation, location.LocDateendlocation,
                 location.LocPoleIdstart, location.LocPoleIdend);
 
-            List<Vehicle> selectedVehicles = new List<Vehicle>();
+            vehicleList = _context.Vehicle.ToList();
+
+            List<Vehicle> preselectedVehicles = new List<Vehicle>();
 
             foreach (Vehicle vehicle in vehicleList)
             {
@@ -461,35 +464,83 @@ namespace TestAuthentification.Controllers
 
             foreach (Vehicle vehicle in vehicleList)
             {
-
                 // Si aucune loc ne respecte les 3 conditions suivantes, on ajoute le vehicule à la liste 
                 // loc commence avant et fini après la loc demandée
                 // loc fini pendant la loc demandée
                 // loc commence pendant la loc demandée
-                if (vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation
-                                             || l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation
-                                             || l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation) == null)
+                if(vehicle.Location == null)
                 {
-                    selectedVehicles.Add(vehicle);
+                    preselectedVehicles.Add(vehicle);
                 }
-            }
-
-            if (selectedVehicles.Count > 0)
-            {
-                Location lastLoc = new Location();
-
-                foreach (Vehicle vehicle in selectedVehicles)
+                else
                 {
-                    List<Location> locs = vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation).ToList();
-                    lastLoc = locs.OrderByDescending(l => l.LocDateendlocation).First();
-                    if (lastLoc.LocPoleIdend != location.LocPoleIdend)
+                    if (vehicle.Location.Where(l => l.LocDatestartlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDateendlocation).Count() == 0)
                     {
-                        selectedVehicles.Remove(vehicle);
+                        if (vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation).Count() == 0)
+                        {
+                            if (vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation && l.LocDateendlocation > location.LocDatestartlocation).Count() == 0)
+                            {
+                                if (vehicle.Location.Where(l => l.LocDatestartlocation > location.LocDatestartlocation && l.LocDatestartlocation < location.LocDateendlocation).Count() == 0)
+                                {
+                                    preselectedVehicles.Add(vehicle);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            }
+            List<Vehicle> selectedVehicles = new List<Vehicle>();
+            if (preselectedVehicles.Count > 0)
+            {
+
+                Location lastLoc, nextLoc = new Location();
+
+                foreach (Vehicle vehicle in preselectedVehicles)
+                {
+
+                    List<Location> locs = vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation).ToList();
+                    if(locs.Count == 0)
+                    {
+                        if(vehicle.VehPoleId == location.LocPoleIdstart)
+                        {
+                            selectedVehicles.Add(vehicle);
+                        }
+                    }
+                    else
+                    {
+                        lastLoc = locs.Where(l => l.LocDateendlocation < location.LocDatestartlocation).OrderByDescending(l => l.LocDateendlocation).First();
+                        nextLoc = locs.Where(l => l.LocDatestartlocation < location.LocDateendlocation).OrderBy(l => l.LocDatestartlocation).First();
+
+                        if(lastLoc.LocPoleIdend!= null)
+                        {
+                            if(nextLoc.LocPoleIdstart == location.LocPoleIdend)
+                            {
+                                selectedVehicles.Add(vehicle);
+                                continue;
+                            }
+                        }
+
+                        if (nextLoc.LocPoleIdend != null)
+                        {
+                            if (lastLoc.LocPoleIdend == location.LocPoleIdstart)
+                            {
+                                selectedVehicles.Add(vehicle);
+                                continue;
+                            }
+                        }
+
+                        if (lastLoc.LocPoleIdend == location.LocPoleIdstart && nextLoc.LocPoleIdstart == location.LocPoleIdend)
+                        {
+                            selectedVehicles.Add(vehicle);
+                            continue;
+                        }
                     }
                 }
             }
 
-            return new List<AvailableVehiculeViewModel>();
+
+            return selectedVehicles;
         }
 
         private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
@@ -511,12 +562,10 @@ namespace TestAuthentification.Controllers
 
                 //la liste des reservations du premier vehicule de la liste, puis du second etc
                 List<Location> listDeslocationDuVehicule = _context.Location.Where(x => x.LocVehId == vehicule.VehId).ToList();
-                
 
                 //Pour chaque location de ce vehicule on va regarder les dates de ces reservations 
                 foreach (Location locationDuVehicule in listDeslocationDuVehicule)
                 {
-
                     // première condition 
                     // si il a une location qui débute avant la location en cours alors le vehicule n'est pas dispo
                     if (locationDuVehicule.LocDatestartlocation < location.LocDatestartlocation && locationDuVehicule.LocDateendlocation > location.LocDatestartlocation)
@@ -572,10 +621,6 @@ namespace TestAuthentification.Controllers
                             listVehiculeNonDisponible.Add(locationDuVehicule.LocVehId.GetValueOrDefault());
                         }
                     }
-
-
-
-
                 }
             }
             // on construit maintenant la liste des vehicules disponible en prenant tout les vehicules en base en enlevant ceux present dans la liste listVehiculeNonDisponible
