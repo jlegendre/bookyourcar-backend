@@ -127,7 +127,7 @@ namespace TestAuthentification.Services
             }
             else
             {
-                throw (new Exception(message: "le statut de location ne permet cette action"));
+                throw (new Exception(message: "le statut de location ne permet pas cette action"));
             }
         }
 
@@ -170,7 +170,6 @@ namespace TestAuthentification.Services
                     {
                         vehicleAboutLocation.VehState = (sbyte)Enums.VehiculeState.InUse;
                         _context.Vehicle.Update(vehicleAboutLocation);
-                        _context.SaveChangesAsync();
                     }
                 }
                 catch (Exception e)
@@ -199,7 +198,6 @@ namespace TestAuthentification.Services
                         vehicleAboutLocation.VehPoleId = loc.LocPoleIdend;
                         vehicleAboutLocation.VehState = (sbyte)Enums.VehiculeState.Available;
                         _context.Vehicle.Update(vehicleAboutLocation);
-                        _context.SaveChangesAsync();
                     }
                 }
                 catch (Exception e)
