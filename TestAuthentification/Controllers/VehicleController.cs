@@ -56,7 +56,7 @@ namespace TestAuthentification.Controllers
                     VehState = x.VehState
 
                 }).Where(x => x.VehState != (int)Enums.VehiculeState.Deleted).ToList();
-                return Ok(model);
+                return Ok(model.OrderBy(x=>x.VehRegistration));
             }
             return Ok(new List<Vehicle>());
 
