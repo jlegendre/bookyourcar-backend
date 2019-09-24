@@ -86,7 +86,7 @@ namespace TestAuthentification.Services
                     locations.Add(locVM);
                 }
             }
-            return locations;
+            return locations.OrderByDescending(x=>x.LocationState).ToList();
         }
 
 
