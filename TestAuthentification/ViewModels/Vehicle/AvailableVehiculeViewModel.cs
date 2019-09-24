@@ -8,8 +8,7 @@ namespace TestAuthentification.ViewModels.Vehicle
 {
     public class AvailableVehiculeViewModel
     {
-        public int VehId { get; set; }
-        
+        public int VehId { get; set; }    
         public string VehCommonName { get; set; }
         public string Registration { get; set; }
     }

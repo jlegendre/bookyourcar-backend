@@ -9,6 +9,7 @@ using TestAuthentification.ViewModels.Location;
 using System.Linq;
 using System.Threading.Tasks;
 using TestAuthentification.Resources;
+using TestAuthentification.ViewModels.Vehicle;
 
 namespace TestAuthentification.Services
 {
@@ -21,30 +22,101 @@ namespace TestAuthentification.Services
             _context = context;
         }
 
-        public List<Vehicle> GetAvailableVehicleForLocation(DateTime dateDebut, DateTime dateFin, int? poleDebut, int? poleFin)
+        public List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
         {
-            try
+            List<Vehicle> vehicleList = _context.Vehicle.ToList();
+
+            List<Vehicle> preselectedVehicles = new List<Vehicle>();
+
+            foreach (Vehicle vehicle in vehicleList)
             {
-                List<MySqlParameter> parametres = new List<MySqlParameter>
+                vehicle.Location = _context.Location.Where(l => l.LocVehId == vehicle.VehId).ToList();
+            }
+
+            foreach (Vehicle vehicle in vehicleList)
+            {
+                // Si aucune loc ne respecte les 3 conditions suivantes, on ajoute le vehicule à la liste 
+                // loc commence avant et fini après la loc demandée
+                // loc fini pendant la loc demandée
+                // loc commence pendant la loc demandée
+                if (vehicle.Location == null)
                 {
-                    new MySqlParameter(
-                        "DATEDEBUT", MySqlDbType.DateTime, Int32.MaxValue, ParameterDirection.Input, false, 1,1, "",DataRowVersion.Current, dateDebut),
-                    new MySqlParameter(
-                        "DATEFIN", MySqlDbType.DateTime, Int32.MaxValue, ParameterDirection.Input, false, 1,1, "",DataRowVersion.Current, dateFin),
-                    new MySqlParameter(
-                        "POLESTART", MySqlDbType.Int32, Int32.MaxValue, ParameterDirection.Input, false, 1,1, "",DataRowVersion.Current, poleDebut),
-                    new MySqlParameter(
-                        "POLEEND", MySqlDbType.Int32, Int32.MaxValue, ParameterDirection.Input, false, 1,1, "",DataRowVersion.Current, poleFin)
-                };
-                using (var dbm = new DbManager())
+                    preselectedVehicles.Add(vehicle);
+                }
+                else
                 {
-                    return dbm.ExecuteList<Vehicle>("getAvailableVehicle", parametres);
+                    if (vehicle.Location.Where(l => l.LocDatestartlocation <= location.LocDatestartlocation && l.LocDateendlocation >= location.LocDateendlocation).Count() == 0)
+                    {
+                        if (vehicle.Location.Where(l => l.LocDateendlocation <= location.LocDatestartlocation && l.LocDateendlocation >= location.LocDatestartlocation).Count() == 0)
+                        {
+                            if (vehicle.Location.Where(l => l.LocDateendlocation <= location.LocDatestartlocation && l.LocDateendlocation >= location.LocDatestartlocation).Count() == 0)
+                            {
+                                if (vehicle.Location.Where(l => l.LocDatestartlocation >= location.LocDatestartlocation && l.LocDatestartlocation <= location.LocDateendlocation).Count() == 0)
+                                {
+                                    preselectedVehicles.Add(vehicle);
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            List<Vehicle> selectedVehicles = new List<Vehicle>();
+            if (preselectedVehicles.Count > 0)
+            {
+                Location lastLoc, nextLoc = new Location();
+                foreach (Vehicle vehicle in preselectedVehicles)
+                {
+                    List<Location> locs = vehicle.Location.Where(l => l.LocDateendlocation < location.LocDatestartlocation).ToList();
+                    if (locs.Count == 0)
+                    {
+                        if (vehicle.VehPoleId == location.LocPoleIdstart)
+                        {
+                            selectedVehicles.Add(vehicle);
+                        }
+                    }
+                    else
+                    {
+                        lastLoc = locs.Where(l => l.LocDateendlocation < location.LocDatestartlocation).OrderByDescending(l => l.LocDateendlocation).First();
+                        nextLoc = locs.Where(l => l.LocDatestartlocation < location.LocDateendlocation).OrderBy(l => l.LocDatestartlocation).First();
+
+                        if (lastLoc.LocPoleIdend != null)
+                        {
+                            if (nextLoc.LocPoleIdstart == location.LocPoleIdend)
+                            {
+                                selectedVehicles.Add(vehicle);
+                                continue;
+                            }
+                        }
+                        if (nextLoc.LocPoleIdend != null)
+                        {
+                            if (lastLoc.LocPoleIdend == location.LocPoleIdstart)
+                            {
+                                selectedVehicles.Add(vehicle);
+                                continue;
+                            }
+                        }
+                        if (lastLoc.LocPoleIdend == location.LocPoleIdstart && nextLoc.LocPoleIdstart == location.LocPoleIdend)
+                        {
+                            selectedVehicles.Add(vehicle);
+                            continue;
+                        }
+                    }
                 }
             }
-            catch (Exception e)
+            List<AvailableVehiculeViewModel> availableVehicules = new List<AvailableVehiculeViewModel>();
+            //construct viewModels
+            foreach (Vehicle vehicle in selectedVehicles)
             {
-                throw new Exception(e.Message);
+                AvailableVehiculeViewModel available = new AvailableVehiculeViewModel()
+                {
+                    VehId = vehicle.VehId,
+                    Registration = vehicle.VehRegistration,
+                    VehCommonName = vehicle.VehBrand + " - " + vehicle.VehModel
+                };
+                availableVehicules.Add(available);
             }
+            return availableVehicules;
         }
 
         public async Task<List<LocationListViewModel>> GetAllLocationAsync()
@@ -88,7 +160,6 @@ namespace TestAuthentification.Services
             }
             return locations;
         }
-
 
         private string GetLocationStateTrad(sbyte locState)
         {
@@ -212,34 +283,6 @@ namespace TestAuthentification.Services
                 throw (new Exception(message: "le statut de location ne permet cette action"));
             }
         }
-
-        /**using (var connection = new MySqlConnection("server=mvinet.fr;port=3306;database=BookYourCar;uid=a5d;password=pwtk@[gh$!7Z#&wX"))
-{
-   var command = new MySqlCommand("getAvailableVehicle", connection);
-   command.CommandType = CommandType.StoredProcedure;
-   command.Parameters.Add(new MySqlParameter("DATEDEBUT", dateDebut));
-   command.Parameters.Add(new MySqlParameter("DATEFIN", dateFin));
-   command.Parameters.Add(new MySqlParameter("POLESTART", poleDebut));
-   command.Parameters.Add(new MySqlParameter("POLEEND", poleFin));
-   command.Connection.Open();
-   var result = command.ExecuteReader();
-   command.Connection.Close();
-
-   var listeVehicule = new List<Vehicle>();
-   foreach (var vehicule in result)
-   {
-       var veh = new Vehicle();
-       while (result.HasRows)
-       {
-           //TODO recuperer les valeurs et les mettres dans un objet Vehicule
-       }
-
-   }
-
-}**/
-
-        //_context.Database.ExecuteSqlCommand("getAvailableVehicle @p0, @p1, @p2, @p3", parameters: new[] { DateTime.Now.ToString(), DateTime.Now.ToString(), 1.ToString(), 1.ToString() });
-
     }
 }
 
