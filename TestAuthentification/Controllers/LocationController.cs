@@ -101,7 +101,7 @@ namespace TestAuthentification.Controllers
                     locations.Add(locVM);
                 }
             }
-            return Ok(locations.ToList());
+            return Ok(locations.OrderByDescending(x=>x.DateDebutResa).ToList());
 
         }
 
