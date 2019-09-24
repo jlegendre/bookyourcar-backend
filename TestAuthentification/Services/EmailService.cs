@@ -44,9 +44,12 @@ namespace TestAuthentification.Services
         /// <summary>
         /// Email lorsqu'on valide une reservation
         /// </summary>
-        public static async Task<bool> SendEmailPutLocationAsync(Models.User user, Location loc, Pole poleS, Pole poleE, Vehicle vehicle, string action)
+        public static async Task<bool> SendEmailPutLocationAsync(Models.User user, Location loc, Pole poleS, Pole poleE, Vehicle vehicle, string message1, string message2, bool afficherInfoVehicule)
         {
-            //TODO : Send specific mail on action 
+            // en fonction de l'action il y a changer 
+            // le titre du mail 
+            // le contenu du mail si jamais la location est annulé 
+
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationValidation);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
             myFiles = myFiles.Replace("%%DEBUTLOCATION%%", loc.LocDatestartlocation.ToLongDateString());
@@ -54,12 +57,27 @@ namespace TestAuthentification.Services
             myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleS.PoleName);
             myFiles = myFiles.Replace("%%FINPOLE%%", poleE.PoleName);
 
-            myFiles = myFiles.Replace("%%MODELE%%", vehicle.VehModel);
-            myFiles = myFiles.Replace("%%MARQUE%%", vehicle.VehBrand);
-            myFiles = myFiles.Replace("%%IMMATRICULATION%%", vehicle.VehRegistration);
-            myFiles = myFiles.Replace("%%KM%%", vehicle.VehKm.ToString());
+            
 
-            var response = await EmailService.SendEmailAsync("Validation de votre réservation - BookYourCar", myFiles, user.UserEmail);
+            if (afficherInfoVehicule)
+            {
+                myFiles = myFiles.Replace("%%AFFICHERVEHICULE%%", System.IO.File.ReadAllText(ConstantsEmail.AfficherInfoVehicule));
+                myFiles = myFiles.Replace("%%MODELE%%", vehicle.VehModel);
+                myFiles = myFiles.Replace("%%MARQUE%%", vehicle.VehBrand);
+                myFiles = myFiles.Replace("%%IMMATRICULATION%%", vehicle.VehRegistration);
+                myFiles = myFiles.Replace("%%KM%%", vehicle.VehKm.ToString());
+            }
+            else
+            {
+                myFiles = myFiles.Replace("%%AFFICHERVEHICULE%%", "");
+            }
+            
+            myFiles = myFiles.Replace("%%MESSAGE1%%", message1);
+            myFiles = myFiles.Replace("%%MESSAGE2%%", message2);
+
+
+
+            var response = await EmailService.SendEmailAsync("Votre réservation - BookYourCar", myFiles, user.UserEmail);
             if (response.IsSuccessStatusCode)
             {
                 return true;

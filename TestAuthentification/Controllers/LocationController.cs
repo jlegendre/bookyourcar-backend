@@ -101,7 +101,7 @@ namespace TestAuthentification.Controllers
                     locations.Add(locVM);
                 }
             }
-            return Ok(locations.ToList());
+            return Ok(locations.OrderByDescending(x=>x.DateDebutResa).ToList());
 
         }
 
@@ -205,22 +205,59 @@ namespace TestAuthentification.Controllers
             try
             {
                 LocationService locServ = new LocationService(_context);
+                User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
+                Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
+                Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
+                Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
+
+                var message1 = "";
+                var message2 = "";
+                bool afficherInformationVehicule = false;
 
                 switch (location.Action)
                 {
+                        
+
                     case "Cancel":
+                        // %%MESSAGE1%% Votre location a été annulée.
+                        // %%MESSAGE2%% 
+                        //afficher information véhicule false
                         locServ.CancelLocation(loc);
+                        message1 = "Votre location a été annulée.";
                         break;
                     case "Validate":
+                        // %%MESSAGE1%% Bonne nouvelle votre location vient d'être validée !
+                        // %%MESSAGE2%% Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !
+                        //afficher information véhicule true
                         locServ.ValidateLocationAndSetVehicule(loc, location.VehicleId);
+                        message1 = "Bonne nouvelle votre location vient d'être validée !";
+                        message2 = "Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !";
+                        afficherInformationVehicule = true;
                         break;
                     case "Update":
+                        // %%MESSAGE1%% Votre location vient d'être modifiée !
+                        // %%MESSAGE2%% Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !
+                        //afficher information véhicule true
                         locServ.UpdateLocationAndVehicule(loc, location.VehicleId);
+                        message1 = "Votre location vient d'être modifiée !";
+                        message2 = "Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !";
+                        afficherInformationVehicule = true;
                         break;
                     case "Start":
+                        // %%MESSAGE1%% Votre location vient de commencer !
+                        // %%MESSAGE2%% Bonne route !
+                        //afficher information véhicule true
                         locServ.StartLocation(loc);
+                        message1 = "Votre location vient de commencer !";
+                        message2 = "Bonne route !";
+                        afficherInformationVehicule = true;
                         break;
                     case "Finish":
+                        // %%MESSAGE1%% Nous esperons que votre location s'est bien passée !
+                        // %%MESSAGE2%% Vous pourrez retrouver le détail de votre location sur BookYourCar !
+                        //afficher information véhicule false
+                        message1 = "Nous espérons que votre location s'est bien passée !";
+                        message2 = "Vous pourrez retrouver le détail de votre location sur BookYourCar !";
                         locServ.FinishLocation(loc);
                         break;
                     default:
@@ -230,13 +267,8 @@ namespace TestAuthentification.Controllers
                 _context.Update(loc);
                 await _context.SaveChangesAsync();
 
-                User user = _context.User.SingleOrDefault(u => u.UserId == loc.LocUserId);
-                Vehicle vehicle = _context.Vehicle.SingleOrDefault(v => v.VehId == location.VehicleId);
-                Pole poleS = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdstart);
-                Pole poleE = _context.Pole.SingleOrDefault(p => p.PoleId == loc.LocPoleIdend);
-
-                //TODO le corps et le titre de l'email doit differeer en fonction de l'action
-                if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle, location.Action))
+                
+                if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle, message1, message2, afficherInformationVehicule))
                 {
                     ModelState.AddModelError("Success", "La location a bien été modifée.");
                     return Ok(ModelState);

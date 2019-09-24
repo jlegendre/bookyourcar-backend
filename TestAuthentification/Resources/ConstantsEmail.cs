@@ -36,8 +36,9 @@ namespace TestAuthentification.Resources
         /// </summary>
         //public static readonly string ResetPassword = "Voici le lien pour rénitialiser votre mot de passe " + Environment.GetEnvironmentVariable("UrlResetPassword") + "%%TOKEN%%";
         public static readonly string ResetPassword = "./wwwroot/EmailTemplates/ResetPassword.html";
-
        
+
+
 
 
         #endregion
@@ -50,6 +51,8 @@ namespace TestAuthentification.Resources
         /// envoie d'un email lorsqu'un utilisateur fait une nouvelle réservation
         /// </summary>
         public const string LocationValidation = "./wwwroot/EmailTemplates/LocationValidation.html";
+
+        public const string AfficherInfoVehicule = "./wwwroot/EmailTemplates/AfficherInfoVehicule.html";
 
         public const string LocationRefuser = "./wwwroot/EmailTemplates/LocationRefus.html";
         //(ConstantsEmail.LocationAsk, user.UserFirstname, location.LocDatestartlocation, location.LocDateendlocation, poleDepart, poleArrive)

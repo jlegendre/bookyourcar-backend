@@ -40,7 +40,7 @@ namespace TestAuthentification.Controllers
                     PoleId = x.PoleId
                 });
 
-                return Ok(model.ToList());
+                return Ok(model.OrderBy(x=>x.PoleCity).ToList());
             }
             return Ok(new List<Pole>());
 
