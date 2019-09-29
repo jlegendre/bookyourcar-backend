@@ -139,7 +139,6 @@ namespace TestAuthentification.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet, Route("GetImageByUser")]
-
         public async Task<IActionResult> GetImageByUser()
         {
             string token = GetToken();
@@ -167,7 +166,18 @@ namespace TestAuthentification.Controllers
             {
                 return false;
             }
-            
+        }
+        private bool checkIfUserAsVehiculePicture(int vehiculeId)
+        {
+            try
+            {
+                return _context.Images.FirstOrDefault(x => x.ImageVehId == vehiculeId)?.ImageUri == null;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
 
         }
 
@@ -179,9 +189,18 @@ namespace TestAuthentification.Controllers
         [
 
         HttpGet, Route("GetImageByVehicule")]
-
         public async Task<IActionResult> GetImageByVehicule(int vehiculeId)
         {
+            string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+
+            // check si l'user a une image
+            if (!checkIfUserAsVehiculePicture(vehiculeId))
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-no-car-pic.png");
+                return new ObjectResult(path);
+            }
+
             return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == vehiculeId)?.ImageUri);
         }
 
