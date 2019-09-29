@@ -88,7 +88,7 @@ namespace TestAuthentification.Controllers
         {
             string token = GetToken();
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
-            
+
             if (CheckIfImageFile(file))
             {
                 if (file == null || file.Length == 0)
@@ -129,7 +129,7 @@ namespace TestAuthentification.Controllers
                 ModelState.AddModelError("Error", "Format du fichier non pris en charge.");
                 return BadRequest(ModelState);
             }
-            
+
         }
 
 
@@ -140,9 +140,35 @@ namespace TestAuthentification.Controllers
         /// <returns></returns>
         [HttpGet, Route("GetImageByUser")]
 
-        public async Task<IActionResult> GetImageByUser(int userId)
+        public async Task<IActionResult> GetImageByUser()
         {
-            return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri);
+            string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
+            User user = _authService.GetUserConnected(token);
+
+
+            // check si l'user a une image
+            if (!checkIfUserAsPicture(user.UserId))
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-user-image.png");
+                return new ObjectResult(path);
+            }
+
+            return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == user.UserId)?.ImageUri);
+        }
+
+        private bool checkIfUserAsPicture(int userId)
+        {
+            try
+            {
+                return _context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri == null;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+            
+
         }
 
         /// <summary>
