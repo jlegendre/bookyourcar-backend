@@ -14,10 +14,12 @@ namespace TestAuthentification.Controllers
     public class ImagesController : Controller
     {
         private readonly BookYourCarContext _context;
+        private readonly AuthService _authService;
 
         public ImagesController(BookYourCarContext context)
         {
             _context = context;
+            _authService = new AuthService(context);
         }
 
         /// <summary>
@@ -27,35 +29,50 @@ namespace TestAuthentification.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpPost, Route("UploadImageUser")]
-        public async Task<IActionResult> UploadImageUser(IFormFile file, int userId)
+        public async Task<IActionResult> UploadImageUser(IFormFile file)
         {
-            if (file == null || file.Length == 0) return Content("file not selected");
+            string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+            User user = _authService.GetUserConnected(token);
 
-            using (Stream stream = new FileStream(path, FileMode.Create))
+            if (CheckIfImageFile(file))
             {
-                await file.CopyToAsync(stream);
-            }
+                if (file == null || file.Length == 0) return Content("file not selected");
 
-            try
-            {
-                Images newImage = new Images()
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+
+                using (Stream stream = new FileStream(path, FileMode.Create))
                 {
-                    ImageUri = path,
-                    ImageUserId = userId
-                };
-                _context.Images.Add(newImage);
-                await _context.SaveChangesAsync();
+                    await file.CopyToAsync(stream);
+                }
+
+                try
+                {
+                    Images newImage = new Images()
+                    {
+                        ImageUri = path,
+                        ImageUserId = user.UserId
+                    };
+                    _context.Images.Add(newImage);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
+                    Console.WriteLine(e);
+                    return BadRequest(ModelState);
+                }
+
+                return Ok("Files upload");
             }
-            catch (Exception e)
+            else
             {
-                ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
-                Console.WriteLine(e);
+                ModelState.AddModelError("Error", "Format du fichier non pris en charge.");
                 return BadRequest(ModelState);
             }
 
-            return Ok("Files upload");
+
 
 
         }
@@ -69,44 +86,50 @@ namespace TestAuthentification.Controllers
         [HttpPost, Route("UploadImageVehicule")]
         public async Task<IActionResult> UploadImageVehicule(IFormFile file, int vehiculeId)
         {
-            var token = GetToken();
-
-            if (!TokenService.ValidateTokenWhereIsAdmin(token) || !TokenService.VerifDateExpiration(token))
-                return Unauthorized();
+            string token = GetToken();
+            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
             
-            if (file == null || file.Length == 0)
+            if (CheckIfImageFile(file))
             {
-                ModelState.AddModelError("Error", "Veuillez choisir un fichier.");
-                return BadRequest(ModelState);
-            }
-
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
-
-            using (Stream stream = new FileStream(path, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            try
-            {
-                Images newImage = new Images()
+                if (file == null || file.Length == 0)
                 {
-                    ImageUri = path,
-                    ImageVehId = vehiculeId
-                };
-                _context.Images.Add(newImage);
-                await _context.SaveChangesAsync();
+                    ModelState.AddModelError("Error", "Veuillez choisir un fichier.");
+                    return BadRequest(ModelState);
+                }
+
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+
+                using (Stream stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                try
+                {
+                    Images newImage = new Images()
+                    {
+                        ImageUri = path,
+                        ImageVehId = vehiculeId
+                    };
+                    _context.Images.Add(newImage);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
+                    Console.WriteLine(e);
+                    return BadRequest(ModelState);
+                }
+
+                return Ok("Files upload");
+
             }
-            catch (Exception e)
+            else
             {
-                ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
-                Console.WriteLine(e);
+                ModelState.AddModelError("Error", "Format du fichier non pris en charge.");
                 return BadRequest(ModelState);
             }
-
-            return Ok("Files upload");
-
-
+            
         }
 
 
@@ -147,6 +170,24 @@ namespace TestAuthentification.Controllers
 
             return token;
         }
+
+        /// <summary>
+        /// Method to check if file is image file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        private bool CheckIfImageFile(IFormFile file)
+        {
+            byte[] fileBytes;
+            using (var ms = new MemoryStream())
+            {
+                file.CopyTo(ms);
+                fileBytes = ms.ToArray();
+            }
+
+            return ImageService.GetImageFormat(fileBytes) != ImageService.ImageFormat.unknown;
+        }
+
 
 
     }
