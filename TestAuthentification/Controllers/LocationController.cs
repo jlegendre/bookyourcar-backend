@@ -215,22 +215,21 @@ namespace TestAuthentification.Controllers
                 bool afficherInformationVehicule = false;
 
                 switch (location.Action)
-                {
-                        
-
+                {                     
                     case "Cancel":
                         // %%MESSAGE1%% Votre location a été annulée.
                         // %%MESSAGE2%% 
                         //afficher information véhicule false
                         locServ.CancelLocation(loc);
-                        message1 = "Votre location a été annulée.";
+                        message1 = "Votre location a été annulée par un administrateur...";
+                        message2 = "Vous pouvez le contacter pour avoir plus de détails sur cette annulation.";
                         break;
                     case "Validate":
                         // %%MESSAGE1%% Bonne nouvelle votre location vient d'être validée !
                         // %%MESSAGE2%% Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !
                         //afficher information véhicule true
                         locServ.ValidateLocationAndSetVehicule(loc, location.VehicleId);
-                        message1 = "Bonne nouvelle votre location vient d'être validée !";
+                        message1 = "Bonne nouvelle, votre location vient d'être validée !";
                         message2 = "Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !";
                         afficherInformationVehicule = true;
                         break;
@@ -240,13 +239,13 @@ namespace TestAuthentification.Controllers
                         //afficher information véhicule true
                         locServ.UpdateLocationAndVehicule(loc, location.VehicleId);
                         message1 = "Votre location vient d'être modifiée !";
-                        message2 = "Vous pouvez maintenant consulter le détail de votre location sur BookYourCar !";
+                        message2 = "Un nouveau véhicule vous a été affecté. Consulter le détail de votre location sur BookYourCar !";
                         afficherInformationVehicule = true;
                         break;
                     case "Start":
                         // %%MESSAGE1%% Votre location vient de commencer !
                         // %%MESSAGE2%% Bonne route !
-                        //afficher information véhicule true
+                        // afficher information véhicule true
                         locServ.StartLocation(loc);
                         message1 = "Votre location vient de commencer !";
                         message2 = "Bonne route !";
@@ -255,7 +254,7 @@ namespace TestAuthentification.Controllers
                     case "Finish":
                         // %%MESSAGE1%% Nous esperons que votre location s'est bien passée !
                         // %%MESSAGE2%% Vous pourrez retrouver le détail de votre location sur BookYourCar !
-                        //afficher information véhicule false
+                        // afficher information véhicule false
                         message1 = "Nous espérons que votre location s'est bien passée !";
                         message2 = "Vous pourrez retrouver le détail de votre location sur BookYourCar !";
                         locServ.FinishLocation(loc);

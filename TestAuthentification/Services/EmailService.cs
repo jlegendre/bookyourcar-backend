@@ -57,8 +57,6 @@ namespace TestAuthentification.Services
             myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleS.PoleName);
             myFiles = myFiles.Replace("%%FINPOLE%%", poleE.PoleName);
 
-            
-
             if (afficherInfoVehicule)
             {
                 myFiles = myFiles.Replace("%%AFFICHERVEHICULE%%", System.IO.File.ReadAllText(ConstantsEmail.AfficherInfoVehicule));

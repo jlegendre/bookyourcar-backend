@@ -171,7 +171,15 @@ namespace TestAuthentification.Controllers
             {
                 if(_context.Vehicle.Count(v=> v.VehPoleId == id) != 0)
                 {
-                    throw new Exception("Un ou plusieurs véhicules sont affectés à ce pôle, la suppression est impossible");
+                    throw new Exception("Un ou plusieurs véhicules sont affectés à ce pôle, la suppression est donc impossible");
+                }
+                if (_context.User.Count(u => u.UserPoleId == id) != 0)
+                {
+                    throw new Exception("Un ou plusieurs utilisateurs sont affectés à ce pôle, la suppression est donc impossible");
+                }
+                if (_context.Location.Count(l => l.LocPoleIdend == id || l.LocPoleIdstart == id) != 0)
+                {
+                    throw new Exception("Une ou plusieurs locations sont liées à ce pôle, la suppression est donc impossible");
                 }
                 _context.Pole.Remove(pole);
                 await _context.SaveChangesAsync();

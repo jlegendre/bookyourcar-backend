@@ -31,7 +31,6 @@ namespace TestAuthentification.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
-
             try
             {
                 DayOfWeek today = date.DayOfWeek;
@@ -42,12 +41,14 @@ namespace TestAuthentification.Controllers
 
                 //Get first and last day of current week
                 Tuple<DateTime, DateTime> weeksDay = GetFirstAndLastDaysOfCurrentWeek(date);
+                Tuple<DateTime, DateTime> weeksCurrentDay = GetFirstAndLastDaysOfCurrentWeek(DateTime.Today);
+
                 planningVM.StartWeek = weeksDay.Item1;
                 planningVM.EndWeek = weeksDay.Item2;
 
-                //Get count reservations which end or strat in the current week
-                planningVM.StartReservationCount = planningService.GetStartReservationCountThisWeek(weeksDay);
-                planningVM.EndReservationCount = planningService.GetEndReservationCountThisWeek(weeksDay);
+                //Get count reservations which end or start in the current week
+                planningVM.StartReservationCount = planningService.GetStartReservationCountThisWeek(weeksCurrentDay);
+                planningVM.EndReservationCount = planningService.GetEndReservationCountThisWeek(weeksCurrentDay);
 
                 //Get all vehicle count and used vehicle count for today
                 planningVM.TotalVehiclesCount = planningService.GetCountTotalVehicles();
@@ -70,12 +71,11 @@ namespace TestAuthentification.Controllers
         {
             DayOfWeek dayOfWeek = date.DayOfWeek;
 
-            DateTime fisrtDay = date.AddDays(-(int)dayOfWeek + 1);
+            DateTime firstDay = date.AddDays(-(int)dayOfWeek + 1);
             DateTime lastDay = date.AddDays(7 - (int)dayOfWeek + 1);
 
-            return new Tuple<DateTime,DateTime>(fisrtDay, lastDay);
+            return new Tuple<DateTime,DateTime>(firstDay, lastDay);
         }
-
 
         #region utilitaire Token
         private string GetToken()
