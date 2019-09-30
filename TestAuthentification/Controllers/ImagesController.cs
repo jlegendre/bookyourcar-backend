@@ -147,7 +147,7 @@ namespace TestAuthentification.Controllers
 
 
             // check si l'user a une image
-            if (!checkIfUserAsPicture(user.UserId))
+            if (checkIfUserAsPicture(user.UserId))
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-user-image.png");
                 return new ObjectResult(path);
@@ -160,6 +160,8 @@ namespace TestAuthentification.Controllers
         {
             try
             {
+                var test = _context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri;
+
                 return _context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri == null;
             }
             catch (Exception e)
@@ -195,7 +197,7 @@ namespace TestAuthentification.Controllers
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             // check si l'user a une image
-            if (!checkIfUserAsVehiculePicture(vehiculeId))
+            if (checkIfUserAsVehiculePicture(vehiculeId))
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-no-car-pic.png");
                 return new ObjectResult(path);
