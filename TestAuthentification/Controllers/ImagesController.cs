@@ -40,7 +40,7 @@ namespace TestAuthentification.Controllers
             {
                 if (file == null || file.Length == 0) return Content("file not selected");
 
-                var path = Directory.GetCurrentDirectory()+ "/wwwroot/images/" + file.FileName;
+                var path = Directory.GetCurrentDirectory() + "/wwwroot/images/" + file.FileName;
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
@@ -51,7 +51,7 @@ namespace TestAuthentification.Controllers
                 {
                     Images newImage = new Images()
                     {
-                        ImageUri = path,
+                        ImageUri = file.FileName,
                         ImageUserId = user.UserId
                     };
                     _context.Images.Add(newImage);
@@ -108,7 +108,7 @@ namespace TestAuthentification.Controllers
                 {
                     Images newImage = new Images()
                     {
-                        ImageUri = path,
+                        ImageUri = file.FileName,
                         ImageVehId = vehiculeId
                     };
                     _context.Images.Add(newImage);
@@ -150,11 +150,13 @@ namespace TestAuthentification.Controllers
             // check si l'user a une image
             if (checkIfUserAsPicture(user.UserId))
             {
-                var path = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", "default-user-image.png");
-                return new ObjectResult(path);
+                var pathToreturn = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", "default-user-image.png");
+                return new ObjectResult(pathToreturn);
             }
 
-            return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == user.UserId)?.ImageUri);
+            var fileName = _context.Images.FirstOrDefault(x => x.ImageUserId == user.UserId)?.ImageUri;
+            var path = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", fileName);
+            return new ObjectResult(path);
         }
 
         private bool checkIfUserAsPicture(int userId)
