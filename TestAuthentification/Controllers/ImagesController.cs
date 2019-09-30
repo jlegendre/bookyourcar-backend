@@ -40,7 +40,7 @@ namespace TestAuthentification.Controllers
             {
                 if (file == null || file.Length == 0) return Content("file not selected");
 
-                var path = Path.Combine(Environment.GetEnvironmentVariable("UrlImages"), DateTime.Now.ToLocalTime().ToFileTime() + file.FileName);
+                var path = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", Guid.NewGuid()+file.FileName);
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
@@ -97,7 +97,7 @@ namespace TestAuthentification.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var path = Path.Combine(Environment.GetEnvironmentVariable("UrlImages"), DateTime.Now.ToLocalTime().ToFileTime() + file.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
@@ -139,6 +139,7 @@ namespace TestAuthentification.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet, Route("GetImageByUser")]
+        
         public async Task<IActionResult> GetImageByUser()
         {
             string token = GetToken();
@@ -147,22 +148,19 @@ namespace TestAuthentification.Controllers
 
 
             // check si l'user a une image
-            if (CheckIfUserAsPicture(user.UserId))
+            if (!checkIfUserAsPicture(user.UserId))
             {
-
-                var path = Path.Combine(Environment.GetEnvironmentVariable("UrlImages"), "default-user-image.png");
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-user-image.png");
                 return new ObjectResult(path);
             }
 
             return new ObjectResult(_context.Images.FirstOrDefault(x => x.ImageUserId == user.UserId)?.ImageUri);
         }
 
-        private bool CheckIfUserAsPicture(int userId)
+        private bool checkIfUserAsPicture(int userId)
         {
             try
             {
-                var test = _context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri;
-
                 return _context.Images.FirstOrDefault(x => x.ImageUserId == userId)?.ImageUri == null;
             }
             catch (Exception e)
@@ -170,7 +168,7 @@ namespace TestAuthentification.Controllers
                 return false;
             }
         }
-        private bool CheckIfUserAsVehiculePicture(int vehiculeId)
+        private bool checkIfUserAsVehiculePicture(int vehiculeId)
         {
             try
             {
@@ -198,9 +196,9 @@ namespace TestAuthentification.Controllers
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             // check si l'user a une image
-            if (CheckIfUserAsVehiculePicture(vehiculeId))
+            if (!checkIfUserAsVehiculePicture(vehiculeId))
             {
-                var path = Path.Combine(Environment.GetEnvironmentVariable("UrlImages"), "default-no-car-pic.png");
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-no-car-pic.png");
                 return new ObjectResult(path);
             }
 
