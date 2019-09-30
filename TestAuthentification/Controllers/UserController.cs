@@ -108,7 +108,6 @@ namespace TestAuthentification.Controllers
                 return NotFound();
             }
 
-
             try
             {
                 user.UserEmail = UserInfoViewModel.UserEmail;
@@ -117,8 +116,8 @@ namespace TestAuthentification.Controllers
                 user.UserNumpermis = UserInfoViewModel.UserNumpermis;
                 user.UserPhone = UserInfoViewModel.UserPhone;
                 user.UserPoleId = UserInfoViewModel.UserPoleId;
-                user.UserRightId = UserInfoViewModel.UserRightId;
                 user.UserPole.PoleName = UserInfoViewModel.PoleName;
+                user.UserRightId = UserInfoViewModel.UserRightId;
 
                 _context.Entry(user).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -187,35 +186,7 @@ namespace TestAuthentification.Controllers
             return locationToReturn;
         }
 
-        // POST: api/Users
-        //[HttpPost]
-        //public async Task<IActionResult> PostUser([FromBody] User user)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var token = GetToken();
-        //    if (string.IsNullOrEmpty(token))
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    if (TokenService.ValidateToken(token))
-        //    {
-        //        _context.User.Add(user);
-        //        await _context.SaveChangesAsync();
-
-        //        return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-        //    }
-
-        //    return Unauthorized();
-
-
-
-        //}
-
+       
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
@@ -273,7 +244,6 @@ namespace TestAuthentification.Controllers
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
-
 
             var handler = new JwtSecurityTokenHandler();
             var simplePrinciple = handler.ReadJwtToken(token);

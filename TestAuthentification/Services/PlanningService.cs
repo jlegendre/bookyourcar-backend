@@ -18,12 +18,12 @@ namespace TestAuthentification.Services
 
         internal int GetStartReservationCountThisWeek(Tuple<DateTime, DateTime> dates)
         {
-            return _context.Location.Where(loc => loc.LocDatestartlocation >= dates.Item1 && loc.LocDatestartlocation <= dates.Item2).Count();
+            return _context.Location.Where(loc => loc.LocDatestartlocation >= dates.Item1 && loc.LocDatestartlocation <= dates.Item2 && (loc.LocState == (sbyte)Enums.LocationState.Validated || loc.LocState == (sbyte)Enums.LocationState.InProgress || loc.LocState == (sbyte)Enums.LocationState.Finished)).Count();
         }
 
         internal int GetEndReservationCountThisWeek(Tuple<DateTime, DateTime> dates)
         {
-            return _context.Location.Count(loc => loc.LocDateendlocation >= dates.Item1 && loc.LocDateendlocation <= dates.Item2);
+            return _context.Location.Count(loc => loc.LocDateendlocation >= dates.Item1 && loc.LocDateendlocation <= dates.Item2 && (loc.LocState == (sbyte)Enums.LocationState.Validated || loc.LocState == (sbyte)Enums.LocationState.InProgress || loc.LocState == (sbyte)Enums.LocationState.Finished));
         }
 
         internal int GetCountTotalVehicles()
