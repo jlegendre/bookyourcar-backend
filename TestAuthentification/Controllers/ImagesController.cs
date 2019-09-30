@@ -148,7 +148,7 @@ namespace TestAuthentification.Controllers
 
 
             // check si l'user a une image
-            if (!checkIfUserAsPicture(user.UserId))
+            if (checkIfUserAsPicture(user.UserId))
             {
                 var path = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", "default-user-image.png");
                 return new ObjectResult(path);
@@ -196,7 +196,7 @@ namespace TestAuthentification.Controllers
             if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
 
             // check si l'user a une image
-            if (!checkIfUserAsVehiculePicture(vehiculeId))
+            if (checkIfUserAsVehiculePicture(vehiculeId))
             {
                 var path = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", "default-no-car-pic.png");
                 return new ObjectResult(path);
