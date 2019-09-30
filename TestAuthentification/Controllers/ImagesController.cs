@@ -40,7 +40,7 @@ namespace TestAuthentification.Controllers
             {
                 if (file == null || file.Length == 0) return Content("file not selected");
 
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName + DateTime.Now.ToLocalTime().ToLongTimeString());
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
@@ -97,7 +97,7 @@ namespace TestAuthentification.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName + DateTime.Now.ToLocalTime().ToLongTimeString());
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
