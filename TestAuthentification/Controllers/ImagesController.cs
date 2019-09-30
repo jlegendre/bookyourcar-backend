@@ -149,7 +149,8 @@ namespace TestAuthentification.Controllers
             // check si l'user a une image
             if (checkIfUserAsPicture(user.UserId))
             {
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", "default-user-image.png");
+                
+                var path = Path.Combine("https://a5d-dotnet.mvinet.fr/", "images", "default-user-image.png");
                 return new ObjectResult(path);
             }
 
