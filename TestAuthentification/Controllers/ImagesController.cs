@@ -40,7 +40,7 @@ namespace TestAuthentification.Controllers
             {
                 if (file == null || file.Length == 0) return Content("file not selected");
 
-                var path = Path.Combine("https://a5d-dotnet.mvinet.fr", "images", Guid.NewGuid()+file.FileName);
+                var path = Directory.GetCurrentDirectory()+ "/wwwroot/images/" + file.FileName;
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
@@ -139,7 +139,7 @@ namespace TestAuthentification.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet, Route("GetImageByUser")]
-        
+
         public async Task<IActionResult> GetImageByUser()
         {
             string token = GetToken();
