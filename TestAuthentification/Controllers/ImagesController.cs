@@ -40,29 +40,59 @@ namespace TestAuthentification.Controllers
             {
                 if (file == null || file.Length == 0) return Content("file not selected");
 
-                var path = Directory.GetCurrentDirectory() + "/wwwroot/images/" + file.FileName;
+                var guidInstance = Guid.NewGuid();
+                var path = Directory.GetCurrentDirectory() + "/wwwroot/images/" + guidInstance + file.FileName;
 
                 using (Stream stream = new FileStream(path, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                try
+                // si l'utilisateur a pas de photo on fait un add si il en a déja une on fait un update
+                if (checkIfUserAsPicture(user.UserId))
                 {
-                    Images newImage = new Images()
+                    //pas de photo
+                    try
                     {
-                        ImageUri = file.FileName,
-                        ImageUserId = user.UserId
-                    };
-                    _context.Images.Add(newImage);
-                    await _context.SaveChangesAsync();
+                        Images newImage = new Images()
+                        {
+                            ImageUri = guidInstance + file.FileName,
+                            ImageUserId = user.UserId
+                        };
+                        _context.Images.Add(newImage);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
+                        Console.WriteLine(e);
+                        return BadRequest(ModelState);
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
-                    Console.WriteLine(e);
-                    return BadRequest(ModelState);
+                    // on recupère la photo 
+                    Images image = _context.Images.Where(x => x.ImageUserId == user.UserId).FirstOrDefault();
+
+                    //deja une photo
+                    try
+                    {
+                        image.ImageUri = guidInstance + file.FileName;
+                        image.ImageUserId = user.UserId;
+                        
+                        _context.Images.Update(image);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        ModelState.AddModelError("Error", "Une erreur est survenue." + e.Message);
+                        Console.WriteLine(e);
+                        return BadRequest(ModelState);
+                    }
                 }
+
+
+
 
                 return Ok("Files upload");
             }
