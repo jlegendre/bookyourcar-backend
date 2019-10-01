@@ -79,8 +79,8 @@ namespace TestAuthentification.Controllers
                 {
                     LocationListViewModel locVM = new LocationListViewModel();
                     locVM.LocationId = loc.LocId;
-                    locVM.DateDebutResa = loc.LocDatestartlocation.ToString("d");
-                    locVM.DateFinResa = loc.LocDateendlocation.ToLocalTime().ToShortDateString();
+                    locVM.DateDebutResa = loc.LocDatestartlocation.ToString("dd/MM/yyyy");
+                    locVM.DateFinResa = loc.LocDateendlocation.ToLocalTime().ToString("dd/MM/yyyy");
 
                     User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
                     locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
@@ -327,8 +327,8 @@ namespace TestAuthentification.Controllers
                 string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationRefuser);
 
                 myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToLongDateString());
-                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToLongDateString());
+                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToString("dd/MM/yyyy"));
+                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToString("dd/MM/yyyy"));
                 myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
                 myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
                 var response = await EmailService.SendEmailAsync("Refus de votre location - BookYourCar", myFiles, user.UserEmail);
@@ -424,8 +424,8 @@ namespace TestAuthentification.Controllers
                 string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationAsk);
 
                 myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToString("d"));
-                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToString("d"));
+                myFiles = myFiles.Replace("%%DEBUTLOCATION%%", location.LocDatestartlocation.ToString("dd/MM/yyyy"));
+                myFiles = myFiles.Replace("%%FINLOCATION%%", location.LocDateendlocation.ToString("dd/MM/yyyy"));
                 myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleDepart);
                 myFiles = myFiles.Replace("%%FINPOLE%%", poleArrive);
                 var response = await EmailService.SendEmailAsync("Vous venez de demander une Location - BookYourCar", myFiles, user.UserEmail);

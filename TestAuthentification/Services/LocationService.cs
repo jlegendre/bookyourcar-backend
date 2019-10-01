@@ -24,7 +24,8 @@ namespace TestAuthentification.Services
 
         public List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
         {
-            List<Vehicle> vehicleList = _context.Vehicle.ToList();
+            // on prend tout les vehicules qui n'ont pas l'état à Supprimé et à Maintenance
+            List<Vehicle> vehicleList = _context.Vehicle.Where(x=>x.VehState != (sbyte)Enums.VehiculeState.Deleted && x.VehState != (sbyte)Enums.VehiculeState.Maintenance).ToList();
 
             List<Vehicle> preselectedVehicles = new List<Vehicle>();
 

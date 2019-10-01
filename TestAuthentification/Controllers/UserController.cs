@@ -242,55 +242,46 @@ namespace TestAuthentification.Controllers
             List<User> userEnAttente =
                 _context.User.Where(x => x.UserState.Equals((sbyte)Enums.UserState.EmailVerif)).ToList();
 
-            if (userEnAttente.Count > 0)
+
+            var usersInWaitingModel = userEnAttente.Select(x => new UserInfoViewModel()
             {
-                var usersInWaitingModel = userEnAttente.Select(x => new UserInfoViewModel()
-                {
-                    PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
-                    UserFirstname = x.UserFirstname,
-                    UserId = x.UserId,
-                    UserRightId = x.UserRightId,
-                    UserName = x.UserName,
-                    UserEmail = x.UserEmail,
-                    UserPoleId = x.UserPoleId,
-                    UserPhone = x.UserPhone,
-                    UserNumpermis = x.UserNumpermis
-                }).ToList();
+                PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                UserFirstname = x.UserFirstname,
+                UserId = x.UserId,
+                UserRightId = x.UserRightId,
+                UserName = x.UserName,
+                UserEmail = x.UserEmail,
+                UserPoleId = x.UserPoleId,
+                UserPhone = x.UserPhone,
+                UserNumpermis = x.UserNumpermis
+            }).ToList();
 
 
-                List<User> allUsers = _context.User.Where(x =>
-                    !x.UserState.Equals((sbyte) Enums.UserState.EmailVerif) &&
-                    !x.UserState.Equals((sbyte) Enums.UserState.Blocked) &&
+            List<User> allUsers = _context.User.Where(x =>
+                    !x.UserState.Equals((sbyte)Enums.UserState.EmailVerif) &&
+                    !x.UserState.Equals((sbyte)Enums.UserState.Blocked) &&
                     !x.UserState.Equals((sbyte)Enums.UserState.Rejected)).ToList();
 
-                var allUsersModel = allUsers.Select(x => new UserInfoViewModel()
-                {
-                    PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
-                    UserFirstname = x.UserFirstname,
-                    UserId = x.UserId,
-                    UserRightId = x.UserRightId,
-                    UserName = x.UserName,
-                    UserEmail = x.UserEmail,
-                    UserPoleId = x.UserPoleId,
-                    UserPhone = x.UserPhone,
-                    UserNumpermis = x.UserNumpermis
-                }).ToList();
-
-
-                var modelToReturn = new AllUserStateAndUserInWaiting();
-                modelToReturn.allUsers = allUsersModel;
-                modelToReturn.usersInWaiting = usersInWaitingModel;
-
-
-
-
-                return Ok(modelToReturn);
-            }
-            else
+            var allUsersModel = allUsers.Select(x => new UserInfoViewModel()
             {
-                //Retourne une liste vide
-                return Ok(new List<User>());
-            }
+                PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                UserFirstname = x.UserFirstname,
+                UserId = x.UserId,
+                UserRightId = x.UserRightId,
+                UserName = x.UserName,
+                UserEmail = x.UserEmail,
+                UserPoleId = x.UserPoleId,
+                UserPhone = x.UserPhone,
+                UserNumpermis = x.UserNumpermis
+            }).ToList();
+
+
+            var modelToReturn = new AllUserStateAndUserInWaiting();
+            modelToReturn.allUsers = allUsersModel;
+            modelToReturn.usersInWaiting = usersInWaitingModel;
+
+
+            return Ok(modelToReturn);
 
         }
         /// <summary>
