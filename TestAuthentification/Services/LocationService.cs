@@ -120,7 +120,7 @@ namespace TestAuthentification.Services
 
         public async Task<List<LocationListViewModel>> GetAllLocationAsync()
         {
-            List<Location> listLocation = await _context.Location.ToListAsync();
+            List<Location> listLocation = await _context.Location.Where(x=>x.LocState != (sbyte)Enums.LocationState.Asked).ToListAsync();
 
             List<LocationListViewModel> locations = new List<LocationListViewModel>();
 
@@ -159,6 +159,49 @@ namespace TestAuthentification.Services
             }
             return locations.OrderByDescending(x=>x.LocationState).ToList();
         }
+
+        public async Task<List<LocationListViewModel>> GetAllLocationInWaitingAsync()
+        {
+            List<Location> listLocation = await _context.Location.Where(x=>x.LocState == (sbyte)Enums.LocationState.Asked).ToListAsync();
+
+            List<LocationListViewModel> locations = new List<LocationListViewModel>();
+
+            if (listLocation.Count > 0)
+            {
+                foreach (Location loc in listLocation)
+                {
+                    LocationListViewModel locVM = new LocationListViewModel();
+                    locVM.LocationId = loc.LocId;
+                    locVM.DateDebutResa = loc.LocDatestartlocation.ToString("dd/MM/yyyy");
+                    locVM.DateFinResa = loc.LocDateendlocation.ToString("dd/MM/yyyy");
+
+                    User user = _context.User.Where(u => u.UserId == loc.LocUserId).First();
+                    locVM.UserFriendlyName = String.Format("{0} {1}", user.UserFirstname, user.UserName);
+
+                    Pole poleStart = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdstart).First();
+                    locVM.PoleDepart = poleStart.PoleName;
+                    Pole poleEnd = _context.Pole.Where(p => p.PoleId == loc.LocPoleIdend).First();
+                    locVM.PoleDestination = poleEnd.PoleName;
+
+                    if (loc.LocVehId != null)
+                    {
+                        Vehicle vehicle = _context.Vehicle.Where(v => v.VehId == loc.LocVehId).First();
+                        locVM.VehicleFriendlyName = String.Format("{0} {1}", vehicle.VehBrand, vehicle.VehModel);
+                    }
+                    else
+                    {
+                        locVM.VehicleFriendlyName = "Pas de vehicule associé";
+                    }
+
+                    locVM.LocationState = GetLocationStateTrad(loc.LocState);
+                    locVM.LocationStateId = loc.LocState;
+
+                    locations.Add(locVM);
+                }
+            }
+            return locations.OrderByDescending(x => x.LocationState).ToList();
+        }
+
 
         private string GetLocationStateTrad(sbyte locState)
         {
