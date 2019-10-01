@@ -264,7 +264,7 @@ namespace TestAuthentification.Controllers
                         return BadRequest(ModelState);
                 }
                 _context.Update(loc);
-                await _context.SaveChangesAsync();
+                _context.SaveChangesAsync();
 
                 
                 if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle, message1, message2, afficherInformationVehicule))

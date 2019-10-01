@@ -26,35 +26,6 @@ namespace TestAuthentification.Controllers
             _context.Pole.ToList();
         }
 
-        // GET: api/Users
-        [HttpGet]
-        public async Task<IActionResult> GetUser()
-        {
-            var token = GetToken();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (!TokenService.ValidateToken(token) || !TokenService.VerifDateExpiration(token)) return Unauthorized();
-
-
-            var listUser = await _context.User.ToListAsync();
-            if (listUser.Count > 0)
-            {
-                var model = listUser.Select(x => new UserInfoViewModel()
-                {
-                    PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
-                    UserFirstname = x.UserFirstname,
-                    UserEmail = x.UserEmail,
-                    UserId = x.UserId,
-                    UserRightId = x.UserRightId,
-                    UserName = x.UserName,
-                    UserPoleId = x.UserPoleId,
-                    UserPhone = x.UserPhone,
-                    UserNumpermis = x.UserNumpermis
-                });
-                return Ok(model.ToList());
-            }
-
-            return Ok(listUser.ToList());
-        }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
@@ -174,7 +145,7 @@ namespace TestAuthentification.Controllers
 
         private Location GetNextLocationByUser(int userId)
         {
-            var locationToReturn = _context.Location.Where(x => x.LocUserId == userId && x.LocDatestartlocation >=  DateTime.Now)
+            var locationToReturn = _context.Location.Where(x => x.LocUserId == userId && x.LocDatestartlocation >= DateTime.Now)
                 .OrderBy(x => x.LocDateendlocation).FirstOrDefault();
 
             if (locationToReturn == null)
@@ -182,11 +153,11 @@ namespace TestAuthentification.Controllers
                 locationToReturn = _context.Location.Where(x => x.LocUserId == userId && x.LocDatestartlocation <= DateTime.Now)
                     .OrderBy(x => x.LocDateendlocation).FirstOrDefault();
             }
-            
+
             return locationToReturn;
         }
 
-       
+
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
@@ -260,8 +231,8 @@ namespace TestAuthentification.Controllers
         /// Retourne la liste des utilisateurs qui n'ont pas encore été validé par l'administrateur et ou l'utilisateur a vérifié son email 
         /// </summary>
         /// <returns></returns>
-        [HttpGet, Route("userInWaiting")]
-        public async Task<IActionResult> GetUserInWaiting()
+        [HttpGet, Route("GetUsers")]
+        public async Task<IActionResult> GetUsers()
         {
             var token = GetToken();
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -273,7 +244,7 @@ namespace TestAuthentification.Controllers
 
             if (userEnAttente.Count > 0)
             {
-                var model = userEnAttente.Select(x => new UserInfoViewModel()
+                var usersInWaitingModel = userEnAttente.Select(x => new UserInfoViewModel()
                 {
                     PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
                     UserFirstname = x.UserFirstname,
@@ -284,8 +255,36 @@ namespace TestAuthentification.Controllers
                     UserPoleId = x.UserPoleId,
                     UserPhone = x.UserPhone,
                     UserNumpermis = x.UserNumpermis
-                });
-                return Ok(model);
+                }).ToList();
+
+
+                List<User> allUsers = _context.User.Where(x =>
+                    !x.UserState.Equals((sbyte) Enums.UserState.EmailVerif) &&
+                    !x.UserState.Equals((sbyte) Enums.UserState.Blocked) &&
+                    !x.UserState.Equals((sbyte)Enums.UserState.Rejected)).ToList();
+
+                var allUsersModel = allUsers.Select(x => new UserInfoViewModel()
+                {
+                    PoleName = x.UserPole != null ? x.UserPole.PoleName : "",
+                    UserFirstname = x.UserFirstname,
+                    UserId = x.UserId,
+                    UserRightId = x.UserRightId,
+                    UserName = x.UserName,
+                    UserEmail = x.UserEmail,
+                    UserPoleId = x.UserPoleId,
+                    UserPhone = x.UserPhone,
+                    UserNumpermis = x.UserNumpermis
+                }).ToList();
+
+
+                var modelToReturn = new AllUserStateAndUserInWaiting();
+                modelToReturn.allUsers = allUsersModel;
+                modelToReturn.usersInWaiting = usersInWaitingModel;
+
+
+
+
+                return Ok(modelToReturn);
             }
             else
             {
@@ -298,14 +297,18 @@ namespace TestAuthentification.Controllers
         /// Compte le nombre d'utilisateur en attente
         /// </summary>
         /// <returns></returns>
-        [HttpGet, Route("CountUserInWaiting")]
-        public async Task<IActionResult> CountUserInWaiting()
+        [HttpGet, Route("CountUserInWaitingAndLocationAsked")]
+        public async Task<IActionResult> CountUserInWaitingAndLocationAsked()
         {
             var token = GetToken();
             if (!TokenService.ValidateTokenWhereIsAdmin(token) || !TokenService.VerifDateExpiration(token))
                 return Unauthorized();
-            
-            return new ObjectResult(_context.User.Count(x => x.UserState.Equals((sbyte)Enums.UserState.EmailVerif)));
+
+            var roles = new Dictionary<string, int>();
+            roles.Add("UserInWaiting", _context.User.Count(x => x.UserState.Equals((sbyte)Enums.UserState.EmailVerif)));
+            roles.Add("LocationAsked", _context.Location.Count(x => x.LocState.Equals((sbyte)Enums.LocationState.Asked)));
+
+            return new ObjectResult(roles);
         }
 
         /// <summary>
