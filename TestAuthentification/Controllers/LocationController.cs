@@ -9,6 +9,7 @@ using TestAuthentification.Models;
 using TestAuthentification.Resources;
 using TestAuthentification.Services;
 using TestAuthentification.ViewModels.Location;
+using TestAuthentification.ViewModels.Planning;
 using TestAuthentification.ViewModels.Vehicle;
 
 namespace TestAuthentification.Controllers
@@ -42,9 +43,14 @@ namespace TestAuthentification.Controllers
 
             if (connectedUser.UserRight.RightLabel == Enums.Roles.Admin.ToString())
             {
-
                 List<LocationListViewModel> locations = await _locServ.GetAllLocationAsync();
-                return Ok(locations.ToList());
+                List<LocationListViewModel> locationsAsked = await _locServ.GetAllLocationInWaitingAsync();
+
+                AllLocationAndLocationAsked modelToReturn = new AllLocationAndLocationAsked();
+                modelToReturn.AllLocations = locations;
+                modelToReturn.LocationsAsked = locationsAsked;
+
+                return Ok(modelToReturn);
             }
             else
             {
@@ -101,7 +107,7 @@ namespace TestAuthentification.Controllers
                     locations.Add(locVM);
                 }
             }
-            return Ok(locations.OrderByDescending(x=>x.DateDebutResa).ToList());
+            return Ok(locations.OrderByDescending(x => x.DateDebutResa).ToList());
 
         }
 
@@ -220,7 +226,7 @@ namespace TestAuthentification.Controllers
                 bool afficherInformationVehicule = false;
 
                 switch (location.Action)
-                {                     
+                {
                     case "Cancel":
                         // %%MESSAGE1%% Votre location a été annulée.
                         // %%MESSAGE2%% 
@@ -269,9 +275,9 @@ namespace TestAuthentification.Controllers
                         return BadRequest(ModelState);
                 }
                 _context.Update(loc);
-                _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-                
+
                 if (await EmailService.SendEmailPutLocationAsync(user, loc, poleS, poleE, vehicle, message1, message2, afficherInformationVehicule))
                 {
                     ModelState.AddModelError("Success", "La location a bien été modifée.");
@@ -436,11 +442,6 @@ namespace TestAuthentification.Controllers
                     "Une erreur s'est produite sur l'envoi de mail de confirmation mais la validation de la réservation a bien été prise en compte.");
                     return BadRequest(ModelState);
                 }
-
-
-
-
-                return Ok();
             }
             catch (Exception ex)
             {
@@ -482,7 +483,7 @@ namespace TestAuthentification.Controllers
             }
 
             return token;
-        }   
+        }
 
         private List<AvailableVehiculeViewModel> GetAvailableVehiculeForLocation(Location location)
         {
