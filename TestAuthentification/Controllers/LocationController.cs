@@ -180,7 +180,12 @@ namespace TestAuthentification.Controllers
 
         }
 
-
+        /// <summary>
+        /// permet de modifier le statut d'une location 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
         // PUT: api/Locations/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLocation([FromRoute] int id, [FromBody] LocationUpdateViewModel location)
