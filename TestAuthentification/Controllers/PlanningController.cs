@@ -72,7 +72,7 @@ namespace TestAuthentification.Controllers
             DayOfWeek dayOfWeek = date.DayOfWeek;
 
             DateTime firstDay = date.AddDays(-(int)dayOfWeek + 1);
-            DateTime lastDay = date.AddDays(7 - (int)dayOfWeek + 1);
+            DateTime lastDay = date.AddDays(7 - (int)dayOfWeek);
 
             return new Tuple<DateTime,DateTime>(firstDay, lastDay);
         }
