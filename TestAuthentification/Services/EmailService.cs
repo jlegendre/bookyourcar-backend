@@ -52,8 +52,8 @@ namespace TestAuthentification.Services
 
             string myFiles = System.IO.File.ReadAllText(ConstantsEmail.LocationValidation);
             myFiles = myFiles.Replace("%%USERNAME%%", user.UserFirstname);
-            myFiles = myFiles.Replace("%%DEBUTLOCATION%%", loc.LocDatestartlocation.ToLongDateString());
-            myFiles = myFiles.Replace("%%FINLOCATION%%", loc.LocDateendlocation.ToLongDateString());
+            myFiles = myFiles.Replace("%%DEBUTLOCATION%%", loc.LocDatestartlocation.ToString("dd/MM/yyyy"));
+            myFiles = myFiles.Replace("%%FINLOCATION%%", loc.LocDateendlocation.ToString("dd/MM/yyyy"));
             myFiles = myFiles.Replace("%%DEPARTPOLE%%", poleS.PoleName);
             myFiles = myFiles.Replace("%%FINPOLE%%", poleE.PoleName);
 
