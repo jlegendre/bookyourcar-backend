@@ -401,15 +401,13 @@ namespace TestAuthentification.Controllers
             comment.CommentText = model.Comments;
             comment.CommentUserId = user.UserId;
 
-
             // information location
-            location.LocDatestartlocation = model.DateDebutResa;
-            location.LocDateendlocation = model.DateFinResa;
+            location.LocDatestartlocation = Convert.ToDateTime(model.DateDebutResa.ToString("yyyy-MM-dd"));
+            location.LocDateendlocation = Convert.ToDateTime(model.DateFinResa.ToString("yyyy-MM-dd"));
             location.LocPoleIdstart = model.PoleIdDepart;
             location.LocPoleIdend = model.PoleIdDestination;
             location.LocUserId = user.UserId;
             location.LocState = Convert.ToSByte(Enums.LocationState.Asked);
-
 
             try
             {
@@ -419,7 +417,6 @@ namespace TestAuthentification.Controllers
                 comment.CommentLocId = location.LocId;
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
-
 
                 PoleService servicePole = new PoleService(_context);
                 var poleDepart = servicePole.GetPole(location.LocPoleIdstart).PoleName;
