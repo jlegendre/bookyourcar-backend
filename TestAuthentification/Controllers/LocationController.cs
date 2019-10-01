@@ -397,14 +397,14 @@ namespace TestAuthentification.Controllers
 
             // information commentaire
             Comments comment = new Comments();
-            comment.CommentDate = DateTime.Now;
+            comment.CommentDate = Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy")); ;
             comment.CommentText = model.Comments;
             comment.CommentUserId = user.UserId;
 
 
             // information location
-            location.LocDatestartlocation = model.DateDebutResa;
-            location.LocDateendlocation = model.DateFinResa;
+            location.LocDatestartlocation = Convert.ToDateTime(model.DateDebutResa.ToString("dd/MM/yyyy"));
+            location.LocDateendlocation = Convert.ToDateTime(model.DateFinResa.ToString("dd/MM/yyyy"));
             location.LocPoleIdstart = model.PoleIdDepart;
             location.LocPoleIdend = model.PoleIdDestination;
             location.LocUserId = user.UserId;
